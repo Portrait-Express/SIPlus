@@ -1,0 +1,3 @@
+#ifndef SIPLUS_NAMESPACE
+#define SIPLUS_NAMESPACE SIPlus
+#endif
