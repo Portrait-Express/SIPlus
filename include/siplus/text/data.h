@@ -29,7 +29,7 @@ struct UnknownDataTypeContainer {
     bool is() { return type == typeid(std::remove_cvref_t<T>); }
 
     template<typename T>
-    bool as() { return *(T*)ptr; }
+    const T& as() const { return *(const T*)ptr; }
 
     friend void swap(UnknownDataTypeContainer& self, UnknownDataTypeContainer& other) {
         using std::swap;

@@ -5,10 +5,10 @@
 #include "siplus/parser.h"
 
 int test_interpolate(int, char**) {
-    SIPlus::Parser parser;
+    SIPlus::Parser parser = test_context();
 
     CPPTRACE_TRY {
-        auto constructor = parser.get_interpolation("TEST { .x } HELLO", test_context());
+        auto constructor = parser.get_interpolation("TEST { .x } HELLO");
         std::cout << constructor.construct(test_data{}) << std::endl;
     } CPPTRACE_CATCH(std::exception& e) {
         std::cout << e.what() << std::endl;

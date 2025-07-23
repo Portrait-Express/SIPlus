@@ -14,11 +14,25 @@ class Parser {
 public:
     Parser();
 
-    text::TextConstructor get_interpolation(
-        const std::string& text, std::shared_ptr<SIPlusParserContext> context);
+    Parser(const Parser&) = delete;
+    Parser(Parser&& other);
 
-    std::shared_ptr<text::ValueRetriever> get_expression( 
-        const std::string& expression, std::shared_ptr<SIPlusParserContext> context);
+    Parser& operator=(Parser other) {
+        swap(*this, other);
+        return *this;
+    }
+
+    friend void swap(Parser& first, Parser& second) {
+        using std::swap;
+        swap(first.impl_, second.impl_);
+    }
+
+    text::TextConstructor get_interpolation(const std::string& text) const;
+    std::shared_ptr<text::ValueRetriever> get_expression(const std::string& expression) const;
+
+
+    SIPlusParserContext& context();
+    const SIPlusParserContext& context() const;
 
     ~Parser();
 

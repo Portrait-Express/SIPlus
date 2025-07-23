@@ -1,4 +1,4 @@
-#include "siplus/context.h"
+#include "siplus/parser.h"
 
 struct test_data {
     int x = 2;
@@ -8,4 +8,4 @@ struct test_data {
     } y;
 };
 
-std::shared_ptr<SIPlus::SIPlusParserContext> test_context();
+SIPlus::Parser test_context();

@@ -9,13 +9,16 @@ namespace SIPLUS_NAMESPACE {
 
 class ParserImpl {
 public:
-    text::TextConstructor get_interpolation(
-        const std::string& expression, 
-        std::shared_ptr<SIPlusParserContext> context);
+    ParserImpl();
 
-    std::shared_ptr<text::ValueRetriever> get_expression(
-        const std::string& expression, 
-        std::shared_ptr<SIPlusParserContext> context);
+    text::TextConstructor get_interpolation(const std::string& expression) const;
+    std::shared_ptr<text::ValueRetriever> get_expression(const std::string& expression) const;
+
+    SIPlusParserContext& context();
+    const SIPlusParserContext& context() const;
+
+private:
+    std::shared_ptr<SIPlusParserContext> context_;
 };
 
 }

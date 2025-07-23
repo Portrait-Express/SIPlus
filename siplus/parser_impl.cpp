@@ -1,13 +1,13 @@
+#include "ANTLRInputStream.h"
+#include "generated/StringInterpolatorLexer.h"
+#include "generated/StringInterpolatorParser.h"
+
 #include "siplus/parser.h"
 #include "siplus/context.h"
 #include "siplus/text/constructor.h"
 
 #include "parser_impl.h"
 #include "interpolation_visitor.h"
-
-#include "ANTLRInputStream.h"
-#include "generated/StringInterpolatorLexer.h"
-#include "generated/StringInterpolatorParser.h"
 
 namespace SIPLUS_NAMESPACE {
 
@@ -20,21 +20,37 @@ Parser::~Parser() {
     //is destroyed.
 } 
 
-text::TextConstructor Parser::get_interpolation(const std::string& text, std::shared_ptr<SIPlusParserContext> context) {
-    return impl_->get_interpolation(text, context);
+text::TextConstructor Parser::get_interpolation(const std::string& text) const {
+    return impl_->get_interpolation(text);
 }
 
-text::TextConstructor ParserImpl::get_interpolation(const std::string& text, std::shared_ptr<SIPlusParserContext> context) {
+SIPlusParserContext& Parser::context() {
+    return impl_->context();
+}
+
+ParserImpl::ParserImpl() {
+    context_ = std::make_shared<SIPlusParserContext>();
+}
+
+text::TextConstructor ParserImpl::get_interpolation(const std::string& text) const {
     antlr4::ANTLRInputStream stream{text};
     StringInterpolatorLexer lexer{&stream};
     antlr4::CommonTokenStream tokens{&lexer};
     StringInterpolatorParser parser{&tokens};
     
     antlr4::tree::ParseTree *tree = parser.program();
-    InterpolationVisitor visitor{context, tokens};
+    InterpolationVisitor visitor{context_, tokens};
     auto val = tree->accept(&visitor);
 
     return std::any_cast<text::TextConstructor>(val);
+}
+
+const SIPlusParserContext& ParserImpl::context() const {
+    return *context_;
+}
+
+SIPlusParserContext& ParserImpl::context() {
+    return *context_;
 }
 
 }

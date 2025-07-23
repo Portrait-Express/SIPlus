@@ -1,7 +1,7 @@
 #include "common.hxx"
 #include "siplus/context.h"
+#include "siplus/parser.h"
 #include "siplus/text/data.h"
-#include "siplus/text/value_retrievers/retriever.h"
 #include <format>
 
 using namespace SIPLUS_NAMESPACE;
@@ -12,10 +12,10 @@ struct data_acessor : public SIPlus::text::Accessor {
     text::UnknownDataTypeContainer access(
         const text::UnknownDataTypeContainer &value, 
         const std::string &name) override {
-        const test_data *data = reinterpret_cast<const test_data*>(value.ptr);
+        const test_data& data = value.as<test_data>();
 
         if(name == "x") {
-            return text::make_data(data->x);
+            return text::make_data(data.x);
         }
 
         throw std::runtime_error(std::format("No viable property for '{}'", name));
@@ -26,14 +26,10 @@ struct data_acessor : public SIPlus::text::Accessor {
     }
 };
 
-std::shared_ptr<SIPlus::SIPlusParserContext> test_context() {
-    static std::shared_ptr<SIPlusParserContext> context;
+Parser test_context() {
+    Parser parser;
 
-    if(!context) {
-        context = std::make_shared<SIPlusParserContext>();
+    parser.context().emplace_accessor<data_acessor>();
 
-        context->emplace_accessor<data_acessor>();
-    }
-
-    return context;
+    return parser;
 }
