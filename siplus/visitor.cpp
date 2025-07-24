@@ -1,4 +1,5 @@
 #include "visitor.h"
+#include <stdexcept>
 
 namespace SIPLUS_NAMESPACE {
 
@@ -15,6 +16,12 @@ std::any SIPlusParseTreeVisitor::visitChildren(antlr4::tree::ParseTree *node) {
     }
 
     return result;
+}
+
+std::any SIPlusParseTreeVisitor::visitErrorNode(antlr4::tree::ErrorNode * node) {
+    std::stringstream err;
+    err << "Syntax Error: Unexpected '" << node->getText() << "'";
+    throw std::runtime_error{err.str()};
 }
 
 }

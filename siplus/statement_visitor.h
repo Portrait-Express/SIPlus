@@ -2,7 +2,6 @@
 #define INCLUDE_SIPLUS_STATEMENT_VISITOR_H_
 
 #include "BufferedTokenStream.h"
-#include "generated/StringInterpolatorParserBaseVisitor.h"
 
 #include "siplus/context.h"
 #include "visitor.h"
