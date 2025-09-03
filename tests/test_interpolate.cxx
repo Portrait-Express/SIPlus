@@ -5,17 +5,18 @@
 #include "siplus/parser.h"
 
 int test_interpolate(int, char**) {
-    SIPlus::Parser parser = get_test_context();
+    SIPLUS_NAMESPACE::Parser parser = get_test_context();
 
-    CPPTRACE_TRY {
+    return test([](const SIPLUS_NAMESPACE::Parser& parser) {
+        std::string expected{"TEST 2 HELLO"};
         auto constructor = parser.get_interpolation("TEST { .x } HELLO");
-        std::cout << constructor.construct(test_data{}) << std::endl;
-    } CPPTRACE_CATCH(std::exception& e) {
-        std::cout << e.what() << std::endl;
-        cpptrace::from_current_exception().print();
+        std::string text = constructor.construct_with(SIPLUS_NAMESPACE::text::make_data(test_data{}));
 
-        return 1;
-    }
-
-    return 0;
+        if(text == expected) {
+            return 0;
+        } else {
+            std::cout << "Expected: " << expected << "\nGot: " << text << std::endl;
+            return 1;
+        }
+    });
 }

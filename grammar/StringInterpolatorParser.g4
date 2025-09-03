@@ -23,12 +23,14 @@ eval: OPEN expr CLOSE ;
 
 loop_start: OPEN HASH expr CLOSE;
 loop_end: OPEN SLASH SLASH CLOSE ;
-loop: loop_start program loop_end;
+loop: loop_start interpolated_str loop_end;
 
 stmt: eval
     | loop;
 
 normal: ( NORMAL_TEXT | NORMAL_ESCAPE )+ ;
 
-program: ( normal | stmt )* ;
+interpolated_str: ( normal | stmt )* ;
 
+expression_program: expr EOF;
+program: interpolated_str EOF;

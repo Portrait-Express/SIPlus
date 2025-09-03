@@ -28,7 +28,7 @@ std::any StatementVisitor::visitLoop(StringInterpolatorParser::LoopContext *ctx)
 
     InterpolationVisitor prog_visitor{context_, tokens_};
     auto sub = std::any_cast<text::TextConstructor>(
-        ctx->program()->accept(&prog_visitor));
+        ctx->interpolated_str()->accept(&prog_visitor));
 
     auto ptr = std::make_shared<text::RepeatedConstructorConstructorStep>(
         context_, expr_value, sub);

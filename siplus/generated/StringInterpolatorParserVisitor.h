@@ -51,6 +51,10 @@ public:
 
     virtual std::any visitNormal(StringInterpolatorParser::NormalContext *context) = 0;
 
+    virtual std::any visitInterpolated_str(StringInterpolatorParser::Interpolated_strContext *context) = 0;
+
+    virtual std::any visitExpression_program(StringInterpolatorParser::Expression_programContext *context) = 0;
+
     virtual std::any visitProgram(StringInterpolatorParser::ProgramContext *context) = 0;
 
 

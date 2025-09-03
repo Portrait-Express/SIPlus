@@ -22,7 +22,8 @@ public:
     RuleField = 0, RuleString = 1, RuleInteger = 2, RuleFloat = 3, RuleLiteral = 4, 
     RuleArgument = 5, RuleArg_list = 6, RuleFunc = 7, RuleExpr_item = 8, 
     RuleExpr = 9, RuleEval = 10, RuleLoop_start = 11, RuleLoop_end = 12, 
-    RuleLoop = 13, RuleStmt = 14, RuleNormal = 15, RuleProgram = 16
+    RuleLoop = 13, RuleStmt = 14, RuleNormal = 15, RuleInterpolated_str = 16, 
+    RuleExpression_program = 17, RuleProgram = 18
   };
 
   explicit StringInterpolatorParser(antlr4::TokenStream *input);
@@ -58,6 +59,8 @@ public:
   class LoopContext;
   class StmtContext;
   class NormalContext;
+  class Interpolated_strContext;
+  class Expression_programContext;
   class ProgramContext; 
 
   class  FieldContext : public antlr4::ParserRuleContext {
@@ -262,7 +265,7 @@ public:
     LoopContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     Loop_startContext *loop_start();
-    ProgramContext *program();
+    Interpolated_strContext *interpolated_str();
     Loop_endContext *loop_end();
 
 
@@ -302,14 +305,42 @@ public:
 
   NormalContext* normal();
 
-  class  ProgramContext : public antlr4::ParserRuleContext {
+  class  Interpolated_strContext : public antlr4::ParserRuleContext {
   public:
-    ProgramContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    Interpolated_strContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     std::vector<NormalContext *> normal();
     NormalContext* normal(size_t i);
     std::vector<StmtContext *> stmt();
     StmtContext* stmt(size_t i);
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Interpolated_strContext* interpolated_str();
+
+  class  Expression_programContext : public antlr4::ParserRuleContext {
+  public:
+    Expression_programContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    ExprContext *expr();
+    antlr4::tree::TerminalNode *EOF();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Expression_programContext* expression_program();
+
+  class  ProgramContext : public antlr4::ParserRuleContext {
+  public:
+    ProgramContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    Interpolated_strContext *interpolated_str();
+    antlr4::tree::TerminalNode *EOF();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;

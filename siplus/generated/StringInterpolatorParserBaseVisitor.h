@@ -79,6 +79,14 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitInterpolated_str(StringInterpolatorParser::Interpolated_strContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitExpression_program(StringInterpolatorParser::Expression_programContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitProgram(StringInterpolatorParser::ProgramContext *ctx) override {
     return visitChildren(ctx);
   }
