@@ -10,8 +10,9 @@
 namespace SIPLUS_NAMESPACE {
 
 class SIPlusParseTreeVisitor : public StringInterpolatorParserBaseVisitor {
-    virtual std::any visitChildren(antlr4::tree::ParseTree *node) override;
-    virtual std::any visitErrorNode(antlr4::tree::ErrorNode * /*node*/) override;
+    std::any visitChildren(antlr4::tree::ParseTree *node) override;
+    std::any visitErrorNode(antlr4::tree::ErrorNode * /*node*/) override;
+    std::any aggregateResult(std::any oldValue, std::any newValue) override;
 };
 
 }

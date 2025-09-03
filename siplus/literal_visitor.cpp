@@ -1,6 +1,7 @@
 #include "literal_visitor.h"
 #include "Token.h"
 #include "generated/StringInterpolatorLexer.h"
+#include "siplus/text/data.h"
 #include <sstream>
 
 namespace SIPLUS_NAMESPACE {
@@ -47,7 +48,7 @@ std::any LiteralVisitor::visitString(StringInterpolatorParser::StringContext *no
     std::stringstream ss;
 
     auto stop = node->stop->getTokenIndex();
-    for(int i = node->start->getTokenIndex(); i < stop; i++) {
+    for(int i = node->start->getTokenIndex() + 1; i < stop; i++) {
         antlr4::Token *token = tokens_.get(i);
         if(token->getType() == StringInterpolatorLexer::STRING_ESCAPE) {
             ss << get_escape(token->getText().substr(1));
@@ -56,15 +57,15 @@ std::any LiteralVisitor::visitString(StringInterpolatorParser::StringContext *no
         }
     }
 
-    return ss.str();
+    return text::make_data(ss.str());
 }
 
 std::any LiteralVisitor::visitInteger(StringInterpolatorParser::IntegerContext *node) {
-    return parse_int(node->getText());
+    return text::make_data(parse_int(node->getText()));
 }
 
 std::any LiteralVisitor::visitFloat(StringInterpolatorParser::FloatContext *node) {
-    return parse_float(node->getText());
+    return text::make_data(parse_float(node->getText()));
 }
 
 }

@@ -21,13 +21,22 @@ struct UnknownDataTypeContainer {
 
     UnknownDataTypeContainer& operator=(UnknownDataTypeContainer other);
 
+    operator bool() { return ptr; }
+
     std::type_index type = typeid(void);
-    const void *ptr;
-    deleter deleter_;
+    const void *ptr = 0;
 
     template<typename T>
     bool is() { return type == typeid(std::remove_cvref_t<T>); }
 
+    /**
+     * @brief Returns a reference to the stored data as a specified type. If 
+     * this is called with the incorrect type, the returned data is undefined.
+     * Always use `is` before calling this.
+     *
+     * @tparam T The type to return
+     * @return Const reference to stored data
+     */
     template<typename T>
     const T& as() const { return *(const T*)ptr; }
 
@@ -43,15 +52,25 @@ struct UnknownDataTypeContainer {
     ~UnknownDataTypeContainer();
 
 private:
-    size_t *_ref;
+    size_t *_ref = nullptr;
+    deleter deleter_;
 };
 
 
+/**
+ * @brief Make a UnknownDataTypeContainer. Does not take ownership. Valid for 
+ * the lifetime of the referenced object.
+ */
 template<typename T>
 UnknownDataTypeContainer make_data(const T& value) {
     return UnknownDataTypeContainer(typeid(std::remove_cvref_t<T>), &value);
 }
 
+/** @brief Make a UnknownDataTypeContainer. Takes ownership of the pointer if 
+ * acquire is `true`. Defaults to `true`. Frees pointer with a `delete`. If 
+ * you need other freeing, construct a UnknownDataTypeContainer yourself, and
+ * pass a custom deleter.
+ */
 template<typename T>
 UnknownDataTypeContainer make_data(const T *value, bool acquire = true) {
     return UnknownDataTypeContainer(typeid(T), value, [acquire](const void *ptr){ 
@@ -60,6 +79,10 @@ UnknownDataTypeContainer make_data(const T *value, bool acquire = true) {
     } );
 }
 
+/**
+ * @brief Make a UnknownDataTypeContainer. Copies the object to the heap, and 
+ * deletes the pointer when all references die. 
+ */
 template<typename T>
 UnknownDataTypeContainer make_data(const T&& value) {
     return make_data(new std::remove_cvref_t<T>(value), true);

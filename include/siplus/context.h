@@ -8,7 +8,9 @@
 
 #include "siplus/text/accessor.h"
 #include "siplus/function.h"
+#include "siplus/text/converter.h"
 #include "siplus/text/data.h"
+#include "siplus/text/iterator.h"
 
 namespace SIPLUS_NAMESPACE {
 
@@ -16,9 +18,31 @@ class SIPlusParserContext : public std::enable_shared_from_this<SIPlusParserCont
 public:
     SIPlusParserContext();
 
-    void getAccessor();
+    void use_stl();
+
     Function& function(const std::string& name);
     std::shared_ptr<text::Accessor> accessor(const text::UnknownDataTypeContainer& value);
+    std::shared_ptr<text::IteratorProvider> iterator(const text::UnknownDataTypeContainer& value);
+    std::shared_ptr<text::Converter> converter(std::type_index from, std::type_index to);
+
+    template<typename T, typename _T = std::remove_cvref_t<T>>
+    std::shared_ptr<text::Converter> 
+    converter(const text::UnknownDataTypeContainer& from) { 
+        return converter(from.type, typeid(_T)); 
+    }
+
+    template<typename To, typename _T = std::remove_cvref_t<To>>
+    text::UnknownDataTypeContainer 
+    convert(text::UnknownDataTypeContainer from) {
+        return convert(from, typeid(_T));
+    }
+
+    text::UnknownDataTypeContainer 
+    convert(text::UnknownDataTypeContainer from, std::type_index to) {
+        if(from.type == to) return from;
+        return converter(from.type, to)->convert(from, to);
+    }
+
 
     template<typename T, typename ...Ts, typename = std::enable_if_t<std::is_base_of_v<Function, T>>>
     void emplace_function(std::string name, Ts&&... args) {
@@ -32,10 +56,29 @@ public:
         accessors_.emplace_back(std::make_shared<T>(std::forward<Ts>(args)...));
     }
 
+    template<typename T, typename ...Ts, typename = std::enable_if_t<std::is_base_of_v<text::IteratorProvider, T>>>
+    void emplace_iterator(Ts&&... args) {
+        iterators_.emplace_back(std::make_shared<T>(std::forward<Ts>(args)...));
+    }
+
+    template<typename T, typename ...Ts, typename = std::enable_if_t<std::is_base_of_v<text::Converter, T>>>
+    void emplace_converter(Ts&&... args) {
+        converters_.emplace_back(std::make_shared<T>(std::forward<Ts>(args)...));
+    }
 
 private:
+    //accessing caches
+    std::unordered_map<std::type_index, std::shared_ptr<text::Accessor>> accessors_cache_;
+    std::unordered_map<std::type_index, std::shared_ptr<text::IteratorProvider>> iterators_cache_;
+    std::unordered_map<std::type_index, 
+        std::unordered_map<std::type_index, 
+            std::shared_ptr<text::Converter>>> converters_cache_;
+
+    //storage
     std::unordered_map<std::string, std::unique_ptr<Function>> functions_;
     std::vector<std::shared_ptr<text::Accessor>> accessors_;
+    std::vector<std::shared_ptr<text::IteratorProvider>> iterators_;
+    std::vector<std::shared_ptr<text::Converter>> converters_;
 };
 
 }

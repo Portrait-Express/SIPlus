@@ -4,20 +4,27 @@
 #include <string>
 
 #include "siplus/_config.h"
+#include "siplus/context.h"
 #include "siplus/text/constructor.h"
 #include "siplus/text/constructor_steps/constructor_step.h"
+#include "siplus/text/value_retrievers/retriever.h"
 
 namespace SIPLUS_NAMESPACE {
 namespace text {
 
-class NestedConstructorConstructorStep : public TextConstructorStep {
+class RepeatedConstructorConstructorStep : public TextConstructorStep {
 public:
-    explicit NestedConstructorConstructorStep(text::TextConstructor sub);
+    explicit RepeatedConstructorConstructorStep(
+        std::shared_ptr<SIPlusParserContext> context,
+        std::shared_ptr<ValueRetriever> retriever,
+        text::TextConstructor sub);
 
     std::string getPart(const UnknownDataTypeContainer& value) override;
 
 private:
-    text::TextConstructor sub_;
+    TextConstructor sub_;
+    std::shared_ptr<ValueRetriever> retriever_;
+    std::shared_ptr<SIPlusParserContext> context_;
 };
     
 } /* text */

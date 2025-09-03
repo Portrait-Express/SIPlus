@@ -3,11 +3,13 @@
 #include "siplus/context.h"
 #include "siplus/text/constructor.h"
 #include "siplus/text/constructor_steps/literal_step.h"
-#include "siplus/text/constructor_steps/nested_constructor_step.h"
+#include "siplus/text/constructor_steps/repeated_constructor_step.h"
 #include "siplus/text/constructor_steps/retriever_step.h"
 #include "siplus/text/data.h"
 #include "siplus/text/value_retrievers/literal_retriever.h"
 #include "siplus/text/value_retrievers/accessor_retriever.h"
+
+#include "util.h"
 
 namespace SIPLUS_NAMESPACE {
 namespace text {
@@ -25,16 +27,42 @@ std::string TextConstructor::construct_with(UnknownDataTypeContainer data) {
 
     return ss.str();
 }
+
 LiteralConstructorStep::LiteralConstructorStep(std::string val) : part_(val) {}
 
 std::string LiteralConstructorStep::getPart(const UnknownDataTypeContainer&) {
     return part_;
 }
 
-NestedConstructorConstructorStep::NestedConstructorConstructorStep(TextConstructor sub) : sub_(sub) { }
+RepeatedConstructorConstructorStep::RepeatedConstructorConstructorStep(
+        std::shared_ptr<SIPlusParserContext> context,
+        std::shared_ptr<ValueRetriever> retriever,
+        text::TextConstructor sub
+) : context_(context), retriever_(retriever), sub_(sub) { }
 
-std::string NestedConstructorConstructorStep::getPart(const UnknownDataTypeContainer& val) {
-    return sub_.construct_with(val);
+std::string RepeatedConstructorConstructorStep::getPart(const UnknownDataTypeContainer& val) {
+    UnknownDataTypeContainer iterable = retriever_->retrieve(val);
+
+    auto provider = context_->iterator(iterable);
+    auto iterator = provider->iterator(iterable);
+
+    bool more = iterator->more();
+    std::stringstream ss;
+
+    while(more) {
+        iterator->next();
+
+        more = iterator->more();
+
+        if(more) {
+            // "Last" handling will go here later
+            // For now this will get optimized out
+        }
+
+        ss << sub_.construct_with(iterator->current());
+    }
+
+    return ss.str();
 }
 
 ValueRetrieverConstructorStep::ValueRetrieverConstructorStep(
@@ -43,15 +71,13 @@ ValueRetrieverConstructorStep::ValueRetrieverConstructorStep(
 ) : context_(context), retriever_(retriever) {}
 
 std::string ValueRetrieverConstructorStep::getPart(const UnknownDataTypeContainer& part) {
-    auto& function = context_->function("[internal::str]");
-    auto retriever = function.value(retriever_, std::vector<std::shared_ptr<text::ValueRetriever>>{});
-    auto value = retriever->retrieve(part);
+    auto value = retriever_->retrieve(part);
 
-    if(value.type != typeid(std::string)) {
-        throw std::runtime_error{"[internal::str] did not return a string"};
+    if(!value.is<std::string>()) {
+        value = context_->convert<std::string>(value);
     }
 
-    return *(std::string*)value.ptr;
+    return value.as<std::string>();
 }
 
 LiteralValueRetriever::LiteralValueRetriever(UnknownDataTypeContainer value) : value_(value) {}

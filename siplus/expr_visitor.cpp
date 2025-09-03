@@ -1,5 +1,5 @@
 #include "BufferedTokenStream.h"
-#include "generated/StringInterpolatorParserBaseVisitor.h"
+#include "generated/StringInterpolatorParser.h"
 
 #include <memory>
 #include <stdexcept>
@@ -11,22 +11,30 @@
 
 #include "expr_visitor.h"
 #include "literal_visitor.h"
+#include "util.h"
+#include "visitor.h"
 
 namespace SIPLUS_NAMESPACE {
 
-class ArgListVisitor : public StringInterpolatorParserBaseVisitor {
+class ArgListVisitor : public SIPlusParseTreeVisitor {
 public:
     ArgListVisitor(std::shared_ptr<SIPlusParserContext> context, const antlr4::BufferedTokenStream& tokens)
         : context_(context), tokens_(tokens) {}
 
     bool shouldVisitNextChild(antlr4::tree::ParseTree *node, const std::any& currentResult) override {
-        return dynamic_cast<StringInterpolatorParser::ArgumentContext*>(node) != nullptr;
+        return dynamic_cast<StringInterpolatorParser::ArgumentContext*>(node) == nullptr;
     }
 
     std::any visitArgument(StringInterpolatorParser::ArgumentContext *ctx) override {
         ExpressionVisitor visitor{context_, tokens_};
-        visitor.visit(ctx);
+        auto anyval = ctx->accept(&visitor);
+        auto expr = std::any_cast<std::shared_ptr<text::ValueRetriever>>(anyval);
+        arguments_.push_back(expr);
         return arguments_;
+    }
+
+    std::any defaultResult() override {
+        return std::vector<std::shared_ptr<text::ValueRetriever>>{};
     }
 
 private:
@@ -42,13 +50,15 @@ ExpressionVisitor::ExpressionVisitor(
 
 bool ExpressionVisitor::shouldVisitNextChild(antlr4::tree::ParseTree *node, const std::any& currentResult) {
     return dynamic_cast<StringInterpolatorParser::FuncContext*>(node) == nullptr &&
-           dynamic_cast<StringInterpolatorParser::LiteralContext*>(node) == nullptr;
+           dynamic_cast<StringInterpolatorParser::LiteralContext*>(node) == nullptr && 
+           dynamic_cast<StringInterpolatorParser::FieldContext*>(node) == nullptr;
 }
 
 std::any ExpressionVisitor::visitFunc(StringInterpolatorParser::FuncContext *ctx) {
     auto& function = context_->function(ctx->ID()->getText());
     ArgListVisitor visitor{context_, tokens_};
-    auto args = std::any_cast<std::vector<std::shared_ptr<text::ValueRetriever>>>(visitor.visit(ctx->arg_list()));
+    auto val = ctx->arg_list()->accept(&visitor);
+    auto args = std::any_cast<std::vector<std::shared_ptr<text::ValueRetriever>>>(val);
     value_ = function.value(value_, args);
     return value_;
 }
@@ -59,7 +69,9 @@ std::any ExpressionVisitor::visitLiteral(StringInterpolatorParser::LiteralContex
     }
 
     LiteralVisitor visitor{context_, tokens_};
-    value_ = std::make_shared<text::LiteralValueRetriever>(std::any_cast<text::UnknownDataTypeContainer>(visitor.visit(ctx)));
+    auto literal = ctx->accept(&visitor);
+    auto data = std::any_cast<text::UnknownDataTypeContainer>(literal);
+    value_ = std::make_shared<text::LiteralValueRetriever>(data);
     return value_;
 }
 
@@ -77,7 +89,8 @@ std::any ExpressionVisitor::visitField(StringInterpolatorParser::FieldContext *c
     if(!existing)
         return std::make_shared<text::DummyValueRetriever>();
 
-    return std::static_pointer_cast<text::ValueRetriever>(existing);
+    value_ = std::static_pointer_cast<text::ValueRetriever>(existing);
+    return value_;
 }
 
 }

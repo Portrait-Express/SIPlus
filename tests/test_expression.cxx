@@ -6,7 +6,7 @@
 #include "siplus/text/data.h"
 
 int test_expression(int, char**) {
-    SIPlus::Parser parser = test_context();
+    SIPlus::Parser parser = get_test_context();
 
     CPPTRACE_TRY {
         auto retriever = parser.get_expression(".x \"awd\"");

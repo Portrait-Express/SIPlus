@@ -9,7 +9,12 @@ endif()
 
 add_subdirectory(util)
 
-file(GLOB TEST_SOURCES RELATIVE ${CMAKE_SOURCE_DIR}/tests test*.cxx unit/*.cxx)
+set(TEST_SOURCES 
+    test_expression.cxx
+    test_interpolate.cxx
+    test_loop.cxx
+    test_function.cxx
+)
 
 create_test_sourcelist (
     TESTS runner.cxx common.cxx ${TEST_SOURCES}

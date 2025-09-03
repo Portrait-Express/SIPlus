@@ -6,7 +6,7 @@
 #include "interpolation_visitor.h"
 
 #include "siplus/text/constructor_steps/retriever_step.h"
-#include "siplus/text/constructor_steps/nested_constructor_step.h"
+#include "siplus/text/constructor_steps/repeated_constructor_step.h"
 
 namespace SIPLUS_NAMESPACE {
 
@@ -30,7 +30,9 @@ std::any StatementVisitor::visitLoop(StringInterpolatorParser::LoopContext *ctx)
     auto sub = std::any_cast<text::TextConstructor>(
         ctx->program()->accept(&prog_visitor));
 
-    auto ptr = std::make_shared<text::NestedConstructorConstructorStep>(sub);
+    auto ptr = std::make_shared<text::RepeatedConstructorConstructorStep>(
+        context_, expr_value, sub);
+
     return std::static_pointer_cast<text::TextConstructorStep>(ptr);
 }
 

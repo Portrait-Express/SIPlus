@@ -24,5 +24,9 @@ std::any SIPlusParseTreeVisitor::visitErrorNode(antlr4::tree::ErrorNode * node) 
     throw std::runtime_error{err.str()};
 }
 
+std::any SIPlusParseTreeVisitor::aggregateResult(std::any oldValue, std::any newValue) {
+    return newValue.has_value() ? newValue : oldValue;
+}
+
 }
 

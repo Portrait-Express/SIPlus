@@ -5,7 +5,7 @@
 #include "siplus/parser.h"
 
 int test_interpolate(int, char**) {
-    SIPlus::Parser parser = test_context();
+    SIPlus::Parser parser = get_test_context();
 
     CPPTRACE_TRY {
         auto constructor = parser.get_interpolation("TEST { .x } HELLO");

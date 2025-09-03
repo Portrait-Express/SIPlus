@@ -9,9 +9,23 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_subdirectory(dependencies)
 
-file(GLOB lib_sources siplus/*.cpp siplus/**/*.cpp)
+file(GLOB GENERATED_SOURCES siplus/generated/*.cpp)
 
-add_library(siplus ${lib_sources})
+set(SIPLUS_SOURCES 
+    ${GENERATED_SOURCES}
+    siplus/context.cpp
+    siplus/data.cpp
+    siplus/expr_visitor.cpp
+    siplus/interpolation_visitor.cpp
+    siplus/literal_visitor.cpp
+    siplus/parser_impl.cpp
+    siplus/standardlib.cpp
+    siplus/statement_visitor.cpp
+    siplus/text.cpp
+    siplus/visitor.cpp
+)
+
+add_library(siplus ${SIPLUS_SOURCES})
 
 target_include_directories(siplus PUBLIC "${CMAKE_SOURCE_DIR}/include")
 target_link_libraries(siplus antlr4_static)

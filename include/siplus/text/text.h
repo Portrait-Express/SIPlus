@@ -4,9 +4,11 @@
 #include "siplus/_config.h"
 
 #include "siplus/text/accessor.h"
+#include "siplus/text/iterator.h"
+#include "siplus/text/converter.h"
 #include "siplus/text/constructor.h"
 
-#include "siplus/text/constructor_steps/nested_constructor_step.h"
+#include "siplus/text/constructor_steps/repeated_constructor_step.h"
 #include "siplus/text/constructor_steps/retriever_step.h"
 #include "siplus/text/constructor_steps/literal_step.h"
 

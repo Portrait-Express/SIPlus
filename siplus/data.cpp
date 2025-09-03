@@ -35,14 +35,17 @@ UnknownDataTypeContainer& UnknownDataTypeContainer::operator=(UnknownDataTypeCon
 }
 
 UnknownDataTypeContainer::~UnknownDataTypeContainer() {
-    if(*_ref == 1) {
-        delete _ref;
+    //_ref can be nullptr if this object is moved from
+    if(_ref != nullptr) {
+        if(*_ref == 1) {
+            delete _ref;
 
-        if(deleter_) {
-            deleter_(ptr);
+            if(deleter_) {
+                deleter_(ptr);
+            }
+        } else {
+            *_ref = *_ref - 1;
         }
-    } else {
-        *_ref = *_ref - 1;
     }
 }
 
