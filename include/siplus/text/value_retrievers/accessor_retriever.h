@@ -13,7 +13,7 @@ public:
     AccessorValueRetriever(std::shared_ptr<SIPlusParserContext> accessor, std::string name);
     AccessorValueRetriever(std::shared_ptr<SIPlusParserContext> accessor, std::shared_ptr<ValueRetriever> parent, std::string name);
 
-    UnknownDataTypeContainer retrieve(UnknownDataTypeContainer value) override;
+    UnknownDataTypeContainer retrieve(const UnknownDataTypeContainer& value) override;
 
 private:
     std::shared_ptr<ValueRetriever> parent_;

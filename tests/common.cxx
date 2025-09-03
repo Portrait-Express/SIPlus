@@ -6,11 +6,9 @@
 #include <vector>
 
 #include "siplus/context.h"
-#include "siplus/function.h"
 #include "siplus/parser.h"
 #include "siplus/text/data.h"
 #include "siplus/text/iterator.h"
-#include "siplus/text/value_retrievers/retriever.h"
 
 #include "common.hxx"
 #include "../siplus/util.h"

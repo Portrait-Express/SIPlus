@@ -40,7 +40,7 @@ add_func::value(
 }
 
 text::UnknownDataTypeContainer 
-add_func::retriever::retrieve(text::UnknownDataTypeContainer value) {
+add_func::retriever::retrieve(const text::UnknownDataTypeContainer& value) {
     auto context = context_.lock();
     text::UnknownDataTypeContainer sum;
 
@@ -109,7 +109,7 @@ str_func::value(
 }
 
 text::UnknownDataTypeContainer 
-str_func::retriever::retrieve(text::UnknownDataTypeContainer value) {
+str_func::retriever::retrieve(const text::UnknownDataTypeContainer& value) {
     auto ctx = context_.lock();
     auto val = param->retrieve(value);
     return ctx->convert<std::string>(val);

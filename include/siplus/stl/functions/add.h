@@ -26,7 +26,7 @@ private:
             std::weak_ptr<SIPlusParserContext> context
         ) : params(params), context_(context) {}
 
-        text::UnknownDataTypeContainer retrieve(text::UnknownDataTypeContainer value) override;
+        text::UnknownDataTypeContainer retrieve(const text::UnknownDataTypeContainer& value) override;
 
         std::vector<std::shared_ptr<text::ValueRetriever>> params;
 

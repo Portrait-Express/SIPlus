@@ -12,7 +12,7 @@ class DummyValueRetriever : public ValueRetriever {
 public:
     DummyValueRetriever() {}
 
-    UnknownDataTypeContainer retrieve(UnknownDataTypeContainer value) override {
+    UnknownDataTypeContainer retrieve(const UnknownDataTypeContainer& value) override {
         return value;
     };
 };
