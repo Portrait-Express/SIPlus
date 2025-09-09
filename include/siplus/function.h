@@ -14,7 +14,7 @@ public:
     virtual std::shared_ptr<text::ValueRetriever> value(
         std::shared_ptr<text::ValueRetriever> parent,
         std::vector<std::shared_ptr<text::ValueRetriever>> parameters
-    ) = 0;
+    ) const = 0;
 
     virtual ~Function() = default;
 };

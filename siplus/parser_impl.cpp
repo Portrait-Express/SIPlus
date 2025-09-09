@@ -13,6 +13,7 @@
 
 #include "parser_impl.h"
 #include "interpolation_visitor.h"
+#include "token_stream.h"
 #include <format>
 
 namespace SIPLUS_NAMESPACE {
@@ -127,7 +128,7 @@ ParserImpl::ParserImpl() {
 text::TextConstructor ParserImpl::get_interpolation(const std::string& text) const {
     antlr4::ANTLRInputStream stream{text};
     StringInterpolatorLexer lexer{&stream};
-    antlr4::CommonTokenStream tokens{&lexer};
+    internal::MultiChannelTokenStream tokens{&lexer};
     StringInterpolatorParser parser{&tokens};
 
     ErrorListener errors;
@@ -146,7 +147,7 @@ text::TextConstructor ParserImpl::get_interpolation(const std::string& text) con
 std::shared_ptr<text::ValueRetriever> ParserImpl::get_expression(const std::string& text) const {
     antlr4::ANTLRInputStream stream{text};
     StringInterpolatorLexer lexer{&stream};
-    antlr4::CommonTokenStream tokens{&lexer};
+    internal::MultiChannelTokenStream tokens{&lexer};
     StringInterpolatorParser parser{&tokens};
 
     ErrorListener errors;

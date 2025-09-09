@@ -5,9 +5,7 @@
 #include "siplus/parser.h"
 
 int test_interpolate(int, char**) {
-    SIPLUS_NAMESPACE::Parser parser = get_test_context();
-
-    return test([](const SIPLUS_NAMESPACE::Parser& parser) {
+    return test("String Interpolation", [](const SIPLUS_NAMESPACE::Parser& parser) {
         std::string expected{"TEST 2 HELLO"};
         auto constructor = parser.get_interpolation("TEST { .x } HELLO");
         std::string text = constructor.construct_with(SIPLUS_NAMESPACE::text::make_data(test_data{}));

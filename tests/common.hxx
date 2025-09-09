@@ -20,5 +20,12 @@ struct test_data {
     } y;
 };
 
-SIPlus::Parser get_test_context();
-int test(std::function<int(const SIPlus::Parser&)> test_impl);
+SIPlus::Parser& get_test_context();
+int test(std::string name, std::function<int(const SIPlus::Parser&)> test_impl);
+int group(std::string name, std::function<int(const SIPlus::Parser&)> test_impl);
+int group(std::string name, std::function<int()> test_impl);
+
+template<typename... TestResults>
+int tests(TestResults... results) {
+    return (results || ...);
+}

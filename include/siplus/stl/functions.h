@@ -3,6 +3,7 @@
 
 #include "siplus/_config.h"
 #include "siplus/stl/functions/add.h"
+#include "siplus/stl/functions/map.h"
 #include "siplus/stl/functions/str.h"
 
 namespace SIPLUS_NAMESPACE {

@@ -2,6 +2,7 @@
 #include "Token.h"
 #include "generated/StringInterpolatorLexer.h"
 #include "siplus/text/data.h"
+#include <cstdlib>
 #include <sstream>
 
 namespace SIPLUS_NAMESPACE {
@@ -22,11 +23,26 @@ std::string get_escape(const std::string& escape) {
     return escape;
 }
 
-int parse_int(const std::string& text) {
-    return 0;
+//INT: ('0'[xboXBO])?[0-9_]+ ;
+long parse_int(std::string text) {
+    std::transform(text.begin(), text.end(), text.begin(),
+                   [](char c) { return std::tolower(c); });
+
+    text.erase(std::remove(text.begin(), text.end(), '_'), text.end());
+
+    if(text.starts_with("0x")) {
+        return strtol(text.c_str() + 2, NULL, 16);
+    } else if(text.starts_with("0o")) {
+        return strtol(text.c_str() + 2, NULL, 8);
+    } else if(text.starts_with("0b")) {
+        return strtol(text.c_str() + 2, NULL, 2);
+    } else {
+        return strtol(text.c_str(), NULL, 10);
+    }
 }
 
-float parse_float(const std::string& text) {
+//FLOAT: ( [0-9]+ '.' [0-9]* ) | ( '.' [0-9]+ ) ;
+double parse_float(const std::string& text) {
     return 0;
 }
 

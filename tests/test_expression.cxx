@@ -8,7 +8,7 @@
 #include "siplus/text/data.h"
 
 int test_expression(int, char**) {
-    return test([](const SIPlus::Parser& parser) {
+    return test("Expression", [](const SIPlus::Parser& parser) {
         try {
             auto retriever = parser.get_expression(".x \"awd\"");
             auto data = SIPlus::text::make_data(test_data{});

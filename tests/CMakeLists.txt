@@ -14,6 +14,7 @@ set(TEST_SOURCES
     test_interpolate.cxx
     test_loop.cxx
     test_function.cxx
+    test_stdlib.cxx
 )
 
 create_test_sourcelist (

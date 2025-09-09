@@ -82,7 +82,7 @@ std::string ValueRetrieverConstructorStep::getPart(const UnknownDataTypeContaine
 
 LiteralValueRetriever::LiteralValueRetriever(UnknownDataTypeContainer value) : value_(value) {}
 
-UnknownDataTypeContainer LiteralValueRetriever::retrieve(const UnknownDataTypeContainer& value) {
+UnknownDataTypeContainer LiteralValueRetriever::retrieve(const UnknownDataTypeContainer& value) const {
     return value_;
 }
 
@@ -97,12 +97,14 @@ AccessorValueRetriever::AccessorValueRetriever(
     std::string name
 ) : context_(context), parent_(parent), name_(name) {}
 
-UnknownDataTypeContainer AccessorValueRetriever::retrieve(const UnknownDataTypeContainer& value) {
-    auto accessor = context_->accessor(value);
+UnknownDataTypeContainer AccessorValueRetriever::retrieve(const UnknownDataTypeContainer& value) const {
 
     if(parent_) {
-        return accessor->access(parent_->retrieve(value), name_);
+        auto parent = parent_->retrieve(value);
+        auto accessor = context_->accessor(parent);
+        return accessor->access(parent, name_);
     } else {
+        auto accessor = context_->accessor(value);
         return accessor->access(value, name_);
     }
 }

@@ -1,5 +1,5 @@
-#ifndef INCLUDE_FUNCTIONS_STR_H_
-#define INCLUDE_FUNCTIONS_STR_H_
+#ifndef INCLUDE_FUNCTIONS_MAP_H_
+#define INCLUDE_FUNCTIONS_MAP_H_
 
 #include <memory>
 
@@ -9,16 +9,17 @@
 namespace SIPLUS_NAMESPACE {
 namespace stl {
 
-struct str_func : Function  {
-    explicit str_func(std::weak_ptr<SIPlusParserContext> context) : context_(context) { }
+struct map_func : Function  {
+    explicit map_func(std::weak_ptr<SIPlusParserContext> context) 
+        : context_(context) { }
 
     std::shared_ptr<text::ValueRetriever> value(
         std::shared_ptr<text::ValueRetriever> parent, 
         std::vector<std::shared_ptr<text::ValueRetriever>> parameters
     ) const override;
 
+private:
     std::weak_ptr<SIPlusParserContext> context_;
-
 };
 
 } /* stl */
@@ -26,4 +27,4 @@ struct str_func : Function  {
 
 
 
-#endif  // INCLUDE_FUNCTIONS_STR_H_
+#endif  // INCLUDE_FUNCTIONS_MAP_H_

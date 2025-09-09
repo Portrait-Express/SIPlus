@@ -1,8 +1,16 @@
 parser grammar StringInterpolatorParser;
-options { tokenVocab=StringInterpolatorLexer; }
+
+options { 
+tokenVocab=StringInterpolatorLexer; 
+superClass='SIPLUS_NAMESPACE::internal::SIParser';
+}
+
+@header {
+#include "../si_parser.h"
+}
         
     
-field: DOT ( ID ( DOT ID )* )? ;
+field: {enableChannel(antlr4::Token::HIDDEN_CHANNEL);} DOT ( ID ( DOT ID )* )? {disableChannel(antlr4::Token::HIDDEN_CHANNEL);};
 
 string: STRING_START ( STRING_TEXT | STRING_ESCAPE )* STRING_END ;
 integer: INT ;

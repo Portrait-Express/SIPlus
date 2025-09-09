@@ -1,10 +1,12 @@
 #include <format>
-#include <iostream>
+#include <stdexcept>
 
+#include "siplus/internal/vector_iterator_provider.h"
 #include "siplus/stl.h"
 
 #include "siplus/stl/converters/int_string.h"
 #include "siplus/stl/functions.h"
+#include "siplus/stl/functions/add.h"
 #include "siplus/stl/functions/str.h"
 #include "siplus/text/data.h"
 #include "util.h"
@@ -12,12 +14,126 @@
 namespace SIPLUS_NAMESPACE {
 namespace stl {
 
+namespace {
+
+struct add_func_retriever : public text::ValueRetriever {
+    add_func_retriever(
+        const internal::BinaryTypeCache<AdditionImpl, &AdditionImpl::can_add> &adders,
+        std::vector<std::shared_ptr<text::ValueRetriever>> params,
+        std::weak_ptr<SIPlusParserContext> context
+    ) : adders_(adders), params(params), context_(context) {}
+
+    text::UnknownDataTypeContainer retrieve(const text::UnknownDataTypeContainer& value) const override;
+
+    std::vector<std::shared_ptr<text::ValueRetriever>> params;
+
+private:
+    std::weak_ptr<SIPlusParserContext> context_;
+    const internal::BinaryTypeCache<AdditionImpl, &AdditionImpl::can_add> &adders_;
+};
+
+struct map_func_retriever : public text::ValueRetriever {
+    map_func_retriever(
+        std::weak_ptr<SIPlusParserContext> context,
+        std::shared_ptr<text::ValueRetriever> input,
+        std::shared_ptr<text::ValueRetriever> expr
+    ) : context_(context), input_(input), map_expr_(expr) {}
+
+    text::UnknownDataTypeContainer 
+    retrieve(const text::UnknownDataTypeContainer &value) const override;
+
+private:
+    std::weak_ptr<SIPlusParserContext> context_;
+    std::shared_ptr<text::ValueRetriever> input_;
+    std::shared_ptr<text::ValueRetriever> map_expr_;
+};
+
+struct str_func_retriever : public text::ValueRetriever {
+    str_func_retriever(
+        std::shared_ptr<text::ValueRetriever> param,
+        std::weak_ptr<SIPlusParserContext> context
+    ) : param(param), context_(context) {}
+
+    text::UnknownDataTypeContainer retrieve(const text::UnknownDataTypeContainer& value) const override;
+
+    std::shared_ptr<text::ValueRetriever> param;
+
+private:
+    std::weak_ptr<SIPlusParserContext> context_;
+};
+
+}
+
+text::UnknownDataTypeContainer 
+DefaultAdder::add(std::shared_ptr<SIPlusParserContext> context, 
+                  text::UnknownDataTypeContainer sum, 
+                  text::UnknownDataTypeContainer val) {
+    if(sum.is<std::string>()) {
+        sum = text::make_data(sum.as<std::string>() + 
+                              context->convert<std::string>(val).as<std::string>());
+    } else if(sum.is<int>()) {
+        long lval = context->convert<long>(sum).as<long>();
+
+        if(val.is<long>()) {
+            sum = text::make_data(lval + val.as<long>());
+        } else if(val.is<double>()) {
+            sum = text::make_data(lval + val.as<double>());
+        } else if(val.is<std::string>()) {
+            sum = text::make_data(context->convert<std::string>(sum).as<std::string>() + 
+                                  val.as<std::string>());
+        } else {
+            sum = text::make_data(lval + context->convert<long>(val).as<long>());
+        }
+    } else if(sum.is<double>()) {
+        if(val.is<long>()) {
+            sum = text::make_data(sum.as<double>() + val.as<long>());
+        } else if(val.is<double>()) {
+            sum = text::make_data(sum.as<double>() + val.as<double>());
+        } else {
+            sum = text::make_data(sum.as<double>() + 
+                                  context->convert<double>(val).as<double>());
+        }
+    } else if(sum.is<long>()) {
+        if(val.is<long>()) {
+            sum = text::make_data(sum.as<long>() + val.as<long>());
+        } else if(val.is<double>()) {
+            sum = text::make_data(sum.as<long>() + val.as<double>());
+        } else if(val.is<std::string>()) {
+            sum = text::make_data(context->convert<std::string>(sum).as<std::string>() + 
+                                  val.as<std::string>());
+        } else {
+            sum = text::make_data(sum.as<long>() + 
+                                  context->convert<long>(val).as<long>());
+        }
+    } else if(sum.is<double>()) {
+        if(val.is<long>()) {
+            sum = text::make_data(sum.as<double>() + val.as<long>());
+        } else if(val.is<double>()) {
+            sum = text::make_data(sum.as<double>() + val.as<double>());
+        } else {
+            sum = text::make_data(sum.as<double>() + 
+                                  context->convert<double>(val).as<double>());
+        }
+    } else {
+        throw std::runtime_error{std::format("Not sure how to add {} and {}",
+                                             get_type_name(sum.type), 
+                                             get_type_name(val.type))};
+    }
+
+    return sum;
+}
+
+bool DefaultAdder::can_add(std::type_index sum, std::type_index add) {
+    return sum == typeid(std::string) || 
+        sum == typeid(int) || sum == typeid(long) ||
+        sum == typeid(float) || sum == typeid(double);
+}
 
 std::shared_ptr<text::ValueRetriever> 
 add_func::value(
     std::shared_ptr<text::ValueRetriever> parent, 
     std::vector<std::shared_ptr<text::ValueRetriever>> parameters
-) {
+) const {
     if(parameters.size() <= 0) {
         throw std::runtime_error{"Expected at least one parameter for function `add`"};
     }
@@ -36,11 +152,11 @@ add_func::value(
         sum.push_back(ptr);
     }
 
-    return std::make_shared<retriever>(sum, context_);
+    return std::make_shared<add_func_retriever>(cache_, sum, context_);
 }
 
 text::UnknownDataTypeContainer 
-add_func::retriever::retrieve(const text::UnknownDataTypeContainer& value) {
+add_func_retriever::retrieve(const text::UnknownDataTypeContainer& value) const {
     auto context = context_.lock();
     text::UnknownDataTypeContainer sum;
 
@@ -51,46 +167,78 @@ add_func::retriever::retrieve(const text::UnknownDataTypeContainer& value) {
         }
 
         auto val = ptr->retrieve(value);
-        if(sum.is<std::string>()) {
-            sum = text::make_data(sum.as<std::string>() + 
-                                  context->convert<std::string>(val).as<std::string>());
-
-        } else if(sum.is<int>()) {
-            if(val.is<int>()) {
-                sum = text::make_data(sum.as<int>() + val.as<int>());
-            } else if(val.is<float>()) {
-                sum = text::make_data(sum.as<int>() + val.as<float>());
-            } else if(val.is<std::string>()) {
-                sum = text::make_data(context->convert<std::string>(sum).as<std::string>() + 
-                                      val.as<std::string>());
-            } else {
-                sum = text::make_data(sum.as<int>() + 
-                                      context->convert<int>(val).as<int>());
-            }
-        } else if(sum.is<float>()) {
-            if(val.is<int>()) {
-                sum = text::make_data(sum.as<float>() + val.as<int>());
-            } else if(val.is<float>()) {
-                sum = text::make_data(sum.as<float>() + val.as<float>());
-            } else {
-                sum = text::make_data(sum.as<float>() + 
-                                      context->convert<float>(val).as<float>());
-            }
-        } else {
-            throw std::runtime_error{std::format("Not sure how to add {} and {}",
+        auto adder = adders_.find(sum.type, val.type);
+        if(adder == adders_.end()) {
+            throw std::runtime_error{std::format("Unsure how to add {} and {}", 
                                                  get_type_name(sum.type), 
                                                  get_type_name(val.type))};
         }
+
+        sum = (*adder)->add(context, sum, val);
     }
 
     return sum;
+}
+
+std::shared_ptr<text::ValueRetriever>
+map_func::value(std::shared_ptr<text::ValueRetriever> parent, 
+    std::vector<std::shared_ptr<text::ValueRetriever>> params) const {
+    std::shared_ptr<text::ValueRetriever> input;
+    std::shared_ptr<text::ValueRetriever> expr;
+
+    if(parent) {
+        input = parent;
+    }
+
+    if(input) {
+        if(params.size() != 1) {
+            throw std::runtime_error{"Expected 1 parameter for function `map`. Got " + 
+                std::to_string(params.size())};
+        }
+
+        expr = params[0];
+    } else {
+        if(params.size() != 2) {
+            throw std::runtime_error{"Expected 2 parameters for function `map`. Got " + 
+                std::to_string(params.size())};
+        }
+
+        input = params[0];
+        expr = params[1];
+    }
+
+    return std::make_shared<map_func_retriever>(context_, input, expr);
+}
+
+text::UnknownDataTypeContainer
+map_func_retriever::retrieve(const text::UnknownDataTypeContainer& val) const {
+    using vec_type = std::vector<text::UnknownDataTypeContainer>;
+    std::unique_ptr<vec_type> ret = std::make_unique<vec_type>();
+    auto context = context_.lock();
+
+    auto iterable = input_->retrieve(val);
+    auto iterator = context->iterator(iterable)->iterator(iterable);
+
+    bool more = iterator->more();
+    while(more) {
+        iterator->next();
+
+        auto val = iterator->current();
+        auto mapped_val = map_expr_->retrieve(val);
+
+        ret->push_back(mapped_val);
+
+        more = iterator->more();
+    }
+
+    return text::make_data(ret.release());
 }
 
 std::shared_ptr<text::ValueRetriever> 
 str_func::value(
     std::shared_ptr<text::ValueRetriever> parent, 
     std::vector<std::shared_ptr<text::ValueRetriever>> parameters
-) {
+) const {
     std::shared_ptr<text::ValueRetriever> param;
 
     if(parent) {
@@ -105,11 +253,11 @@ str_func::value(
         param = parameters[0];
     }
 
-    return std::make_shared<str_func::retriever>(param, context_);
+    return std::make_shared<str_func_retriever>(param, context_);
 }
 
 text::UnknownDataTypeContainer 
-str_func::retriever::retrieve(const text::UnknownDataTypeContainer& value) {
+str_func_retriever::retrieve(const text::UnknownDataTypeContainer& value) const {
     auto ctx = context_.lock();
     auto val = param->retrieve(value);
     return ctx->convert<std::string>(val);
@@ -118,22 +266,30 @@ str_func::retriever::retrieve(const text::UnknownDataTypeContainer& value) {
 
 bool
 int_converter::can_convert(std::type_index from, std::type_index to) {
-    if(from != typeid(int)) {
-        return false;
-    }
-
-    return to == typeid(std::string) ||
-           to == typeid(float);
+    return (from == typeid(int) || from == typeid(long) || from == typeid(short)) &&
+        (to == typeid(std::string) || to == typeid(double) || to == typeid(long));
 }
 
 text::UnknownDataTypeContainer 
 int_converter::convert(text::UnknownDataTypeContainer from, std::type_index to) {
-    int val = from.as<int>();
+    long val;
+    if(from.is<long>()) {
+        val = from.as<long>();
+    } else if(from.is<int>()) {
+        val = from.as<int>();
+    } else if(from.is<short>()) {
+        val = from.as<short>();
+    } else {
+        throw std::runtime_error{"Int converter cannot handle source type " + 
+            get_type_name(from.type)};
+    }
 
     if(to == typeid(std::string)) {
         return text::make_data(std::to_string(val));
-    } else if(to == typeid(float)) {
-        return text::make_data(val);
+    } else if(to == typeid(double)) {
+        return text::make_data(static_cast<double>(val));
+    } else if(to == typeid(long)) {
+        return text::make_data(std::move(val));
     } else {
         throw std::runtime_error{"Cant convert int to " + get_type_name(to)};
     }
@@ -147,6 +303,9 @@ void attach_stl(SIPlusParserContext& context) {
 void attach_stl_functions(SIPlusParserContext& context) {
     context.emplace_function<add_func>("add", context.shared_from_this());
     context.emplace_function<str_func>("str", context.shared_from_this());
+
+    context.emplace_function<map_func>("map", context.shared_from_this());
+    context.emplace_iterator<internal::vector_iterator<text::UnknownDataTypeContainer>>();
 }
 
 void attach_stl_converters(SIPlusParserContext& context) {
@@ -154,4 +313,4 @@ void attach_stl_converters(SIPlusParserContext& context) {
 }
 
 } /* stl */
-} /* SIPLUS_NAMESPACE */
+} /* SIPLUS_NAESPACE */

@@ -2,6 +2,7 @@
 #define INCLUDE_SIPLUS_TEXT_DATA_H_
 
 #include <functional>
+#include <type_traits>
 #include <typeindex>
 
 #include "siplus/_config.h"
@@ -27,7 +28,7 @@ struct UnknownDataTypeContainer {
     const void *ptr = 0;
 
     template<typename T>
-    bool is() { return type == typeid(std::remove_cvref_t<T>); }
+    bool is() const { return type == typeid(std::remove_cvref_t<T>); }
 
     /**
      * @brief Returns a reference to the stored data as a specified type. If 
@@ -58,12 +59,10 @@ private:
 
 
 /**
- * @brief Make a UnknownDataTypeContainer. Does not take ownership. Valid for 
- * the lifetime of the referenced object.
+ * @brief Dummy, returns passed parameter 
  */
-template<typename T>
-UnknownDataTypeContainer make_data(const T& value) {
-    return UnknownDataTypeContainer(typeid(std::remove_cvref_t<T>), &value);
+inline UnknownDataTypeContainer make_data(const text::UnknownDataTypeContainer& data) {
+    return data;
 }
 
 /** @brief Make a UnknownDataTypeContainer. Takes ownership of the pointer if 
@@ -81,10 +80,11 @@ UnknownDataTypeContainer make_data(const T *value, bool acquire = true) {
 
 /**
  * @brief Make a UnknownDataTypeContainer. Copies the object to the heap, and 
- * deletes the pointer when all references die. 
+ * deletes the pointer when all references die. Requires type is copy 
+ * constructible.
  */
-template<typename T>
-UnknownDataTypeContainer make_data(const T&& value) {
+template<typename T> requires (!std::is_pointer_v<T>)
+UnknownDataTypeContainer make_data(const T& value) {
     return make_data(new std::remove_cvref_t<T>(value), true);
 }
 

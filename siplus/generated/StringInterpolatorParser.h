@@ -1,4 +1,7 @@
 
+#include "../si_parser.h"
+
+
 // Generated from StringInterpolatorParser.g4 by ANTLR 4.13.2
 
 #pragma once
@@ -9,7 +12,7 @@
 
 
 
-class  StringInterpolatorParser : public antlr4::Parser {
+class  StringInterpolatorParser : public SIPLUS_NAMESPACE::internal::SIParser {
 public:
   enum {
     NORMAL_TEXT = 1, NORMAL_ESCAPE = 2, OPEN = 3, DOT = 4, HASH = 5, SLASH = 6, 

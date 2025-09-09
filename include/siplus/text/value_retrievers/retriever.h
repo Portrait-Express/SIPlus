@@ -9,7 +9,7 @@ namespace text {
 
 class ValueRetriever {
 public:
-    virtual UnknownDataTypeContainer retrieve(const UnknownDataTypeContainer& value) = 0;
+    virtual UnknownDataTypeContainer retrieve(const UnknownDataTypeContainer& value) const = 0;
 
     virtual ~ValueRetriever() = default;
 };

@@ -14,7 +14,7 @@ class LiteralValueRetriever : public ValueRetriever {
 public:
     explicit LiteralValueRetriever(UnknownDataTypeContainer value);
 
-    virtual UnknownDataTypeContainer retrieve(const UnknownDataTypeContainer& value) override;
+    virtual UnknownDataTypeContainer retrieve(const UnknownDataTypeContainer& value) const override;
 
 private:
     UnknownDataTypeContainer value_;

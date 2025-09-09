@@ -1,11 +1,14 @@
+#include <chrono>
 #include <cpptrace/from_current.hpp>
 #include <iostream> 
 #include <format>
 #include <memory>
 #include <stdexcept>
+#include <typeindex>
 #include <vector>
 
 #include "siplus/context.h"
+#include "siplus/internal/vector_iterator_provider.h"
 #include "siplus/parser.h"
 #include "siplus/text/data.h"
 #include "siplus/text/iterator.h"
@@ -43,72 +46,14 @@ struct user_accessor : public SIPlus::text::Accessor {
     }
 };
 
-struct vector_iterator : public SIPlus::text::IteratorProvider {
-    std::unique_ptr<text::Iterator> iterator(const text::UnknownDataTypeContainer &value) override {
-        const auto& ref = value.as<std::vector<User>>();
-
-        auto ptr = new iterator_impl<User>{ref.begin(), ref.end()};
-        return std::unique_ptr<text::Iterator>{ptr};
-    }
-
-    bool can_iterate(const text::UnknownDataTypeContainer &value) override {
-        return value.type == typeid(std::vector<User>);
-    }
-
-
-private:
-    template<typename T>
-    struct iterator_impl : text::Iterator {
-    public:
-        explicit iterator_impl(
-            std::vector<T>::const_iterator begin,
-            std::vector<T>::const_iterator end
-        ) : begin(begin), cur(begin), end(end) { }
-
-        bool more() override {
-            return cur < end - 1;
-        }
-
-        void next() override {
-            //cur is valid at iterator creation, but we need to eat a next() 
-            //to start the iterator as iterators should not have a valid current()
-            //if next() has not been called
-            if(!begun_) {
-                begun_ = true;
-                return;
-            }
-
-            cur++;
-
-            if(cur >= end) {
-                throw std::runtime_error{"next() called on completed iterator"};
-            }
-        }
-
-        text::UnknownDataTypeContainer current() override {
-            if(!begun_) {
-                throw std::runtime_error{"next() has not been called. call more()&&next()"};
-            }
-
-            return text::make_data(*cur);
-        }
-
-        ~iterator_impl() override { };
-
-    private:
-        bool begun_ = false;
-
-        const std::vector<T>::const_iterator begin;
-        const std::vector<T>::const_iterator end;
-
-        std::vector<T>::const_iterator cur;
-    };
-};
-
 struct data_accessor : public SIPlus::text::Accessor {
     text::UnknownDataTypeContainer access(
         const text::UnknownDataTypeContainer &value, 
         const std::string &name) override {
+        if(value.is<struct test_data::y>()) {
+            return text::make_data(value.as<struct test_data::y>().b);
+        }
+
         const test_data& data = value.as<test_data>();
 
         if(name == "x") {
@@ -123,36 +68,75 @@ struct data_accessor : public SIPlus::text::Accessor {
             return text::make_data(data.users);
         }
 
+
         throw std::runtime_error(std::format("No viable property for '{}'", name));
     }
 
     bool can_access(const text::UnknownDataTypeContainer& value) override {
-        return value.type == typeid(test_data);
+        return value.type == typeid(test_data) || 
+            value.type == typeid(struct test_data::y);
     }
 };
 
-Parser get_test_context() {
-    Parser parser;
+Parser& get_test_context() {
+    static Parser parser;
 
     parser.context().use_stl();
     parser.context().emplace_accessor<data_accessor>();
     parser.context().emplace_accessor<user_accessor>();
-    parser.context().emplace_iterator<vector_iterator>();
+    parser.context().emplace_iterator<internal::vector_iterator<User>>();
 
     return parser;
 }
 
-int test(std::function<int(const Parser&)> test_impl) {
-    Parser parser = get_test_context();
+std::string group_prefix;
+int test(std::string name, std::function<int(const Parser&)> test_impl) {
+    Parser& parser = get_test_context();
 
+    std::cout << "Running test: " << group_prefix << name << " - ";
+    int result;
+
+    std::chrono::system_clock::time_point start;
     CPPTRACE_TRY {
-        return test_impl(parser);
+        start = std::chrono::system_clock::now();
+        result = test_impl(parser);
+        auto end = std::chrono::system_clock::now();
+
+        if(result == 0) {
+            std::cout << "Pass";
+        } else {
+            std::cout << "Failed";
+        }
+
+        std::cout << " " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start) << std::endl;
     } CPPTRACE_CATCH(std::exception& e) {
+        auto end = std::chrono::system_clock::now();
+        std::cout << "Failed with exception " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start) << '\n';
+
         std::cout << e.what() << std::endl;
         cpptrace::from_current_exception().print();
-
-        return 1;
+        
+        result = 1;
     }
 
-    return 1;
+    return result;
+}
+
+int group(std::string name, std::function<int(const SIPlus::Parser&)> test_impl) {
+    name.erase(std::remove(name.begin(), name.end(), '/'), name.end());
+    group_prefix += name + "/";
+
+    int result = test_impl(get_test_context());
+
+    auto it = name.rfind('/');
+    if(it != -1)
+        name.erase(name.begin() + it, name.end());
+
+    return result;
+}
+
+int group(std::string name, std::function<int()> test_impl) {
+    return group(name, [&](const Parser&) {
+        return test_impl();
+    });
 }
