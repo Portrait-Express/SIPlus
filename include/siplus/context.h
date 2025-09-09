@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "siplus/internal/binary_type_cache.h"
 #include "siplus/text/accessor.h"
 #include "siplus/function.h"
 #include "siplus/text/converter.h"
@@ -63,22 +64,19 @@ public:
 
     template<typename T, typename ...Ts, typename = std::enable_if_t<std::is_base_of_v<text::Converter, T>>>
     void emplace_converter(Ts&&... args) {
-        converters_.emplace_back(std::make_shared<T>(std::forward<Ts>(args)...));
+        converters_.emplace_item<T>(std::forward<Ts>(args)...);
     }
 
 private:
     //accessing caches
     std::unordered_map<std::type_index, std::shared_ptr<text::Accessor>> accessors_cache_;
     std::unordered_map<std::type_index, std::shared_ptr<text::IteratorProvider>> iterators_cache_;
-    std::unordered_map<std::type_index, 
-        std::unordered_map<std::type_index, 
-            std::shared_ptr<text::Converter>>> converters_cache_;
+    internal::BinaryTypeCache<text::Converter, &text::Converter::can_convert> converters_;
 
     //storage
     std::unordered_map<std::string, std::unique_ptr<Function>> functions_;
     std::vector<std::shared_ptr<text::Accessor>> accessors_;
     std::vector<std::shared_ptr<text::IteratorProvider>> iterators_;
-    std::vector<std::shared_ptr<text::Converter>> converters_;
 };
 
 }

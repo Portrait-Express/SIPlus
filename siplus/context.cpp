@@ -66,26 +66,15 @@ SIPlusParserContext::iterator(const text::UnknownDataTypeContainer& value) {
 
 std::shared_ptr<text::Converter> 
 SIPlusParserContext::converter(std::type_index from, std::type_index to) {
-    auto fromIt = converters_cache_.find(from);
+    auto it = converters_.find(from, to);
 
-    if(fromIt != converters_cache_.end()) {
-        auto toIt = fromIt->second.find(to);
-
-        if(toIt != fromIt->second.end()) {
-            return toIt->second;
-        }
+    if(it == converters_.end()) {
+        throw std::runtime_error{std::format(
+            "No converter available to convert from {} to {}",
+            get_type_name(from), get_type_name(to))};
     }
 
-    for(auto& converter : converters_) {
-        if(converter->can_convert(from, to)) {
-            converters_cache_[from][to] = converter;
-            return converter;
-        }
-    }
-
-    throw std::runtime_error{std::format(
-        "No converter available to convert from {} to {}",
-        get_type_name(from), get_type_name(to))};
+    return *it;
 }
 
 void
