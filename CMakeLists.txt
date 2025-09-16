@@ -29,7 +29,7 @@ set(SIPLUS_SOURCES
 
 add_library(siplus ${SIPLUS_SOURCES})
 
-target_include_directories(siplus PUBLIC "${CMAKE_SOURCE_DIR}/include")
+target_include_directories(siplus PUBLIC include)
 target_link_libraries(siplus antlr4_static)
 
 add_subdirectory(tests)
