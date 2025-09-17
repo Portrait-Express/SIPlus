@@ -8,10 +8,10 @@
 #include "siplus/text/value_retrievers/accessor_retriever.h"
 #include "siplus/text/value_retrievers/dummy_retriever.h"
 #include "siplus/text/value_retrievers/literal_retriever.h"
+#include "siplus/util.h"
 
 #include "expr_visitor.h"
 #include "literal_visitor.h"
-#include "util.h"
 #include "visitor.h"
 
 namespace SIPLUS_NAMESPACE {

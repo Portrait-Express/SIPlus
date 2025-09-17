@@ -9,7 +9,7 @@
 #include "siplus/text/value_retrievers/literal_retriever.h"
 #include "siplus/text/value_retrievers/accessor_retriever.h"
 
-#include "util.h"
+#include "siplus/util.h"
 
 namespace SIPLUS_NAMESPACE {
 namespace text {

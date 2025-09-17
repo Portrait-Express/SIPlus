@@ -9,8 +9,7 @@
 #include "siplus/context.h"
 #include "siplus/function.h"
 #include "siplus/text/data.h"
-
-#include "util.h"
+#include "siplus/util.h"
 
 namespace SIPLUS_NAMESPACE {
 

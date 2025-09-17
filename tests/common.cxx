@@ -12,9 +12,9 @@
 #include "siplus/parser.h"
 #include "siplus/text/data.h"
 #include "siplus/text/iterator.h"
+#include "siplus/util.h"
 
 #include "common.hxx"
-#include "../siplus/util.h"
 
 using namespace SIPLUS_NAMESPACE;
 
