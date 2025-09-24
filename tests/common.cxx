@@ -123,14 +123,17 @@ int test(std::string name, std::function<int(const Parser&)> test_impl) {
 }
 
 int group(std::string name, std::function<int(const SIPlus::Parser&)> test_impl) {
+    //Remove any slashes from name
     name.erase(std::remove(name.begin(), name.end(), '/'), name.end());
     group_prefix += name + "/";
 
+    //run test fn
     int result = test_impl(get_test_context());
 
-    auto it = name.rfind('/');
-    if(it != -1)
-        name.erase(name.begin() + it, name.end());
+    //Remove last segment of prefix
+    auto it = group_prefix.rfind('/', name.size()-1);
+    if(it != std::string::npos)
+        group_prefix.erase(group_prefix.begin() + it + 1, group_prefix.end());
 
     return result;
 }
