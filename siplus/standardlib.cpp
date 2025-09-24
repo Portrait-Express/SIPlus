@@ -182,48 +182,35 @@ add_func_retriever::retrieve(const text::UnknownDataTypeContainer& value) const 
 std::shared_ptr<text::ValueRetriever>
 map_func::value(std::shared_ptr<text::ValueRetriever> parent, 
     std::vector<std::shared_ptr<text::ValueRetriever>> params) const {
-    std::shared_ptr<text::ValueRetriever> input;
-    std::shared_ptr<text::ValueRetriever> expr;
 
-    if(parent) {
-        input = parent;
+    if(params.size() != 1) {
+        throw std::runtime_error{"Expected 1 parameter for function `map`. Got " + 
+            std::to_string(params.size())};
     }
 
-    if(input) {
-        if(params.size() != 1) {
-            throw std::runtime_error{"Expected 1 parameter for function `map`. Got " + 
-                std::to_string(params.size())};
-        }
-
-        expr = params[0];
-    } else {
-        if(params.size() != 2) {
-            throw std::runtime_error{"Expected 2 parameters for function `map`. Got " + 
-                std::to_string(params.size())};
-        }
-
-        input = params[0];
-        expr = params[1];
-    }
-
-    return std::make_shared<map_func_retriever>(context_, input, expr);
+    return std::make_shared<map_func_retriever>(context_, parent, params[0]);
 }
 
 text::UnknownDataTypeContainer
 map_func_retriever::retrieve(const text::UnknownDataTypeContainer& val) const {
     using vec_type = std::vector<text::UnknownDataTypeContainer>;
+
     std::unique_ptr<vec_type> ret = std::make_unique<vec_type>();
+    text::UnknownDataTypeContainer iterable = val;
     auto context = context_.lock();
 
-    auto iterable = input_->retrieve(val);
+    if(input_) {
+        iterable = input_->retrieve(val);
+    }
+
     auto iterator = context->iterator(iterable)->iterator(iterable);
 
     bool more = iterator->more();
     while(more) {
         iterator->next();
 
-        auto val = iterator->current();
-        auto mapped_val = map_expr_->retrieve(val);
+        auto current = iterator->current();
+        auto mapped_val = map_expr_->retrieve(current);
 
         ret->push_back(mapped_val);
 
