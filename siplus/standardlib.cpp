@@ -3,7 +3,7 @@
 
 #include "siplus/internal/vector_iterator_provider.h"
 #include "siplus/stl.h"
-#include "siplus/stl/converters/int_string.h"
+#include "siplus/stl/converters/numeric.h"
 #include "siplus/stl/functions.h"
 #include "siplus/stl/functions/add.h"
 #include "siplus/stl/functions/str.h"
@@ -265,16 +265,21 @@ str_func_retriever::retrieve(const text::UnknownDataTypeContainer& value) const 
 
 bool
 int_converter::can_convert(std::type_index from, std::type_index to) {
-    return (from == typeid(int) || from == typeid(long) || from == typeid(short)) &&
-        (to == typeid(std::string) || to == typeid(double) || to == typeid(long));
+    return (
+            from == typeid(short) ||
+            from == typeid(int) || 
+            from == typeid(long)
+        ) &&
+        to == typeid(long);
 }
 
 text::UnknownDataTypeContainer 
 int_converter::convert(text::UnknownDataTypeContainer from, std::type_index to) {
+    if(from.is<long>()) return from; 
+
     long val;
-    if(from.is<long>()) {
-        val = from.as<long>();
-    } else if(from.is<int>()) {
+
+    if(from.is<int>()) {
         val = from.as<int>();
     } else if(from.is<short>()) {
         val = from.as<short>();
@@ -283,14 +288,48 @@ int_converter::convert(text::UnknownDataTypeContainer from, std::type_index to) 
             get_type_name(from.type)};
     }
 
-    if(to == typeid(std::string)) {
-        return text::make_data(std::to_string(val));
-    } else if(to == typeid(double)) {
-        return text::make_data(static_cast<double>(val));
-    } else if(to == typeid(long)) {
-        return text::make_data(std::move(val));
+    return text::make_data(val);
+}
+
+bool float_converter::can_convert(std::type_index from, std::type_index to) {
+    return (
+        from == typeid(float) ||
+        from == typeid(double)
+    ) && to == typeid(double);
+}
+
+text::UnknownDataTypeContainer
+float_converter::convert(text::UnknownDataTypeContainer from, std::type_index to) {
+    if(from.is<double>()) return from;
+
+    double d;
+
+    if(from.is<float>()) {
+        d = from.as<float>();
+    }
+
+    return text::make_data(d);
+}
+
+bool
+numeric_string_converter::can_convert(std::type_index from, std::type_index to) {
+    return (
+        int_converter_.can_convert(from, typeid(long)) ||
+        float_converter_.can_convert(from, typeid(double))
+    ) && to == typeid(std::string);
+}
+
+text::UnknownDataTypeContainer
+numeric_string_converter::convert(text::UnknownDataTypeContainer from, std::type_index to) {
+    if(int_converter_.can_convert(from.type, typeid(long))) {
+        long val = int_converter_.convert(from, typeid(long)).as<long>();
+        return text::make_data(to_string(val));
+    } else if(float_converter_.can_convert(from.type, typeid(double))) {
+        double val = float_converter_.convert(from, typeid(double)).as<double>();
+        return text::make_data(to_string(val));
     } else {
-        throw std::runtime_error{"Cant convert int to " + get_type_name(to)};
+        throw std::runtime_error{"Cannot convert from " + get_type_name(from.type) 
+            + " to " + get_type_name(to)};
     }
 }
 
@@ -309,6 +348,8 @@ void attach_stl_functions(SIPlusParserContext& context) {
 
 void attach_stl_converters(SIPlusParserContext& context) {
     context.emplace_converter<int_converter>();
+    context.emplace_converter<float_converter>();
+    context.emplace_converter<numeric_string_converter>();
 }
 
 } /* stl */

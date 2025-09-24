@@ -2,7 +2,6 @@
 #define INCLUDE_STL_CONVERTERS_H_
 
 #include "siplus/context.h"
-#include "siplus/stl/converters/int_string.h"
 
 namespace SIPLUS_NAMESPACE {
 namespace stl {

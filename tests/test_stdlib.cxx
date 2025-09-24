@@ -1,6 +1,9 @@
 #include "common.hxx"
+#include "siplus/stl/converters/numeric.h"
 #include "siplus/text/data.h"
+#include "siplus/util.h"
 #include <algorithm>
+#include <bits/types/cookie_io_functions_t.h>
 #include <iostream>
 
 int test_add() {
@@ -44,7 +47,6 @@ int test_map() {
 
         std::transform(vec.begin(), vec.end(), std::back_inserter(result), 
                        [](SIPlus::text::UnknownDataTypeContainer val) {
-               std::cout << val.as<int>() << std::endl;
             return val.as<int>();
         });
 
@@ -52,6 +54,72 @@ int test_map() {
     });
 }
 
+template<typename T, typename V, typename To> requires std::is_base_of_v<SIPlus::text::Converter, T>
+int test_conversion(V&& val, To&& result) {
+    T converter;
+    SIPlus::text::UnknownDataTypeContainer container;
+
+    if(converter.can_convert(typeid(V), typeid(To))) {
+        container = converter.convert(SIPlus::text::make_data(val), typeid(To));
+    } else {
+        std::cout 
+            << get_type_name(typeid(T)) << " cannot convert from " 
+            << get_type_name(typeid(To)) << " to " 
+            << get_type_name(container.type) << std::endl;
+        return 1;
+    }
+
+    if(container.is<To>()) {
+        if(container.as<To>() == result) {
+            return 0;
+        } else {
+            std::cout << "Expected value " << result
+                << ". Recieved value " << container.as<To>() << std::endl;
+            return 1;
+        }
+    } else {
+        std::cout << "Expected type " << get_type_name(typeid(To)) 
+            << ". Recieved " << get_type_name(container.type) << std::endl;
+        return 1;
+    }
+}
+
+int test_int_converter() {
+    return test("int_converter", [](const SIPlus::Parser& parser) {
+        SIPlus::stl::int_converter converter;
+
+        return tests(
+            test_conversion<SIPlus::stl::int_converter, short, long>(1, 1),
+            test_conversion<SIPlus::stl::int_converter, int, long>(1, 1),
+            test_conversion<SIPlus::stl::int_converter, long, long>(1, 1)
+        );
+    });
+}
+
+int test_float_converter() {
+    return test("float_converter", [](const SIPlus::Parser& parser) {
+        SIPlus::stl::float_converter converter;
+
+        return tests(
+            test_conversion<SIPlus::stl::float_converter, float, double>(1, 1),
+            test_conversion<SIPlus::stl::float_converter, double, double>(1, 1)
+        );
+    });
+}
+
+int test_numeric_string_converter() {
+    return test("numeric_string_converter", [](const SIPlus::Parser& parser) {
+        SIPlus::stl::numeric_string_converter converter;
+
+        return tests(
+            test_conversion<SIPlus::stl::numeric_string_converter, short, std::string>(1, "1"),
+            test_conversion<SIPlus::stl::numeric_string_converter, int, std::string>(1, "1"),
+            test_conversion<SIPlus::stl::numeric_string_converter, long, std::string>(1, "1"),
+            test_conversion<SIPlus::stl::numeric_string_converter, float, std::string>(1, "1"),
+            test_conversion<SIPlus::stl::numeric_string_converter, double, std::string>(1, "1")
+        );
+    });
+}
 int test_functions() {
     return group("functions", []() {
         return tests(
@@ -62,10 +130,22 @@ int test_functions() {
     });
 }
 
+
+int test_converters() {
+    return group("converters", []() {
+        return tests(
+            test_int_converter(),
+            test_float_converter(),
+            test_numeric_string_converter()
+        );
+    });
+}
+
 int test_stdlib(int, char**) {
     return group("stdlib", []() {
         return tests(
-            test_functions()
+            test_functions(),
+            test_converters()
         );
     });
 }
