@@ -150,8 +150,10 @@ int test_int_converter() {
 
 int test_float_converter() {
     return test("float_converter", [](const SIPlus::Parser& parser) {
-        SIPlus::stl::float_converter converter;
-
+        SIPlus::text::UnknownDataTypeContainer data = SIPlus::text::make_data<double>(2);
+        SIPlus::stl::float_converter con;
+        std::cout << data.as<double>() << con.convert(data, typeid(double)).as<double>() << std::endl;
+        
         return tests(
             test_conversion<SIPlus::stl::float_converter, float, double>(1.124f, 1.124),
             test_conversion<SIPlus::stl::float_converter, double, double>(3.141f, 3.141)
