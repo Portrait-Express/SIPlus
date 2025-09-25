@@ -108,10 +108,10 @@ int test(std::string name, std::function<int(const Parser&)> test_impl) {
             std::cout << "Failed";
         }
 
-        std::cout << " " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start) << std::endl;
+        std::cout << " " << std::chrono::duration_cast<std::chrono::microseconds>(end - start) << std::endl;
     } CPPTRACE_CATCH(std::exception& e) {
         auto end = std::chrono::system_clock::now();
-        std::cout << "Failed with exception " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start) << '\n';
+        std::cout << "Failed with exception " << std::chrono::duration_cast<std::chrono::microseconds>(end - start) << '\n';
 
         std::cout << e.what() << std::endl;
         cpptrace::from_current_exception().print();

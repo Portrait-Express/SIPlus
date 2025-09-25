@@ -4,6 +4,9 @@
 #include "siplus/util.h"
 #include <algorithm>
 #include <bits/types/cookie_io_functions_t.h>
+#include <cassert>
+#include <cfloat>
+#include <chrono>
 #include <iostream>
 
 int test_add() {
@@ -54,6 +57,55 @@ int test_map() {
     });
 }
 
+
+
+//https://stackoverflow.com/a/32334103/10844545
+bool nearly_equal(
+  float a, float b,
+  float epsilon = 128 * FLT_EPSILON, float abs_th = FLT_MIN)
+  // those defaults are arbitrary and could be removed
+{
+  assert(std::numeric_limits<float>::epsilon() <= epsilon);
+  assert(epsilon < 1.f);
+
+  if (a == b) return true;
+
+  auto diff = std::abs(a-b);
+  auto norm = std::min((std::abs(a) + std::abs(b)), std::numeric_limits<float>::max());
+  // or even faster: std::min(std::abs(a + b), std::numeric_limits<float>::max());
+  // keeping this commented out until I update figures below
+  return diff < std::max(abs_th, epsilon * norm);
+}
+
+bool nearly_equal(
+  double a, double b,
+  double epsilon = 128 * DBL_EPSILON, double abs_th = DBL_MIN)
+  // those defaults are arbitrary and could be removed
+{
+  assert(std::numeric_limits<double>::epsilon() <= epsilon);
+  assert(epsilon < 1.f);
+
+  if (a == b) return true;
+
+  auto diff = std::abs(a-b);
+  auto norm = std::min((std::abs(a) + std::abs(b)), std::numeric_limits<double>::max());
+  // or even faster: std::min(std::abs(a + b), std::numeric_limits<float>::max());
+  // keeping this commented out until I update figures below
+  return diff < std::max(abs_th, epsilon * norm);
+}
+
+template<typename T>
+bool conversion_equal(T first, T second) {
+    return first == second;
+}
+
+template<>
+bool conversion_equal<double>(double first, double second) {
+    //Use float epsilon since float_converter casts from a float to a double, 
+    //and should be within 1 FLT_EPSILON of accuracy
+    return nearly_equal(first, second, (double)FLT_EPSILON, (double)FLT_MIN);
+}
+
 template<typename T, typename V, typename To> requires std::is_base_of_v<SIPlus::text::Converter, T>
 int test_conversion(V&& val, To&& result) {
     T converter;
@@ -70,7 +122,7 @@ int test_conversion(V&& val, To&& result) {
     }
 
     if(container.is<To>()) {
-        if(container.as<To>() == result) {
+        if(conversion_equal<To>(container.as<To>(), result)) {
             return 0;
         } else {
             std::cout << "Expected value " << result
@@ -89,9 +141,9 @@ int test_int_converter() {
         SIPlus::stl::int_converter converter;
 
         return tests(
-            test_conversion<SIPlus::stl::int_converter, short, long>(1, 1),
-            test_conversion<SIPlus::stl::int_converter, int, long>(1, 1),
-            test_conversion<SIPlus::stl::int_converter, long, long>(1, 1)
+            test_conversion<SIPlus::stl::int_converter, short, long>(12, 12),
+            test_conversion<SIPlus::stl::int_converter, int, long>(42, 42),
+            test_conversion<SIPlus::stl::int_converter, long, long>(1337, 1337)
         );
     });
 }
@@ -101,8 +153,8 @@ int test_float_converter() {
         SIPlus::stl::float_converter converter;
 
         return tests(
-            test_conversion<SIPlus::stl::float_converter, float, double>(1, 1),
-            test_conversion<SIPlus::stl::float_converter, double, double>(1, 1)
+            test_conversion<SIPlus::stl::float_converter, float, double>(1.124f, 1.124),
+            test_conversion<SIPlus::stl::float_converter, double, double>(3.141f, 3.141)
         );
     });
 }
