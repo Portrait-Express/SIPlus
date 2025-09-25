@@ -1,13 +1,13 @@
+#include <algorithm>
+#include <cassert>
+#include <cfloat>
+#include <iostream>
+#include <limits>
+
 #include "common.hxx"
 #include "siplus/stl/converters/numeric.h"
 #include "siplus/text/data.h"
 #include "siplus/util.h"
-#include <algorithm>
-#include <bits/types/cookie_io_functions_t.h>
-#include <cassert>
-#include <cfloat>
-#include <chrono>
-#include <iostream>
 
 int test_add() {
     return test("add", [](const SIPlus::Parser& parser) {
