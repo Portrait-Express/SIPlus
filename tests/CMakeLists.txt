@@ -2,6 +2,7 @@ enable_testing()
 
 option(SIPLUS_RUN_TESTS "Whether or not to run built tests" ON)
 option(SIPLUS_BUILD_TESTS "Whether or not to build tests" ON)
+option(SIPLUS_TESTS_USE_CPPTRACE "Include cpptrace in built tests for stack traces" ON)
 
 if(NOT SIPLUS_BUILD_TESTS)
 return()
@@ -26,7 +27,12 @@ create_test_sourcelist (
 # add the executable
 add_executable (runner ${TESTS})
 
-target_link_libraries(runner PRIVATE siplus cpptrace::cpptrace)
+if(SIPLUS_TESTS_USE_CPPTRACE) 
+    set(SIPLUS_TEST_LIBRARIES ${SIPLUS_TEST_LIBRARIES} cpptrace::cpptrace)
+    target_compile_definitions(runner PUBLIC SIPLUS_HAS_CPPTRACE)
+endif()
+
+target_link_libraries(runner PRIVATE siplus ${SIPLUS_TEST_LIBRARIES})
 target_include_directories(runner PRIVATE ${CMAKE_SOURCE_DIR}/tests)
 
 

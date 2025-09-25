@@ -1,17 +1,26 @@
 #include <chrono>
-#include <cpptrace/from_current.hpp>
 #include <iostream> 
 #include <format>
-#include <memory>
 #include <stdexcept>
 #include <typeindex>
-#include <vector>
+
+#ifdef SIPLUS_HAS_CPPTRACE
+
+#include <cpptrace/from_current.hpp>
+#define SIPLUS_TRY CPPTRACE_TRY
+#define SIPLUS_CATCH(args) CPPTRACE_CATCH(args)
+
+#else 
+
+#define SIPLUS_TRY try
+#define SIPLUS_CATCH catch
+
+#endif
 
 #include "siplus/context.h"
 #include "siplus/internal/vector_iterator_provider.h"
 #include "siplus/parser.h"
 #include "siplus/text/data.h"
-#include "siplus/text/iterator.h"
 #include "siplus/util.h"
 
 #include "common.hxx"
@@ -97,7 +106,7 @@ int test(std::string name, std::function<int(const Parser&)> test_impl) {
     int result;
 
     std::chrono::system_clock::time_point start;
-    CPPTRACE_TRY {
+    SIPLUS_TRY {
         start = std::chrono::system_clock::now();
         result = test_impl(parser);
         auto end = std::chrono::system_clock::now();
@@ -109,12 +118,15 @@ int test(std::string name, std::function<int(const Parser&)> test_impl) {
         }
 
         std::cout << " " << std::chrono::duration_cast<std::chrono::microseconds>(end - start) << std::endl;
-    } CPPTRACE_CATCH(std::exception& e) {
+    } SIPLUS_CATCH(std::exception& e) {
         auto end = std::chrono::system_clock::now();
         std::cout << "Failed with exception " << std::chrono::duration_cast<std::chrono::microseconds>(end - start) << '\n';
 
         std::cout << e.what() << std::endl;
+
+#ifdef SIPLUS_HAS_CPPTRACE
         cpptrace::from_current_exception().print();
+#endif
         
         result = 1;
     }

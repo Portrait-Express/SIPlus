@@ -1,4 +1,3 @@
-#include <cpptrace/from_current.hpp>
 #include <cstring>
 #include <iostream>
 #include <stdexcept>
