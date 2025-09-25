@@ -22,7 +22,7 @@ struct UnknownDataTypeContainer {
 
     UnknownDataTypeContainer& operator=(UnknownDataTypeContainer other);
 
-    operator bool() { return ptr; }
+    explicit operator bool() { return ptr; }
 
     std::type_index type = typeid(void);
     const void *ptr = 0;
