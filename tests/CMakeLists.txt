@@ -33,7 +33,7 @@ if(SIPLUS_TESTS_USE_CPPTRACE)
 endif()
 
 target_link_libraries(runner PRIVATE siplus ${SIPLUS_TEST_LIBRARIES})
-target_include_directories(runner PRIVATE ${CMAKE_SOURCE_DIR}/tests)
+target_include_directories(runner PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 
 # Add all the ADD_TEST for each test
