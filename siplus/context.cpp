@@ -1,8 +1,3 @@
-#include <format>
-#include <functional>
-#include <iostream>
-#include <ostream>
-#include <stdexcept>
 #include <string>
 
 #include "siplus/stl.h"
@@ -19,7 +14,7 @@ Function& SIPlusParserContext::function(const std::string& name) {
     auto it = functions_.find(name);
 
     if(it == functions_.end()) {
-        throw std::runtime_error{std::format("Function '{}' not found.", name)};
+        throw std::runtime_error{"Function '" + name + "' not found.",};
     }
 
     return *it->second;
@@ -39,7 +34,7 @@ SIPlusParserContext::accessor(const text::UnknownDataTypeContainer& value) {
         }
     }
 
-    throw std::runtime_error{std::format("No accessor available able to handle {}", value.type.name())};
+    throw std::runtime_error{"No accessor available able to handle " + get_type_name(value.type)};
 }
 
 
@@ -57,9 +52,8 @@ SIPlusParserContext::iterator(const text::UnknownDataTypeContainer& value) {
         }
     }
 
-    throw std::runtime_error{std::format(
-        "No iterator provider available able to iterate {}", 
-        get_type_name(value.type))};
+    throw std::runtime_error{"No iterator provider available able to iterate " 
+        + get_type_name(value.type)};
 }
 
 
@@ -68,9 +62,8 @@ SIPlusParserContext::converter(std::type_index from, std::type_index to) {
     auto it = converters_.find(from, to);
 
     if(it == converters_.end()) {
-        throw std::runtime_error{std::format(
-            "No converter available to convert from {} to {}",
-            get_type_name(from), get_type_name(to))};
+        throw std::runtime_error{"No converter available to convert from " 
+            + get_type_name(from) + " to " + get_type_name(to)};
     }
 
     return *it;

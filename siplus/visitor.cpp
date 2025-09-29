@@ -1,5 +1,4 @@
 #include "visitor.h"
-#include <stdexcept>
 
 namespace SIPLUS_NAMESPACE {
 

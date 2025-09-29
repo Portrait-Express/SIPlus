@@ -14,7 +14,7 @@
 #include "parser_impl.h"
 #include "interpolation_visitor.h"
 #include "token_stream.h"
-#include <format>
+#include <sstream>
 
 namespace SIPLUS_NAMESPACE {
 
@@ -64,7 +64,10 @@ void ErrorListener::syntaxError(
     const std::string &msg, 
     std::exception_ptr e) {
 
-    throw std::runtime_error{std::format("line {}:{} {}", line, charPositionInLine, msg)};
+    std::stringstream ss;
+    ss << "line " << line << ':' << charPositionInLine << ' ' << msg;
+
+    throw std::runtime_error{ss.str()};
 }
 
 void ErrorListener::reportAmbiguity(

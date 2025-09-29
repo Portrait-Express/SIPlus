@@ -29,6 +29,9 @@ set(SIPLUS_SOURCES
 
 add_library(siplus ${SIPLUS_SOURCES})
 
+#target_compile_options(siplus PRIVATE -s -ffunction-sections -fdata-sections -fno-unwind-tables -fno-asynchronous-unwind-tables)
+#target_link_options(siplus PRIVATE -s -Wl,-s -Wl,-Bsymbolic -Wl,--gc-sections)
+
 target_include_directories(siplus PUBLIC include)
 target_link_libraries(siplus antlr4_static)
 

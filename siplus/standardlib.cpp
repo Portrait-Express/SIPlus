@@ -1,6 +1,3 @@
-#include <format>
-#include <stdexcept>
-
 #include "siplus/internal/vector_iterator_provider.h"
 #include "siplus/stl.h"
 #include "siplus/stl/converters/numeric.h"
@@ -114,9 +111,8 @@ DefaultAdder::add(std::shared_ptr<SIPlusParserContext> context,
                                   context->convert<double>(val).as<double>());
         }
     } else {
-        throw std::runtime_error{std::format("Not sure how to add {} and {}",
-                                             get_type_name(sum.type), 
-                                             get_type_name(val.type))};
+        throw std::runtime_error{"Not sure how to add " 
+            + get_type_name(sum.type) + " and " + get_type_name(val.type)};
     }
 
     return sum;
@@ -168,9 +164,8 @@ add_func_retriever::retrieve(const text::UnknownDataTypeContainer& value) const 
         auto val = ptr->retrieve(value);
         auto adder = adders_.find(sum.type, val.type);
         if(adder == adders_.end()) {
-            throw std::runtime_error{std::format("Unsure how to add {} and {}", 
-                                                 get_type_name(sum.type), 
-                                                 get_type_name(val.type))};
+            throw std::runtime_error{"Unsure how to add " 
+                + get_type_name(sum.type) + " and " + get_type_name(val.type)};
         }
 
         sum = (*adder)->add(context, sum, val);

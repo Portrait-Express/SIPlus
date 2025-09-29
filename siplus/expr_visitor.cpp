@@ -2,7 +2,6 @@
 #include "generated/StringInterpolatorParser.h"
 
 #include <memory>
-#include <stdexcept>
 
 #include "siplus/text/data.h"
 #include "siplus/text/value_retrievers/accessor_retriever.h"
