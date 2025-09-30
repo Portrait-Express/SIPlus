@@ -3,7 +3,7 @@
 
 #include "Parser.h"
 #include "TokenStream.h"
-#include "siplus/_config.h"
+#include "siplus/config.h"
 
 namespace SIPLUS_NAMESPACE {
 namespace internal {

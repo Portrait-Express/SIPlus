@@ -1,5 +1,5 @@
 #include "Token.h"
-#include "siplus/_config.h"
+#include "siplus/config.h"
 
 #include "./token_stream.h"
 

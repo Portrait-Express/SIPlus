@@ -3,7 +3,7 @@
 
 #include <any>
 
-#include "siplus/_config.h"
+#include "siplus/config.h"
 #include "siplus/text/data.h"
 #include "siplus/text/value_retrievers/retriever.h"
 

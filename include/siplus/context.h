@@ -19,7 +19,9 @@ class SIPlusParserContext : public std::enable_shared_from_this<SIPlusParserCont
 public:
     SIPlusParserContext();
 
+#ifdef SIPLUS_INCLUDE_STDLIB
     void use_stl();
+#endif
 
     Function& function(const std::string& name);
     std::shared_ptr<text::Accessor> accessor(const text::UnknownDataTypeContainer& value);

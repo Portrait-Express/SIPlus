@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "siplus/_config.h"
+#include "siplus/config.h"
 #include "siplus/context.h"
 #include "siplus/text/constructor.h"
 #include "siplus/text/constructor_steps/constructor_step.h"

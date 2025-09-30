@@ -5,7 +5,7 @@
 #include "generated/StringInterpolatorParserBaseVisitor.h"
 #include "ParseTree.h"
 
-#include "siplus/_config.h"
+#include "siplus/config.h"
 
 namespace SIPLUS_NAMESPACE {
 

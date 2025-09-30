@@ -1,7 +1,7 @@
 #ifndef INCLUDE_INTERNAL_VECTOR_ITERATOR_PROVIDER_H_
 #define INCLUDE_INTERNAL_VECTOR_ITERATOR_PROVIDER_H_
 
-#include "siplus/_config.h"
+#include "siplus/config.h"
 #include "siplus/text/iterator.h"
 
 namespace SIPLUS_NAMESPACE {

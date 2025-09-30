@@ -1,6 +1,10 @@
 #ifndef INCLUDE_FUNCTIONS_MAP_H_
 #define INCLUDE_FUNCTIONS_MAP_H_
 
+#include "siplus/config.h"
+
+#ifdef SIPLUS_INCLUDE_STDLIB
+
 #include <memory>
 
 #include "siplus/context.h"
@@ -25,6 +29,6 @@ private:
 } /* stl */
 } /* SIPLUS_NAMESPACE */
 
-
+#endif  // SIPLUS_INCLUDE_STDLIB
 
 #endif  // INCLUDE_FUNCTIONS_MAP_H_

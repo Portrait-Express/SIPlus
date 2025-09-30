@@ -1,7 +1,7 @@
 #ifndef INCLUDE_INTERNAL_BINARY_TYPE_CACHE_H_
 #define INCLUDE_INTERNAL_BINARY_TYPE_CACHE_H_
 
-#include "siplus/_config.h"
+#include "siplus/config.h"
 #include <concepts>
 #include <list>
 #include <memory>

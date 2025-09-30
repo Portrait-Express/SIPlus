@@ -1,7 +1,7 @@
 #ifndef INCLUDE_SIPLUS_TEXT_ACCESSOR_RETRIEVER_H_
 #define INCLUDE_SIPLUS_TEXT_ACCESSOR_RETRIEVER_H_
 
-#include "siplus/_config.h"
+#include "siplus/config.h"
 #include "siplus/context.h"
 #include "siplus/text/value_retrievers/retriever.h"
 

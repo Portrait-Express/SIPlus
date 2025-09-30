@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "siplus/_config.h"
+#include "siplus/config.h"
 #include "siplus/text/data.h"
 
 namespace SIPLUS_NAMESPACE {

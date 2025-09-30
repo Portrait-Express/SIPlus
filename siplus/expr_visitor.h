@@ -3,7 +3,7 @@
 
 #include "BufferedTokenStream.h"
 
-#include "siplus/_config.h"
+#include "siplus/config.h"
 #include "siplus/context.h"
 #include "siplus/text/value_retrievers/retriever.h"
 #include "visitor.h"

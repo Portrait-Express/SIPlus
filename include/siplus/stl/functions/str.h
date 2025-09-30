@@ -1,6 +1,10 @@
 #ifndef INCLUDE_FUNCTIONS_STR_H_
 #define INCLUDE_FUNCTIONS_STR_H_
 
+#include "siplus/config.h"
+
+#ifdef SIPLUS_INCLUDE_STDLIB
+
 #include <memory>
 
 #include "siplus/context.h"
@@ -24,6 +28,6 @@ struct str_func : Function  {
 } /* stl */
 } /* SIPLUS_NAMESPACE */
 
-
+#endif  // SIPLUS_INCLUDE_STDLIB
 
 #endif  // INCLUDE_FUNCTIONS_STR_H_

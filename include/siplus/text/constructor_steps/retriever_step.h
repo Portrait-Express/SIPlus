@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include "siplus/_config.h"
+#include "siplus/config.h"
 #include "siplus/context.h"
 #include "siplus/text/constructor_steps/constructor_step.h"
 #include "siplus/text/value_retrievers/retriever.h"

@@ -5,7 +5,7 @@
 #include <type_traits>
 #include <typeindex>
 
-#include "siplus/_config.h"
+#include "siplus/config.h"
 
 namespace SIPLUS_NAMESPACE {
 namespace text {

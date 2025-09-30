@@ -1,10 +1,13 @@
 #include <string>
 
-#include "siplus/stl.h"
 #include "siplus/context.h"
 #include "siplus/function.h"
 #include "siplus/text/data.h"
 #include "siplus/util.h"
+
+#ifdef SIPLUS_INCLUDE_STDLIB
+#include "siplus/stl.h"
+#endif
 
 namespace SIPLUS_NAMESPACE {
 
@@ -69,9 +72,13 @@ SIPlusParserContext::converter(std::type_index from, std::type_index to) {
     return *it;
 }
 
+#ifdef SIPLUS_INCLUDE_STDLIB
+
 void
 SIPlusParserContext::use_stl() {
     stl::attach_stl(*this);
 }
+
+#endif
 
 }

@@ -1,6 +1,8 @@
+#include "siplus/text/converter.h"
 #include <chrono>
 #include <iostream> 
 #include <format>
+#include <sstream>
 #include <stdexcept>
 #include <typeindex>
 
@@ -28,6 +30,23 @@
 using namespace SIPLUS_NAMESPACE;
 
 int common(int, char**) { return 0; } //dummy for ctest
+
+#ifndef SIPLUS_INCLUDE_STDLIB
+
+struct int_string_converter : text::Converter {
+    bool can_convert(std::type_index from, std::type_index to) override {
+        return from == typeid(int) && to == typeid(std::string);
+    }
+
+    text::UnknownDataTypeContainer 
+    convert(text::UnknownDataTypeContainer from, std::type_index to) override {
+        std::stringstream ss;
+        ss << from.as<int>();
+        return text::make_data(ss.str());
+    }
+};
+
+#endif
 
 struct user_accessor : public SIPlus::text::Accessor {
     text::UnknownDataTypeContainer access(
@@ -90,7 +109,12 @@ struct data_accessor : public SIPlus::text::Accessor {
 Parser& get_test_context() {
     static Parser parser;
 
+#ifdef SIPLUS_INCLUDE_STDLIB
     parser.context().use_stl();
+#else
+    parser.context().emplace_converter<int_string_converter>();
+#endif
+
     parser.context().emplace_accessor<data_accessor>();
     parser.context().emplace_accessor<user_accessor>();
     parser.context().emplace_iterator<internal::vector_iterator<User>>();

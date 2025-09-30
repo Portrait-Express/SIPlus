@@ -4,7 +4,7 @@
 #include "BufferedTokenStream.h"
 #include "Token.h"
 #include "TokenSource.h"
-#include "siplus/_config.h"
+#include "siplus/config.h"
 
 namespace SIPLUS_NAMESPACE {
 namespace internal {

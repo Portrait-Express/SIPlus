@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
+option(SIPLUS_INCLUDE_STDLIB "Include standard library base for siplus. Can be disabled to reduce binary size" ON)
+set(SIPLUS_NAMESPACE SIPlus CACHE STRING "Optionally specify a different root namespace")
 
 project(siplus)
 
@@ -21,16 +23,21 @@ set(SIPLUS_SOURCES
     siplus/interpolation_visitor.cpp
     siplus/literal_visitor.cpp
     siplus/parser_impl.cpp
-    siplus/standardlib.cpp
     siplus/statement_visitor.cpp
     siplus/text.cpp
     siplus/visitor.cpp
 )
 
+if(SIPLUS_INCLUDE_STDLIB)
+    set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/standardlib.cpp)
+endif()
+
 add_library(siplus ${SIPLUS_SOURCES})
 
-#target_compile_options(siplus PRIVATE -s -ffunction-sections -fdata-sections -fno-unwind-tables -fno-asynchronous-unwind-tables)
-#target_link_options(siplus PRIVATE -s -Wl,-s -Wl,-Bsymbolic -Wl,--gc-sections)
+configure_file(
+    "${PROJECT_SOURCE_DIR}/config.h.in"
+    "${PROJECT_SOURCE_DIR}/include/siplus/config.h"
+)
 
 target_include_directories(siplus PUBLIC include)
 target_link_libraries(siplus antlr4_static)

@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 
-#include "siplus/_config.h"
+#include "siplus/config.h"
 #include "siplus/text/value_retrievers/retriever.h"
 
 namespace SIPLUS_NAMESPACE {

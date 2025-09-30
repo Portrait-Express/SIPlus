@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "siplus/_config.h"
+#include "siplus/config.h"
 #include "siplus/text/constructor_steps/constructor_step.h"
 #include "siplus/text/data.h"
 

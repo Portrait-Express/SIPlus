@@ -1,7 +1,10 @@
 #ifndef INCLUDE_CONVERTERS_NUMERIC_H_
 #define INCLUDE_CONVERTERS_NUMERIC_H_
 
-#include "siplus/_config.h"
+#include "siplus/config.h"
+
+#ifdef SIPLUS_INCLUDE_STDLIB
+
 #include "siplus/text/converter.h"
 
 namespace SIPLUS_NAMESPACE {
@@ -43,5 +46,7 @@ private:
 
 } /* stl */
 } /* SIPLUS_NAMESPACE */
+
+#endif  // SIPLUS_INCLUDE_STDLIB
 
 #endif  // INCLUDE_CONVERTERS_NUMERIC_H_
