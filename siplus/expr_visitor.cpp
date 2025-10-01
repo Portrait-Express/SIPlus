@@ -75,11 +75,7 @@ std::any ExpressionVisitor::visitLiteral(StringInterpolatorParser::LiteralContex
 }
 
 std::any ExpressionVisitor::visitField(StringInterpolatorParser::FieldContext *ctx) {
-    if(value_) {
-        throw std::runtime_error{"Fields cannot accept inputs"};
-    }
-
-    std::shared_ptr<text::AccessorValueRetriever> existing;
+    std::shared_ptr<text::ValueRetriever> existing = value_;
 
     for(auto& token : ctx->ID()) {
         if(!existing) {

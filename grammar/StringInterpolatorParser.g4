@@ -15,8 +15,9 @@ field: {enableChannel(antlr4::Token::HIDDEN_CHANNEL);} DOT ( ID ( DOT ID )* )? {
 string: STRING_START ( STRING_TEXT | STRING_ESCAPE )* STRING_END ;
 integer: INT ;
 float: FLOAT ;
+boolean: TRUE | FALSE ;
 
-literal: string | integer | float ;
+literal: string | integer | float | boolean ;
 
 argument: literal | field | OPENP expr CLOSEP ;
 arg_list: argument? ( argument )*;

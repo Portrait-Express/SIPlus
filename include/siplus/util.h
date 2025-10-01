@@ -1,3 +1,6 @@
+#ifndef INCLUDE_SIPLUS_UTIL_H_
+#define INCLUDE_SIPLUS_UTIL_H_
+
 #include <sstream>
 #include <typeindex>
 
@@ -29,3 +32,4 @@ inline std::string get_type_name(const std::type_index& type) {
     return name;
 }
 
+#endif  // INCLUDE_SIPLUS_UTIL_H_

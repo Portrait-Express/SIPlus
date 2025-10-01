@@ -55,64 +55,68 @@ void stringinterpolatorparserParserInitialize() {
 #endif
   auto staticData = std::make_unique<StringInterpolatorParserStaticData>(
     std::vector<std::string>{
-      "field", "string", "integer", "float", "literal", "argument", "arg_list", 
-      "func", "expr_item", "expr", "eval", "loop_start", "loop_end", "loop", 
-      "stmt", "normal", "interpolated_str", "expression_program", "program"
+      "field", "string", "integer", "float", "boolean", "literal", "argument", 
+      "arg_list", "func", "expr_item", "expr", "eval", "loop_start", "loop_end", 
+      "loop", "stmt", "normal", "interpolated_str", "expression_program", 
+      "program"
     },
     std::vector<std::string>{
-      "", "", "", "'{'", "'.'", "'#'", "'/'", "'}'", "'('", "')'", "'|'", 
-      "'\\'"
+      "", "", "", "'{'", "'true'", "'false'", "'.'", "'#'", "'/'", "'}'", 
+      "'('", "')'", "'|'", "'\\'"
     },
     std::vector<std::string>{
-      "", "NORMAL_TEXT", "NORMAL_ESCAPE", "OPEN", "DOT", "HASH", "SLASH", 
-      "CLOSE", "OPENP", "CLOSEP", "PIPE", "BACKSLASH", "STRING_START", "WS", 
-      "INT", "FLOAT", "ID", "ANY", "STRING_TEXT", "STRING_ESCAPE", "STRING_END"
+      "", "NORMAL_TEXT", "NORMAL_ESCAPE", "OPEN", "TRUE", "FALSE", "DOT", 
+      "HASH", "SLASH", "CLOSE", "OPENP", "CLOSEP", "PIPE", "BACKSLASH", 
+      "STRING_START", "WS", "INT", "FLOAT", "ID", "ANY", "STRING_TEXT", 
+      "STRING_ESCAPE", "STRING_END"
     }
   );
   static const int32_t serializedATNSegment[] = {
-  	4,1,20,147,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,
+  	4,1,22,152,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,
   	7,7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,2,13,7,13,2,14,7,
-  	14,2,15,7,15,2,16,7,16,2,17,7,17,2,18,7,18,1,0,1,0,1,0,1,0,1,0,5,0,44,
-  	8,0,10,0,12,0,47,9,0,3,0,49,8,0,1,0,1,0,1,1,1,1,5,1,55,8,1,10,1,12,1,
-  	58,9,1,1,1,1,1,1,2,1,2,1,3,1,3,1,4,1,4,1,4,3,4,69,8,4,1,5,1,5,1,5,1,5,
-  	1,5,1,5,3,5,77,8,5,1,6,3,6,80,8,6,1,6,5,6,83,8,6,10,6,12,6,86,9,6,1,7,
-  	1,7,1,7,1,8,1,8,1,8,3,8,94,8,8,1,9,1,9,1,9,1,9,1,9,1,9,5,9,102,8,9,10,
-  	9,12,9,105,9,9,1,10,1,10,1,10,1,10,1,11,1,11,1,11,1,11,1,11,1,12,1,12,
-  	1,12,1,12,1,12,1,13,1,13,1,13,1,13,1,14,1,14,3,14,127,8,14,1,15,4,15,
-  	130,8,15,11,15,12,15,131,1,16,1,16,5,16,136,8,16,10,16,12,16,139,9,16,
-  	1,17,1,17,1,17,1,18,1,18,1,18,1,18,0,1,18,19,0,2,4,6,8,10,12,14,16,18,
-  	20,22,24,26,28,30,32,34,36,0,2,1,0,18,19,1,0,1,2,143,0,38,1,0,0,0,2,52,
-  	1,0,0,0,4,61,1,0,0,0,6,63,1,0,0,0,8,68,1,0,0,0,10,76,1,0,0,0,12,79,1,
-  	0,0,0,14,87,1,0,0,0,16,93,1,0,0,0,18,95,1,0,0,0,20,106,1,0,0,0,22,110,
-  	1,0,0,0,24,115,1,0,0,0,26,120,1,0,0,0,28,126,1,0,0,0,30,129,1,0,0,0,32,
-  	137,1,0,0,0,34,140,1,0,0,0,36,143,1,0,0,0,38,39,6,0,-1,0,39,48,5,4,0,
-  	0,40,45,5,16,0,0,41,42,5,4,0,0,42,44,5,16,0,0,43,41,1,0,0,0,44,47,1,0,
-  	0,0,45,43,1,0,0,0,45,46,1,0,0,0,46,49,1,0,0,0,47,45,1,0,0,0,48,40,1,0,
-  	0,0,48,49,1,0,0,0,49,50,1,0,0,0,50,51,6,0,-1,0,51,1,1,0,0,0,52,56,5,12,
-  	0,0,53,55,7,0,0,0,54,53,1,0,0,0,55,58,1,0,0,0,56,54,1,0,0,0,56,57,1,0,
-  	0,0,57,59,1,0,0,0,58,56,1,0,0,0,59,60,5,20,0,0,60,3,1,0,0,0,61,62,5,14,
-  	0,0,62,5,1,0,0,0,63,64,5,15,0,0,64,7,1,0,0,0,65,69,3,2,1,0,66,69,3,4,
-  	2,0,67,69,3,6,3,0,68,65,1,0,0,0,68,66,1,0,0,0,68,67,1,0,0,0,69,9,1,0,
-  	0,0,70,77,3,8,4,0,71,77,3,0,0,0,72,73,5,8,0,0,73,74,3,18,9,0,74,75,5,
-  	9,0,0,75,77,1,0,0,0,76,70,1,0,0,0,76,71,1,0,0,0,76,72,1,0,0,0,77,11,1,
-  	0,0,0,78,80,3,10,5,0,79,78,1,0,0,0,79,80,1,0,0,0,80,84,1,0,0,0,81,83,
-  	3,10,5,0,82,81,1,0,0,0,83,86,1,0,0,0,84,82,1,0,0,0,84,85,1,0,0,0,85,13,
-  	1,0,0,0,86,84,1,0,0,0,87,88,5,16,0,0,88,89,3,12,6,0,89,15,1,0,0,0,90,
-  	94,3,8,4,0,91,94,3,0,0,0,92,94,3,14,7,0,93,90,1,0,0,0,93,91,1,0,0,0,93,
-  	92,1,0,0,0,94,17,1,0,0,0,95,96,6,9,-1,0,96,97,3,16,8,0,97,103,1,0,0,0,
-  	98,99,10,1,0,0,99,100,5,10,0,0,100,102,3,16,8,0,101,98,1,0,0,0,102,105,
-  	1,0,0,0,103,101,1,0,0,0,103,104,1,0,0,0,104,19,1,0,0,0,105,103,1,0,0,
-  	0,106,107,5,3,0,0,107,108,3,18,9,0,108,109,5,7,0,0,109,21,1,0,0,0,110,
-  	111,5,3,0,0,111,112,5,5,0,0,112,113,3,18,9,0,113,114,5,7,0,0,114,23,1,
-  	0,0,0,115,116,5,3,0,0,116,117,5,6,0,0,117,118,5,6,0,0,118,119,5,7,0,0,
-  	119,25,1,0,0,0,120,121,3,22,11,0,121,122,3,32,16,0,122,123,3,24,12,0,
-  	123,27,1,0,0,0,124,127,3,20,10,0,125,127,3,26,13,0,126,124,1,0,0,0,126,
-  	125,1,0,0,0,127,29,1,0,0,0,128,130,7,1,0,0,129,128,1,0,0,0,130,131,1,
-  	0,0,0,131,129,1,0,0,0,131,132,1,0,0,0,132,31,1,0,0,0,133,136,3,30,15,
-  	0,134,136,3,28,14,0,135,133,1,0,0,0,135,134,1,0,0,0,136,139,1,0,0,0,137,
-  	135,1,0,0,0,137,138,1,0,0,0,138,33,1,0,0,0,139,137,1,0,0,0,140,141,3,
-  	18,9,0,141,142,5,0,0,1,142,35,1,0,0,0,143,144,3,32,16,0,144,145,5,0,0,
-  	1,145,37,1,0,0,0,13,45,48,56,68,76,79,84,93,103,126,131,135,137
+  	14,2,15,7,15,2,16,7,16,2,17,7,17,2,18,7,18,2,19,7,19,1,0,1,0,1,0,1,0,
+  	1,0,5,0,46,8,0,10,0,12,0,49,9,0,3,0,51,8,0,1,0,1,0,1,1,1,1,5,1,57,8,1,
+  	10,1,12,1,60,9,1,1,1,1,1,1,2,1,2,1,3,1,3,1,4,1,4,1,5,1,5,1,5,1,5,3,5,
+  	74,8,5,1,6,1,6,1,6,1,6,1,6,1,6,3,6,82,8,6,1,7,3,7,85,8,7,1,7,5,7,88,8,
+  	7,10,7,12,7,91,9,7,1,8,1,8,1,8,1,9,1,9,1,9,3,9,99,8,9,1,10,1,10,1,10,
+  	1,10,1,10,1,10,5,10,107,8,10,10,10,12,10,110,9,10,1,11,1,11,1,11,1,11,
+  	1,12,1,12,1,12,1,12,1,12,1,13,1,13,1,13,1,13,1,13,1,14,1,14,1,14,1,14,
+  	1,15,1,15,3,15,132,8,15,1,16,4,16,135,8,16,11,16,12,16,136,1,17,1,17,
+  	5,17,141,8,17,10,17,12,17,144,9,17,1,18,1,18,1,18,1,19,1,19,1,19,1,19,
+  	0,1,20,20,0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,0,3,
+  	1,0,20,21,1,0,4,5,1,0,1,2,148,0,40,1,0,0,0,2,54,1,0,0,0,4,63,1,0,0,0,
+  	6,65,1,0,0,0,8,67,1,0,0,0,10,73,1,0,0,0,12,81,1,0,0,0,14,84,1,0,0,0,16,
+  	92,1,0,0,0,18,98,1,0,0,0,20,100,1,0,0,0,22,111,1,0,0,0,24,115,1,0,0,0,
+  	26,120,1,0,0,0,28,125,1,0,0,0,30,131,1,0,0,0,32,134,1,0,0,0,34,142,1,
+  	0,0,0,36,145,1,0,0,0,38,148,1,0,0,0,40,41,6,0,-1,0,41,50,5,6,0,0,42,47,
+  	5,18,0,0,43,44,5,6,0,0,44,46,5,18,0,0,45,43,1,0,0,0,46,49,1,0,0,0,47,
+  	45,1,0,0,0,47,48,1,0,0,0,48,51,1,0,0,0,49,47,1,0,0,0,50,42,1,0,0,0,50,
+  	51,1,0,0,0,51,52,1,0,0,0,52,53,6,0,-1,0,53,1,1,0,0,0,54,58,5,14,0,0,55,
+  	57,7,0,0,0,56,55,1,0,0,0,57,60,1,0,0,0,58,56,1,0,0,0,58,59,1,0,0,0,59,
+  	61,1,0,0,0,60,58,1,0,0,0,61,62,5,22,0,0,62,3,1,0,0,0,63,64,5,16,0,0,64,
+  	5,1,0,0,0,65,66,5,17,0,0,66,7,1,0,0,0,67,68,7,1,0,0,68,9,1,0,0,0,69,74,
+  	3,2,1,0,70,74,3,4,2,0,71,74,3,6,3,0,72,74,3,8,4,0,73,69,1,0,0,0,73,70,
+  	1,0,0,0,73,71,1,0,0,0,73,72,1,0,0,0,74,11,1,0,0,0,75,82,3,10,5,0,76,82,
+  	3,0,0,0,77,78,5,10,0,0,78,79,3,20,10,0,79,80,5,11,0,0,80,82,1,0,0,0,81,
+  	75,1,0,0,0,81,76,1,0,0,0,81,77,1,0,0,0,82,13,1,0,0,0,83,85,3,12,6,0,84,
+  	83,1,0,0,0,84,85,1,0,0,0,85,89,1,0,0,0,86,88,3,12,6,0,87,86,1,0,0,0,88,
+  	91,1,0,0,0,89,87,1,0,0,0,89,90,1,0,0,0,90,15,1,0,0,0,91,89,1,0,0,0,92,
+  	93,5,18,0,0,93,94,3,14,7,0,94,17,1,0,0,0,95,99,3,10,5,0,96,99,3,0,0,0,
+  	97,99,3,16,8,0,98,95,1,0,0,0,98,96,1,0,0,0,98,97,1,0,0,0,99,19,1,0,0,
+  	0,100,101,6,10,-1,0,101,102,3,18,9,0,102,108,1,0,0,0,103,104,10,1,0,0,
+  	104,105,5,12,0,0,105,107,3,18,9,0,106,103,1,0,0,0,107,110,1,0,0,0,108,
+  	106,1,0,0,0,108,109,1,0,0,0,109,21,1,0,0,0,110,108,1,0,0,0,111,112,5,
+  	3,0,0,112,113,3,20,10,0,113,114,5,9,0,0,114,23,1,0,0,0,115,116,5,3,0,
+  	0,116,117,5,7,0,0,117,118,3,20,10,0,118,119,5,9,0,0,119,25,1,0,0,0,120,
+  	121,5,3,0,0,121,122,5,8,0,0,122,123,5,8,0,0,123,124,5,9,0,0,124,27,1,
+  	0,0,0,125,126,3,24,12,0,126,127,3,34,17,0,127,128,3,26,13,0,128,29,1,
+  	0,0,0,129,132,3,22,11,0,130,132,3,28,14,0,131,129,1,0,0,0,131,130,1,0,
+  	0,0,132,31,1,0,0,0,133,135,7,2,0,0,134,133,1,0,0,0,135,136,1,0,0,0,136,
+  	134,1,0,0,0,136,137,1,0,0,0,137,33,1,0,0,0,138,141,3,32,16,0,139,141,
+  	3,30,15,0,140,138,1,0,0,0,140,139,1,0,0,0,141,144,1,0,0,0,142,140,1,0,
+  	0,0,142,143,1,0,0,0,143,35,1,0,0,0,144,142,1,0,0,0,145,146,3,20,10,0,
+  	146,147,5,0,0,1,147,37,1,0,0,0,148,149,3,34,17,0,149,150,5,0,0,1,150,
+  	39,1,0,0,0,13,47,50,58,73,81,84,89,98,108,131,136,140,142
   };
   staticData->serializedATN = antlr4::atn::SerializedATNView(serializedATNSegment, sizeof(serializedATNSegment) / sizeof(serializedATNSegment[0]));
 
@@ -211,26 +215,26 @@ StringInterpolatorParser::FieldContext* StringInterpolatorParser::field() {
     size_t alt;
     enterOuterAlt(_localctx, 1);
     enableChannel(antlr4::Token::HIDDEN_CHANNEL);
-    setState(39);
+    setState(41);
     match(StringInterpolatorParser::DOT);
-    setState(48);
+    setState(50);
     _errHandler->sync(this);
 
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 1, _ctx)) {
     case 1: {
-      setState(40);
+      setState(42);
       match(StringInterpolatorParser::ID);
-      setState(45);
+      setState(47);
       _errHandler->sync(this);
       alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 0, _ctx);
       while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
         if (alt == 1) {
-          setState(41);
+          setState(43);
           match(StringInterpolatorParser::DOT);
-          setState(42);
+          setState(44);
           match(StringInterpolatorParser::ID); 
         }
-        setState(47);
+        setState(49);
         _errHandler->sync(this);
         alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 0, _ctx);
       }
@@ -309,15 +313,15 @@ StringInterpolatorParser::StringContext* StringInterpolatorParser::string() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(52);
+    setState(54);
     match(StringInterpolatorParser::STRING_START);
-    setState(56);
+    setState(58);
     _errHandler->sync(this);
     _la = _input->LA(1);
     while (_la == StringInterpolatorParser::STRING_TEXT
 
     || _la == StringInterpolatorParser::STRING_ESCAPE) {
-      setState(53);
+      setState(55);
       _la = _input->LA(1);
       if (!(_la == StringInterpolatorParser::STRING_TEXT
 
@@ -328,11 +332,11 @@ StringInterpolatorParser::StringContext* StringInterpolatorParser::string() {
         _errHandler->reportMatch(this);
         consume();
       }
-      setState(58);
+      setState(60);
       _errHandler->sync(this);
       _la = _input->LA(1);
     }
-    setState(59);
+    setState(61);
     match(StringInterpolatorParser::STRING_END);
    
   }
@@ -381,7 +385,7 @@ StringInterpolatorParser::IntegerContext* StringInterpolatorParser::integer() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(61);
+    setState(63);
     match(StringInterpolatorParser::INT);
    
   }
@@ -430,8 +434,71 @@ StringInterpolatorParser::FloatContext* StringInterpolatorParser::float_() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(63);
+    setState(65);
     match(StringInterpolatorParser::FLOAT);
+   
+  }
+  catch (RecognitionException &e) {
+    _errHandler->reportError(this, e);
+    _localctx->exception = std::current_exception();
+    _errHandler->recover(this, _localctx->exception);
+  }
+
+  return _localctx;
+}
+
+//----------------- BooleanContext ------------------------------------------------------------------
+
+StringInterpolatorParser::BooleanContext::BooleanContext(ParserRuleContext *parent, size_t invokingState)
+  : ParserRuleContext(parent, invokingState) {
+}
+
+tree::TerminalNode* StringInterpolatorParser::BooleanContext::TRUE() {
+  return getToken(StringInterpolatorParser::TRUE, 0);
+}
+
+tree::TerminalNode* StringInterpolatorParser::BooleanContext::FALSE() {
+  return getToken(StringInterpolatorParser::FALSE, 0);
+}
+
+
+size_t StringInterpolatorParser::BooleanContext::getRuleIndex() const {
+  return StringInterpolatorParser::RuleBoolean;
+}
+
+
+std::any StringInterpolatorParser::BooleanContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<StringInterpolatorParserVisitor*>(visitor))
+    return parserVisitor->visitBoolean(this);
+  else
+    return visitor->visitChildren(this);
+}
+
+StringInterpolatorParser::BooleanContext* StringInterpolatorParser::boolean() {
+  BooleanContext *_localctx = _tracker.createInstance<BooleanContext>(_ctx, getState());
+  enterRule(_localctx, 8, StringInterpolatorParser::RuleBoolean);
+  size_t _la = 0;
+
+#if __cplusplus > 201703L
+  auto onExit = finally([=, this] {
+#else
+  auto onExit = finally([=] {
+#endif
+    exitRule();
+  });
+  try {
+    enterOuterAlt(_localctx, 1);
+    setState(67);
+    _la = _input->LA(1);
+    if (!(_la == StringInterpolatorParser::TRUE
+
+    || _la == StringInterpolatorParser::FALSE)) {
+    _errHandler->recoverInline(this);
+    }
+    else {
+      _errHandler->reportMatch(this);
+      consume();
+    }
    
   }
   catch (RecognitionException &e) {
@@ -461,6 +528,10 @@ StringInterpolatorParser::FloatContext* StringInterpolatorParser::LiteralContext
   return getRuleContext<StringInterpolatorParser::FloatContext>(0);
 }
 
+StringInterpolatorParser::BooleanContext* StringInterpolatorParser::LiteralContext::boolean() {
+  return getRuleContext<StringInterpolatorParser::BooleanContext>(0);
+}
+
 
 size_t StringInterpolatorParser::LiteralContext::getRuleIndex() const {
   return StringInterpolatorParser::RuleLiteral;
@@ -476,7 +547,7 @@ std::any StringInterpolatorParser::LiteralContext::accept(tree::ParseTreeVisitor
 
 StringInterpolatorParser::LiteralContext* StringInterpolatorParser::literal() {
   LiteralContext *_localctx = _tracker.createInstance<LiteralContext>(_ctx, getState());
-  enterRule(_localctx, 8, StringInterpolatorParser::RuleLiteral);
+  enterRule(_localctx, 10, StringInterpolatorParser::RuleLiteral);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -486,27 +557,35 @@ StringInterpolatorParser::LiteralContext* StringInterpolatorParser::literal() {
     exitRule();
   });
   try {
-    setState(68);
+    setState(73);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
       case StringInterpolatorParser::STRING_START: {
         enterOuterAlt(_localctx, 1);
-        setState(65);
+        setState(69);
         string();
         break;
       }
 
       case StringInterpolatorParser::INT: {
         enterOuterAlt(_localctx, 2);
-        setState(66);
+        setState(70);
         integer();
         break;
       }
 
       case StringInterpolatorParser::FLOAT: {
         enterOuterAlt(_localctx, 3);
-        setState(67);
+        setState(71);
         float_();
+        break;
+      }
+
+      case StringInterpolatorParser::TRUE:
+      case StringInterpolatorParser::FALSE: {
+        enterOuterAlt(_localctx, 4);
+        setState(72);
+        boolean();
         break;
       }
 
@@ -565,7 +644,7 @@ std::any StringInterpolatorParser::ArgumentContext::accept(tree::ParseTreeVisito
 
 StringInterpolatorParser::ArgumentContext* StringInterpolatorParser::argument() {
   ArgumentContext *_localctx = _tracker.createInstance<ArgumentContext>(_ctx, getState());
-  enterRule(_localctx, 10, StringInterpolatorParser::RuleArgument);
+  enterRule(_localctx, 12, StringInterpolatorParser::RuleArgument);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -575,32 +654,34 @@ StringInterpolatorParser::ArgumentContext* StringInterpolatorParser::argument() 
     exitRule();
   });
   try {
-    setState(76);
+    setState(81);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
+      case StringInterpolatorParser::TRUE:
+      case StringInterpolatorParser::FALSE:
       case StringInterpolatorParser::STRING_START:
       case StringInterpolatorParser::INT:
       case StringInterpolatorParser::FLOAT: {
         enterOuterAlt(_localctx, 1);
-        setState(70);
+        setState(75);
         literal();
         break;
       }
 
       case StringInterpolatorParser::DOT: {
         enterOuterAlt(_localctx, 2);
-        setState(71);
+        setState(76);
         field();
         break;
       }
 
       case StringInterpolatorParser::OPENP: {
         enterOuterAlt(_localctx, 3);
-        setState(72);
+        setState(77);
         match(StringInterpolatorParser::OPENP);
-        setState(73);
+        setState(78);
         expr(0);
-        setState(74);
+        setState(79);
         match(StringInterpolatorParser::CLOSEP);
         break;
       }
@@ -648,7 +729,7 @@ std::any StringInterpolatorParser::Arg_listContext::accept(tree::ParseTreeVisito
 
 StringInterpolatorParser::Arg_listContext* StringInterpolatorParser::arg_list() {
   Arg_listContext *_localctx = _tracker.createInstance<Arg_listContext>(_ctx, getState());
-  enterRule(_localctx, 12, StringInterpolatorParser::RuleArg_list);
+  enterRule(_localctx, 14, StringInterpolatorParser::RuleArg_list);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -660,12 +741,12 @@ StringInterpolatorParser::Arg_listContext* StringInterpolatorParser::arg_list() 
   try {
     size_t alt;
     enterOuterAlt(_localctx, 1);
-    setState(79);
+    setState(84);
     _errHandler->sync(this);
 
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 5, _ctx)) {
     case 1: {
-      setState(78);
+      setState(83);
       argument();
       break;
     }
@@ -673,15 +754,15 @@ StringInterpolatorParser::Arg_listContext* StringInterpolatorParser::arg_list() 
     default:
       break;
     }
-    setState(84);
+    setState(89);
     _errHandler->sync(this);
     alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 6, _ctx);
     while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
       if (alt == 1) {
-        setState(81);
+        setState(86);
         argument(); 
       }
-      setState(86);
+      setState(91);
       _errHandler->sync(this);
       alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 6, _ctx);
     }
@@ -725,7 +806,7 @@ std::any StringInterpolatorParser::FuncContext::accept(tree::ParseTreeVisitor *v
 
 StringInterpolatorParser::FuncContext* StringInterpolatorParser::func() {
   FuncContext *_localctx = _tracker.createInstance<FuncContext>(_ctx, getState());
-  enterRule(_localctx, 14, StringInterpolatorParser::RuleFunc);
+  enterRule(_localctx, 16, StringInterpolatorParser::RuleFunc);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -736,9 +817,9 @@ StringInterpolatorParser::FuncContext* StringInterpolatorParser::func() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(87);
+    setState(92);
     match(StringInterpolatorParser::ID);
-    setState(88);
+    setState(93);
     arg_list();
    
   }
@@ -784,7 +865,7 @@ std::any StringInterpolatorParser::Expr_itemContext::accept(tree::ParseTreeVisit
 
 StringInterpolatorParser::Expr_itemContext* StringInterpolatorParser::expr_item() {
   Expr_itemContext *_localctx = _tracker.createInstance<Expr_itemContext>(_ctx, getState());
-  enterRule(_localctx, 16, StringInterpolatorParser::RuleExpr_item);
+  enterRule(_localctx, 18, StringInterpolatorParser::RuleExpr_item);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -794,28 +875,30 @@ StringInterpolatorParser::Expr_itemContext* StringInterpolatorParser::expr_item(
     exitRule();
   });
   try {
-    setState(93);
+    setState(98);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
+      case StringInterpolatorParser::TRUE:
+      case StringInterpolatorParser::FALSE:
       case StringInterpolatorParser::STRING_START:
       case StringInterpolatorParser::INT:
       case StringInterpolatorParser::FLOAT: {
         enterOuterAlt(_localctx, 1);
-        setState(90);
+        setState(95);
         literal();
         break;
       }
 
       case StringInterpolatorParser::DOT: {
         enterOuterAlt(_localctx, 2);
-        setState(91);
+        setState(96);
         field();
         break;
       }
 
       case StringInterpolatorParser::ID: {
         enterOuterAlt(_localctx, 3);
-        setState(92);
+        setState(97);
         func();
         break;
       }
@@ -876,8 +959,8 @@ StringInterpolatorParser::ExprContext* StringInterpolatorParser::expr(int preced
   StringInterpolatorParser::ExprContext *_localctx = _tracker.createInstance<ExprContext>(_ctx, parentState);
   StringInterpolatorParser::ExprContext *previousContext = _localctx;
   (void)previousContext; // Silence compiler, in case the context is not used by generated code.
-  size_t startState = 18;
-  enterRecursionRule(_localctx, 18, StringInterpolatorParser::RuleExpr, precedence);
+  size_t startState = 20;
+  enterRecursionRule(_localctx, 20, StringInterpolatorParser::RuleExpr, precedence);
 
     
 
@@ -891,10 +974,10 @@ StringInterpolatorParser::ExprContext* StringInterpolatorParser::expr(int preced
   try {
     size_t alt;
     enterOuterAlt(_localctx, 1);
-    setState(96);
+    setState(101);
     expr_item();
     _ctx->stop = _input->LT(-1);
-    setState(103);
+    setState(108);
     _errHandler->sync(this);
     alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 8, _ctx);
     while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
@@ -904,15 +987,15 @@ StringInterpolatorParser::ExprContext* StringInterpolatorParser::expr(int preced
         previousContext = _localctx;
         _localctx = _tracker.createInstance<ExprContext>(parentContext, parentState);
         pushNewRecursionContext(_localctx, startState, RuleExpr);
-        setState(98);
+        setState(103);
 
         if (!(precpred(_ctx, 1))) throw FailedPredicateException(this, "precpred(_ctx, 1)");
-        setState(99);
+        setState(104);
         match(StringInterpolatorParser::PIPE);
-        setState(100);
+        setState(105);
         expr_item(); 
       }
-      setState(105);
+      setState(110);
       _errHandler->sync(this);
       alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 8, _ctx);
     }
@@ -958,7 +1041,7 @@ std::any StringInterpolatorParser::EvalContext::accept(tree::ParseTreeVisitor *v
 
 StringInterpolatorParser::EvalContext* StringInterpolatorParser::eval() {
   EvalContext *_localctx = _tracker.createInstance<EvalContext>(_ctx, getState());
-  enterRule(_localctx, 20, StringInterpolatorParser::RuleEval);
+  enterRule(_localctx, 22, StringInterpolatorParser::RuleEval);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -969,11 +1052,11 @@ StringInterpolatorParser::EvalContext* StringInterpolatorParser::eval() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(106);
+    setState(111);
     match(StringInterpolatorParser::OPEN);
-    setState(107);
+    setState(112);
     expr(0);
-    setState(108);
+    setState(113);
     match(StringInterpolatorParser::CLOSE);
    
   }
@@ -1023,7 +1106,7 @@ std::any StringInterpolatorParser::Loop_startContext::accept(tree::ParseTreeVisi
 
 StringInterpolatorParser::Loop_startContext* StringInterpolatorParser::loop_start() {
   Loop_startContext *_localctx = _tracker.createInstance<Loop_startContext>(_ctx, getState());
-  enterRule(_localctx, 22, StringInterpolatorParser::RuleLoop_start);
+  enterRule(_localctx, 24, StringInterpolatorParser::RuleLoop_start);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -1034,13 +1117,13 @@ StringInterpolatorParser::Loop_startContext* StringInterpolatorParser::loop_star
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(110);
+    setState(115);
     match(StringInterpolatorParser::OPEN);
-    setState(111);
+    setState(116);
     match(StringInterpolatorParser::HASH);
-    setState(112);
+    setState(117);
     expr(0);
-    setState(113);
+    setState(118);
     match(StringInterpolatorParser::CLOSE);
    
   }
@@ -1090,7 +1173,7 @@ std::any StringInterpolatorParser::Loop_endContext::accept(tree::ParseTreeVisito
 
 StringInterpolatorParser::Loop_endContext* StringInterpolatorParser::loop_end() {
   Loop_endContext *_localctx = _tracker.createInstance<Loop_endContext>(_ctx, getState());
-  enterRule(_localctx, 24, StringInterpolatorParser::RuleLoop_end);
+  enterRule(_localctx, 26, StringInterpolatorParser::RuleLoop_end);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -1101,13 +1184,13 @@ StringInterpolatorParser::Loop_endContext* StringInterpolatorParser::loop_end() 
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(115);
+    setState(120);
     match(StringInterpolatorParser::OPEN);
-    setState(116);
+    setState(121);
     match(StringInterpolatorParser::SLASH);
-    setState(117);
+    setState(122);
     match(StringInterpolatorParser::SLASH);
-    setState(118);
+    setState(123);
     match(StringInterpolatorParser::CLOSE);
    
   }
@@ -1153,7 +1236,7 @@ std::any StringInterpolatorParser::LoopContext::accept(tree::ParseTreeVisitor *v
 
 StringInterpolatorParser::LoopContext* StringInterpolatorParser::loop() {
   LoopContext *_localctx = _tracker.createInstance<LoopContext>(_ctx, getState());
-  enterRule(_localctx, 26, StringInterpolatorParser::RuleLoop);
+  enterRule(_localctx, 28, StringInterpolatorParser::RuleLoop);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -1164,11 +1247,11 @@ StringInterpolatorParser::LoopContext* StringInterpolatorParser::loop() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(120);
+    setState(125);
     loop_start();
-    setState(121);
+    setState(126);
     interpolated_str();
-    setState(122);
+    setState(127);
     loop_end();
    
   }
@@ -1210,7 +1293,7 @@ std::any StringInterpolatorParser::StmtContext::accept(tree::ParseTreeVisitor *v
 
 StringInterpolatorParser::StmtContext* StringInterpolatorParser::stmt() {
   StmtContext *_localctx = _tracker.createInstance<StmtContext>(_ctx, getState());
-  enterRule(_localctx, 28, StringInterpolatorParser::RuleStmt);
+  enterRule(_localctx, 30, StringInterpolatorParser::RuleStmt);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -1220,19 +1303,19 @@ StringInterpolatorParser::StmtContext* StringInterpolatorParser::stmt() {
     exitRule();
   });
   try {
-    setState(126);
+    setState(131);
     _errHandler->sync(this);
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 9, _ctx)) {
     case 1: {
       enterOuterAlt(_localctx, 1);
-      setState(124);
+      setState(129);
       eval();
       break;
     }
 
     case 2: {
       enterOuterAlt(_localctx, 2);
-      setState(125);
+      setState(130);
       loop();
       break;
     }
@@ -1288,7 +1371,7 @@ std::any StringInterpolatorParser::NormalContext::accept(tree::ParseTreeVisitor 
 
 StringInterpolatorParser::NormalContext* StringInterpolatorParser::normal() {
   NormalContext *_localctx = _tracker.createInstance<NormalContext>(_ctx, getState());
-  enterRule(_localctx, 30, StringInterpolatorParser::RuleNormal);
+  enterRule(_localctx, 32, StringInterpolatorParser::RuleNormal);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -1301,13 +1384,13 @@ StringInterpolatorParser::NormalContext* StringInterpolatorParser::normal() {
   try {
     size_t alt;
     enterOuterAlt(_localctx, 1);
-    setState(129); 
+    setState(134); 
     _errHandler->sync(this);
     alt = 1;
     do {
       switch (alt) {
         case 1: {
-              setState(128);
+              setState(133);
               _la = _input->LA(1);
               if (!(_la == StringInterpolatorParser::NORMAL_TEXT
 
@@ -1324,7 +1407,7 @@ StringInterpolatorParser::NormalContext* StringInterpolatorParser::normal() {
       default:
         throw NoViableAltException(this);
       }
-      setState(131); 
+      setState(136); 
       _errHandler->sync(this);
       alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 10, _ctx);
     } while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER);
@@ -1376,7 +1459,7 @@ std::any StringInterpolatorParser::Interpolated_strContext::accept(tree::ParseTr
 
 StringInterpolatorParser::Interpolated_strContext* StringInterpolatorParser::interpolated_str() {
   Interpolated_strContext *_localctx = _tracker.createInstance<Interpolated_strContext>(_ctx, getState());
-  enterRule(_localctx, 32, StringInterpolatorParser::RuleInterpolated_str);
+  enterRule(_localctx, 34, StringInterpolatorParser::RuleInterpolated_str);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -1388,23 +1471,23 @@ StringInterpolatorParser::Interpolated_strContext* StringInterpolatorParser::int
   try {
     size_t alt;
     enterOuterAlt(_localctx, 1);
-    setState(137);
+    setState(142);
     _errHandler->sync(this);
     alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 12, _ctx);
     while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
       if (alt == 1) {
-        setState(135);
+        setState(140);
         _errHandler->sync(this);
         switch (_input->LA(1)) {
           case StringInterpolatorParser::NORMAL_TEXT:
           case StringInterpolatorParser::NORMAL_ESCAPE: {
-            setState(133);
+            setState(138);
             normal();
             break;
           }
 
           case StringInterpolatorParser::OPEN: {
-            setState(134);
+            setState(139);
             stmt();
             break;
           }
@@ -1413,7 +1496,7 @@ StringInterpolatorParser::Interpolated_strContext* StringInterpolatorParser::int
           throw NoViableAltException(this);
         } 
       }
-      setState(139);
+      setState(144);
       _errHandler->sync(this);
       alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 12, _ctx);
     }
@@ -1457,7 +1540,7 @@ std::any StringInterpolatorParser::Expression_programContext::accept(tree::Parse
 
 StringInterpolatorParser::Expression_programContext* StringInterpolatorParser::expression_program() {
   Expression_programContext *_localctx = _tracker.createInstance<Expression_programContext>(_ctx, getState());
-  enterRule(_localctx, 34, StringInterpolatorParser::RuleExpression_program);
+  enterRule(_localctx, 36, StringInterpolatorParser::RuleExpression_program);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -1468,9 +1551,9 @@ StringInterpolatorParser::Expression_programContext* StringInterpolatorParser::e
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(140);
+    setState(145);
     expr(0);
-    setState(141);
+    setState(146);
     match(StringInterpolatorParser::EOF);
    
   }
@@ -1512,7 +1595,7 @@ std::any StringInterpolatorParser::ProgramContext::accept(tree::ParseTreeVisitor
 
 StringInterpolatorParser::ProgramContext* StringInterpolatorParser::program() {
   ProgramContext *_localctx = _tracker.createInstance<ProgramContext>(_ctx, getState());
-  enterRule(_localctx, 36, StringInterpolatorParser::RuleProgram);
+  enterRule(_localctx, 38, StringInterpolatorParser::RuleProgram);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -1523,9 +1606,9 @@ StringInterpolatorParser::ProgramContext* StringInterpolatorParser::program() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(143);
+    setState(148);
     interpolated_str();
-    setState(144);
+    setState(149);
     match(StringInterpolatorParser::EOF);
    
   }
@@ -1540,7 +1623,7 @@ StringInterpolatorParser::ProgramContext* StringInterpolatorParser::program() {
 
 bool StringInterpolatorParser::sempred(RuleContext *context, size_t ruleIndex, size_t predicateIndex) {
   switch (ruleIndex) {
-    case 9: return exprSempred(antlrcpp::downCast<ExprContext *>(context), predicateIndex);
+    case 10: return exprSempred(antlrcpp::downCast<ExprContext *>(context), predicateIndex);
 
   default:
     break;

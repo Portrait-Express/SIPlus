@@ -8,6 +8,7 @@
 #include "siplus/stl/functions/add.h"
 #include "siplus/stl/functions/map.h"
 #include "siplus/stl/functions/str.h"
+#include "siplus/stl/functions/if.h"
 
 namespace SIPLUS_NAMESPACE {
 namespace stl {

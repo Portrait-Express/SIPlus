@@ -1,13 +1,12 @@
 #include <algorithm>
 #include <cassert>
 #include <cfloat>
-#include <iostream>
-#include <limits>
 
-#include "common.hxx"
+#include "siplus/parser.h"
 #include "siplus/stl/converters/numeric.h"
 #include "siplus/text/data.h"
-#include "siplus/util.h"
+
+#include "common.hxx"
 
 int test_add() {
     return test("add", [](const SIPlus::Parser& parser) {
@@ -57,83 +56,46 @@ int test_map() {
     });
 }
 
-
-
-//https://stackoverflow.com/a/32334103/10844545
-bool nearly_equal(
-  float a, float b,
-  float epsilon = 128 * FLT_EPSILON, float abs_th = FLT_MIN)
-  // those defaults are arbitrary and could be removed
-{
-  assert(std::numeric_limits<float>::epsilon() <= epsilon);
-  assert(epsilon < 1.f);
-
-  if (a == b) return true;
-
-  auto diff = std::abs(a-b);
-  auto norm = std::min((std::abs(a) + std::abs(b)), std::numeric_limits<float>::max());
-  // or even faster: std::min(std::abs(a + b), std::numeric_limits<float>::max());
-  // keeping this commented out until I update figures below
-  return diff < std::max(abs_th, epsilon * norm);
+int test_and() {
+    return test("and", [](const SIPlus::Parser& parser) {
+        return tests(
+            test_expression("and true false", false),
+            test_expression("and true true", true),
+            test_expression("and false false", false)
+        );
+    });
 }
 
-bool nearly_equal(
-  double a, double b,
-  double epsilon = 128 * DBL_EPSILON, double abs_th = DBL_MIN)
-  // those defaults are arbitrary and could be removed
-{
-  assert(std::numeric_limits<double>::epsilon() <= epsilon);
-  assert(epsilon < 1.f);
-
-  if (a == b) return true;
-
-  auto diff = std::abs(a-b);
-  auto norm = std::min((std::abs(a) + std::abs(b)), std::numeric_limits<double>::max());
-  // or even faster: std::min(std::abs(a + b), std::numeric_limits<float>::max());
-  // keeping this commented out until I update figures below
-  return diff < std::max(abs_th, epsilon * norm);
+int test_or() {
+    return test("or", [](const SIPlus::Parser& parser) {
+        return tests(
+            test_expression("or true false", true),
+            test_expression("or true true", true),
+            test_expression("or false false", false)
+        );
+    });
 }
 
-template<typename T>
-bool conversion_equal(T first, T second) {
-    return first == second;
+int test_xor() {
+    return test("xor", [](const SIPlus::Parser& parser) {
+        return tests(
+            test_expression("xor true false", true),
+            test_expression("xor true true", false),
+            test_expression("xor false false", false)
+        );
+    });
 }
 
-template<>
-bool conversion_equal<double>(double first, double second) {
-    //Use float epsilon since float_converter casts from a float to a double, 
-    //and should be within 1 FLT_EPSILON of accuracy
-    return nearly_equal(first, second, (double)FLT_EPSILON, (double)FLT_MIN);
-}
+int test_if() {
+    return test("if", [](const SIPlus::Parser& parser) {
+        auto value = parser.get_expression("if .x .y \"\" | .b");
+        auto result = value->retrieve(SIPlus::text::make_data(test_data()));
 
-template<typename T, typename V, typename To> requires std::is_base_of_v<SIPlus::text::Converter, T>
-int test_conversion(V&& val, To&& result) {
-    T converter;
-    SIPlus::text::UnknownDataTypeContainer container;
+        if(!result.is<short>()) return 1;
+        if(result.as<short>() != 1) return 1;
 
-    if(converter.can_convert(typeid(V), typeid(To))) {
-        container = converter.convert(SIPlus::text::make_data(val), typeid(To));
-    } else {
-        std::cout 
-            << get_type_name(typeid(T)) << " cannot convert from " 
-            << get_type_name(typeid(To)) << " to " 
-            << get_type_name(container.type) << std::endl;
-        return 1;
-    }
-
-    if(container.is<To>()) {
-        if(conversion_equal<To>(container.as<To>(), result)) {
-            return 0;
-        } else {
-            std::cout << "Expected value " << result
-                << ". Recieved value " << container.as<To>() << std::endl;
-            return 1;
-        }
-    } else {
-        std::cout << "Expected type " << get_type_name(typeid(To)) 
-            << ". Recieved " << get_type_name(container.type) << std::endl;
-        return 1;
-    }
+        return 0;
+    });
 }
 
 int test_int_converter() {
@@ -152,8 +114,7 @@ int test_float_converter() {
     return test("float_converter", [](const SIPlus::Parser& parser) {
         SIPlus::text::UnknownDataTypeContainer data = SIPlus::text::make_data<double>(2);
         SIPlus::stl::float_converter con;
-        std::cout << data.as<double>() << con.convert(data, typeid(double)).as<double>() << std::endl;
-        
+
         return tests(
             test_conversion<SIPlus::stl::float_converter, float, double>(1.124f, 1.124),
             test_conversion<SIPlus::stl::float_converter, double, double>(3.141f, 3.141)
@@ -174,12 +135,30 @@ int test_numeric_string_converter() {
         );
     });
 }
+
+int test_numeric_bool_converter() {
+    return test("numeric_bool_converter", [](const SIPlus::Parser& parser) {
+        return tests(
+            test_conversion<SIPlus::stl::numeric_bool_converter, short, bool>(1, true),
+            test_conversion<SIPlus::stl::numeric_bool_converter, int, bool>(0, false),
+            test_conversion<SIPlus::stl::numeric_bool_converter, long, bool>(11212521L, true),
+            test_conversion<SIPlus::stl::numeric_bool_converter, long, bool>(0, false),
+            test_conversion<SIPlus::stl::numeric_bool_converter, float, bool>(1.3, true),
+            test_conversion<SIPlus::stl::numeric_bool_converter, double, bool>(0, false)
+        );
+    });
+}
+
 int test_functions() {
     return group("functions", []() {
         return tests(
             test_add(),
             test_str(),
-            test_map()
+            test_map(),
+            test_if(),
+            test_and(),
+            test_xor(),
+            test_or()
         );
     });
 }
@@ -190,7 +169,8 @@ int test_converters() {
         return tests(
             test_int_converter(),
             test_float_converter(),
-            test_numeric_string_converter()
+            test_numeric_string_converter(),
+            test_numeric_bool_converter()
         );
     });
 }

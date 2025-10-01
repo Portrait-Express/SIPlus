@@ -44,6 +44,16 @@ double parse_float(const std::string& text) {
     return 0;
 }
 
+bool parse_bool(const std::string& text) {
+    if(text == "true") {
+        return true;
+    } else if(text == "false") {
+        return false;
+    } else {
+        throw std::runtime_error{"Boolean parsed text was not a recognized keyword"};
+    }
+}
+
 }
 
 LiteralVisitor::LiteralVisitor(
@@ -80,6 +90,10 @@ std::any LiteralVisitor::visitInteger(StringInterpolatorParser::IntegerContext *
 
 std::any LiteralVisitor::visitFloat(StringInterpolatorParser::FloatContext *node) {
     return text::make_data(parse_float(node->getText()));
+}
+
+std::any LiteralVisitor::visitBoolean(StringInterpolatorParser::BooleanContext *node) {
+    return text::make_data(parse_bool(node->getText()));
 }
 
 }

@@ -30,6 +30,8 @@ public:
 
     virtual std::any visitFloat(StringInterpolatorParser::FloatContext *context) = 0;
 
+    virtual std::any visitBoolean(StringInterpolatorParser::BooleanContext *context) = 0;
+
     virtual std::any visitLiteral(StringInterpolatorParser::LiteralContext *context) = 0;
 
     virtual std::any visitArgument(StringInterpolatorParser::ArgumentContext *context) = 0;

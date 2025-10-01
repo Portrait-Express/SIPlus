@@ -34,6 +34,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitBoolean(StringInterpolatorParser::BooleanContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitLiteral(StringInterpolatorParser::LiteralContext *ctx) override {
     return visitChildren(ctx);
   }

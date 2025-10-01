@@ -31,7 +31,7 @@ struct float_converter : text::Converter {
 };
     
 /**
- * struct int_converter - Converts numeric types to a string
+ * struct numeric_string_converter - Converts numeric types to a string
  */
 struct numeric_string_converter : text::Converter {
     text::UnknownDataTypeContainer 
@@ -43,6 +43,21 @@ private:
     float_converter float_converter_;
     int_converter int_converter_;
 };
+
+/**
+ * struct numeric_bool_converter - Converts numeric types to bool
+ */
+struct numeric_bool_converter : text::Converter {
+    text::UnknownDataTypeContainer 
+    convert(text::UnknownDataTypeContainer from, std::type_index to) override;
+
+    bool can_convert(std::type_index from, std::type_index to) override;
+
+private:
+    float_converter float_converter_;
+    int_converter int_converter_;
+};
+
 
 } /* stl */
 } /* SIPLUS_NAMESPACE */

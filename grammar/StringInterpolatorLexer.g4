@@ -6,6 +6,8 @@ OPEN: '{' -> mode(TEMPLATE);
 
 mode TEMPLATE;
 
+TRUE: 'true' ;
+FALSE: 'false' ;
 DOT: '.' ;
 HASH: '#' ;
 SLASH: '/' ;

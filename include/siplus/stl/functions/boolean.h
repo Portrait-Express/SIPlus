@@ -1,0 +1,73 @@
+#ifndef INCLUDE_FUNCTIONS_BOOLEAN_H_
+#define INCLUDE_FUNCTIONS_BOOLEAN_H_
+
+#include "siplus/config.h"
+
+#ifdef SIPLUS_INCLUDE_STDLIB
+
+#include <memory>
+
+#include "siplus/context.h"
+#include "siplus/function.h"
+
+namespace SIPLUS_NAMESPACE {
+namespace stl {
+
+struct xor_func : Function  {
+    explicit if_func(std::weak_ptr<SIPlusParserContext> context) 
+        : context_(context) { }
+
+    std::shared_ptr<text::ValueRetriever> value(
+        std::shared_ptr<text::ValueRetriever> parent, 
+        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    ) const override;
+
+private:
+    std::weak_ptr<SIPlusParserContext> context_;
+};
+
+struct or_func : Function  {
+    explicit if_func(std::weak_ptr<SIPlusParserContext> context) 
+        : context_(context) { }
+
+    std::shared_ptr<text::ValueRetriever> value(
+        std::shared_ptr<text::ValueRetriever> parent, 
+        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    ) const override;
+
+private:
+    std::weak_ptr<SIPlusParserContext> context_;
+};
+
+struct and_func : Function  {
+    explicit if_func(std::weak_ptr<SIPlusParserContext> context) 
+        : context_(context) { }
+
+    std::shared_ptr<text::ValueRetriever> value(
+        std::shared_ptr<text::ValueRetriever> parent, 
+        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    ) const override;
+
+private:
+    std::weak_ptr<SIPlusParserContext> context_;
+};
+
+struct not_func : Function  {
+    explicit if_func(std::weak_ptr<SIPlusParserContext> context) 
+        : context_(context) { }
+
+    std::shared_ptr<text::ValueRetriever> value(
+        std::shared_ptr<text::ValueRetriever> parent, 
+        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    ) const override;
+
+private:
+    std::weak_ptr<SIPlusParserContext> context_;
+};
+
+} /* stl */
+} /* SIPLUS_NAMESPACE */
+
+#endif  // SIPLUS_INCLUDE_STDLIB
+
+#endif  // INCLUDE_FUNCTIONS_BOOLEAN_H_

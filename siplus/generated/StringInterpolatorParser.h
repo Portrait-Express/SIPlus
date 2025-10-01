@@ -15,18 +15,18 @@
 class  StringInterpolatorParser : public SIPLUS_NAMESPACE::internal::SIParser {
 public:
   enum {
-    NORMAL_TEXT = 1, NORMAL_ESCAPE = 2, OPEN = 3, DOT = 4, HASH = 5, SLASH = 6, 
-    CLOSE = 7, OPENP = 8, CLOSEP = 9, PIPE = 10, BACKSLASH = 11, STRING_START = 12, 
-    WS = 13, INT = 14, FLOAT = 15, ID = 16, ANY = 17, STRING_TEXT = 18, 
-    STRING_ESCAPE = 19, STRING_END = 20
+    NORMAL_TEXT = 1, NORMAL_ESCAPE = 2, OPEN = 3, TRUE = 4, FALSE = 5, DOT = 6, 
+    HASH = 7, SLASH = 8, CLOSE = 9, OPENP = 10, CLOSEP = 11, PIPE = 12, 
+    BACKSLASH = 13, STRING_START = 14, WS = 15, INT = 16, FLOAT = 17, ID = 18, 
+    ANY = 19, STRING_TEXT = 20, STRING_ESCAPE = 21, STRING_END = 22
   };
 
   enum {
-    RuleField = 0, RuleString = 1, RuleInteger = 2, RuleFloat = 3, RuleLiteral = 4, 
-    RuleArgument = 5, RuleArg_list = 6, RuleFunc = 7, RuleExpr_item = 8, 
-    RuleExpr = 9, RuleEval = 10, RuleLoop_start = 11, RuleLoop_end = 12, 
-    RuleLoop = 13, RuleStmt = 14, RuleNormal = 15, RuleInterpolated_str = 16, 
-    RuleExpression_program = 17, RuleProgram = 18
+    RuleField = 0, RuleString = 1, RuleInteger = 2, RuleFloat = 3, RuleBoolean = 4, 
+    RuleLiteral = 5, RuleArgument = 6, RuleArg_list = 7, RuleFunc = 8, RuleExpr_item = 9, 
+    RuleExpr = 10, RuleEval = 11, RuleLoop_start = 12, RuleLoop_end = 13, 
+    RuleLoop = 14, RuleStmt = 15, RuleNormal = 16, RuleInterpolated_str = 17, 
+    RuleExpression_program = 18, RuleProgram = 19
   };
 
   explicit StringInterpolatorParser(antlr4::TokenStream *input);
@@ -50,6 +50,7 @@ public:
   class StringContext;
   class IntegerContext;
   class FloatContext;
+  class BooleanContext;
   class LiteralContext;
   class ArgumentContext;
   class Arg_listContext;
@@ -126,6 +127,20 @@ public:
 
   FloatContext* float_();
 
+  class  BooleanContext : public antlr4::ParserRuleContext {
+  public:
+    BooleanContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *TRUE();
+    antlr4::tree::TerminalNode *FALSE();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  BooleanContext* boolean();
+
   class  LiteralContext : public antlr4::ParserRuleContext {
   public:
     LiteralContext(antlr4::ParserRuleContext *parent, size_t invokingState);
@@ -133,6 +148,7 @@ public:
     StringContext *string();
     IntegerContext *integer();
     FloatContext *float_();
+    BooleanContext *boolean();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;

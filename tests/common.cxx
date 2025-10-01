@@ -1,10 +1,7 @@
-#include "siplus/text/converter.h"
 #include <chrono>
 #include <iostream> 
 #include <format>
-#include <sstream>
 #include <stdexcept>
-#include <typeindex>
 
 #ifdef SIPLUS_HAS_CPPTRACE
 
@@ -20,10 +17,9 @@
 #endif
 
 #include "siplus/context.h"
-#include "siplus/internal/vector_iterator_provider.h"
 #include "siplus/parser.h"
 #include "siplus/text/data.h"
-#include "siplus/util.h"
+#include "siplus/internal/vector_iterator_provider.h"
 
 #include "common.hxx"
 
@@ -106,18 +102,23 @@ struct data_accessor : public SIPlus::text::Accessor {
     }
 };
 
+bool g_parser_init = false;
 Parser& get_test_context() {
     static Parser parser;
 
+    if(!g_parser_init) {
 #ifdef SIPLUS_INCLUDE_STDLIB
-    parser.context().use_stl();
+        parser.context().use_stl();
 #else
-    parser.context().emplace_converter<int_string_converter>();
+        parser.context().emplace_converter<int_string_converter>();
 #endif
 
-    parser.context().emplace_accessor<data_accessor>();
-    parser.context().emplace_accessor<user_accessor>();
-    parser.context().emplace_iterator<internal::vector_iterator<User>>();
+        parser.context().emplace_accessor<data_accessor>();
+        parser.context().emplace_accessor<user_accessor>();
+        parser.context().emplace_iterator<internal::vector_iterator<User>>();
+
+        g_parser_init = true;
+    }
 
     return parser;
 }
@@ -178,4 +179,31 @@ int group(std::string name, std::function<int()> test_impl) {
     return group(name, [&](const Parser&) {
         return test_impl();
     });
+}
+
+template<>
+bool conversion_equal<double>(double first, double second) {
+    return nearly_equal(first, second, (double)FLT_EPSILON, (double)FLT_MIN);
+}
+
+bool nearly_equal(float a, float b, float epsilon, float abs_th) {
+  assert(std::numeric_limits<float>::epsilon() <= epsilon);
+  assert(epsilon < 1.f);
+
+  if (a == b) return true;
+
+  auto diff = std::abs(a-b);
+  auto norm = std::min((std::abs(a) + std::abs(b)), std::numeric_limits<float>::max());
+  return diff < std::max(abs_th, epsilon * norm);
+}
+
+bool nearly_equal(double a, double b, double epsilon, double abs_th) {
+  assert(std::numeric_limits<double>::epsilon() <= epsilon);
+  assert(epsilon < 1.f);
+
+  if (a == b) return true;
+
+  auto diff = std::abs(a-b);
+  auto norm = std::min((std::abs(a) + std::abs(b)), std::numeric_limits<double>::max());
+  return diff < std::max(abs_th, epsilon * norm);
 }
