@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 option(SIPLUS_INCLUDE_STDLIB "Include standard library base for siplus. Can be disabled to reduce binary size" ON)
+option(SIPLUS_SANITIZE_ADDRESS "Set -fsanitize=address for memory leak testing" OFF)
 set(SIPLUS_NAMESPACE SIPlus CACHE STRING "Optionally specify a different root namespace")
 
 project(siplus)
@@ -29,10 +30,19 @@ set(SIPLUS_SOURCES
 )
 
 if(SIPLUS_INCLUDE_STDLIB)
-    set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/standardlib.cpp)
+    set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/standardlib.cpp)
+    set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/converting_operator.cpp)
+    set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/converters.cpp)
+    set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/text.cpp)
+    set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/util.cpp)
 endif()
 
 add_library(siplus ${SIPLUS_SOURCES})
+
+if(SIPLUS_SANITIZE_ADDRESS)
+    target_compile_options(siplus PUBLIC -fsanitize=address)
+    target_link_options(siplus PUBLIC -fsanitize=address)
+endif()
 
 configure_file(
     "${PROJECT_SOURCE_DIR}/config.h.in"

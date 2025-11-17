@@ -5,7 +5,10 @@
 
 #ifdef SIPLUS_INCLUDE_STDLIB
 
-#include "siplus/stl/functions/add.h"
+#include "siplus/stl/functions/arithmetic.h"
+#include "siplus/stl/functions/typed_operator.h"
+#include "siplus/stl/functions/converting_operator.h"
+#include "siplus/stl/functions/comparison.h"
 #include "siplus/stl/functions/map.h"
 #include "siplus/stl/functions/str.h"
 #include "siplus/stl/functions/if.h"

@@ -1,0 +1,86 @@
+#ifndef INCLUDE_FUNCTIONS_CONVERTING_OPERATOR_H_
+#define INCLUDE_FUNCTIONS_CONVERTING_OPERATOR_H_
+
+#include "siplus/config.h"
+#include <optional>
+
+#ifdef SIPLUS_INCLUDE_STDLIB
+
+#include "siplus/context.h"
+#include "siplus/text/data.h"
+#include <memory>
+
+namespace SIPLUS_NAMESPACE {
+namespace stl {
+
+struct operator_impl {
+    virtual SIPlus::text::UnknownDataTypeContainer invoke(
+        std::shared_ptr<SIPlusParserContext>   context,
+        text::UnknownDataTypeContainer         lhs, 
+        text::UnknownDataTypeContainer         rhs
+    ) = 0;
+
+    virtual bool can_handle(std::type_index lhs, std::type_index rhs) const = 0;
+    bool btcache_can_handle(std::type_index lhs, std::type_index rhs);
+
+    virtual ~operator_impl() = default;
+};
+
+struct converting_operator_function : Function {
+    explicit converting_operator_function(
+        std::weak_ptr<SIPlusParserContext> context
+    ) : context_(context) { }
+
+    std::shared_ptr<text::ValueRetriever> value(
+        std::shared_ptr<text::ValueRetriever> parent, 
+        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    ) const override;
+
+    template<typename T, typename... Ts>
+    void emplace_impl(const Ts&&... args) {
+        cache_.emplace_item<T>(std::forward<Ts>(args)...);
+    }
+
+    bool has_impl(std::type_index lhs, std::type_index rhs) const;
+    std::shared_ptr<operator_impl> find_impl(std::type_index lhs, std::type_index rhs) const;
+
+private:
+    std::weak_ptr<SIPlusParserContext> context_;
+    internal::BinaryTypeCache<operator_impl, &operator_impl::btcache_can_handle> cache_;
+};
+
+struct numeric_adder : operator_impl {
+    text::UnknownDataTypeContainer 
+    invoke(
+        std::shared_ptr<SIPlusParserContext> context,
+        text::UnknownDataTypeContainer lhs, 
+        text::UnknownDataTypeContainer rhs
+    ) override;
+
+    bool can_handle(std::type_index lhs, std::type_index rhs) const override;
+
+private:
+    bool is_numeric(std::type_index type) const;
+    text::UnknownDataTypeContainer as_base(
+        std::shared_ptr<SIPlusParserContext> ctx,
+        text::UnknownDataTypeContainer       value
+    ) const;
+};
+
+struct string_concatenator : operator_impl {
+    text::UnknownDataTypeContainer 
+    invoke(
+        std::shared_ptr<SIPlusParserContext> context,
+        text::UnknownDataTypeContainer lhs, 
+        text::UnknownDataTypeContainer rhs
+    ) override;
+
+    bool can_handle(std::type_index lhs, std::type_index rhs) const override;
+};
+
+} /* stl */
+} /* SIPLUS_NAMESPACE  */
+
+#endif // SIPLUS_INCLUDE_STDLIB
+
+#endif  // INCLUDE_FUNCTIONS_CONVERTING_OPERATOR_H_

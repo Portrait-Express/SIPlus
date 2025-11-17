@@ -7,6 +7,8 @@
 
 #include "siplus/context.h"
 
+#include "siplus/stl/converters/numeric.h"
+
 namespace SIPLUS_NAMESPACE {
 namespace stl {
     

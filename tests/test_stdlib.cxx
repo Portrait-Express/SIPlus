@@ -10,17 +10,21 @@
 
 int test_add() {
     return test("add", [](const SIPlus::Parser& parser) {
-        auto expr = parser.get_expression("add .x .y.b");
-        auto val = expr->retrieve(SIPlus::text::make_data(test_data{}));
-        return (val.is<long>() && val.as<long>() == 3) ? 0 : 1;
+        return tests(
+            test_expression("add .x .y.b", 3L),
+            test_expression("add .x 2.3", 4.3),
+            test_expression<std::string>(R"(add .x "ab")", "2ab"),
+            test_expression<std::string>(R"(add "a" "b")", "ab"),
+            test_expression<std::string>(R"("a" | add "b")", "ab")
+        );
     });
 }
 
 int test_str() {
     return test("str", [](const SIPlus::Parser& parser) {
-        auto expr = parser.get_expression(".x | str");
-        auto val = expr->retrieve(SIPlus::text::make_data(test_data{}));
-        return (val.is<std::string>() && val.as<std::string>() == "2") ? 0 : 1;
+        return tests(
+            test_expression<std::string>(".x | str", "2")
+        );
     });
 }
 
@@ -98,6 +102,64 @@ int test_if() {
     });
 }
 
+int test_replace() { 
+    return test("replace", [](const SIPlus::Parser& parser) {
+        return tests(
+            test_expression<std::string>(R"(replace "Hello" "e" "a")", "Hallo"),
+            test_expression<std::string>(R"("test" | replace "test" "something")", "something"),
+            test_expression<std::string>(R"(replace "AAAAAa" "A" "BA")", "BABABABABAa")
+        );
+    });
+}
+
+int test_padEnd() { 
+    return test("padEnd", [](const SIPlus::Parser& parser) {
+        return tests(
+            test_expression<std::string>(R"(padEnd "Hello" 8 "o")", "Helloooo"),
+            test_expression<std::string>(R"(padEnd "Long Text" 2 "-")", "Long Text"),
+            test_expression<std::string>(R"(padEnd "" 3 "0")", "000")
+        );
+    });
+}
+
+int test_padStart() { 
+    return test("padStart", [](const SIPlus::Parser& parser) {
+        return tests(
+            test_expression<std::string>(R"(padStart "2" 2 "0")", "02"),
+            test_expression<std::string>(R"(padStart "Long Text" 2 "-")", "Long Text"),
+            test_expression<std::string>(R"(padStart "" 3 "0")", "000")
+        );
+    });
+}
+
+int test_trim() { 
+    return test("trim", [](const SIPlus::Parser& parser) {
+        return tests(
+            test_expression<std::string>(R"("  test  " | trim)", "test"),
+            test_expression<std::string>(R"("  " | trim)", ""),
+            test_expression<std::string>(R"("test" | trim)", "test")
+        );
+    });
+}
+
+int test_upper() { 
+    return test("upper", [](const SIPlus::Parser& parser) {
+        return tests(
+            test_expression<std::string>(R"("Test" | upper)", "TEST"),
+            test_expression<std::string>(R"("" | upper)", "")
+        );
+    });
+}
+
+int test_lower() { 
+    return test("lower", [](const SIPlus::Parser& parser) {
+        return tests(
+            test_expression<std::string>(R"("Test" | lower)", "test"),
+            test_expression<std::string>(R"("" | lower)", "")
+        );
+    });
+}
+
 int test_int_converter() {
     return test("int_converter", [](const SIPlus::Parser& parser) {
         SIPlus::stl::int_converter converter;
@@ -158,7 +220,13 @@ int test_functions() {
             test_if(),
             test_and(),
             test_xor(),
-            test_or()
+            test_or(),
+            test_replace(),
+            test_padEnd(),
+            test_padStart(),
+            test_trim(),
+            test_lower(),
+            test_upper()
         );
     });
 }

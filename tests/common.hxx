@@ -78,12 +78,59 @@ int test_conversion(V&& val, To&& result) {
 }
 
 template<typename T>
+struct test_expression_compare {
+    static bool compare(const T& val, const T& other) {
+        return val == other;
+    }
+};
+
+template<>
+struct test_expression_compare<float> {
+    static bool compare(const float& val, const float& other) {
+        return nearly_equal(val, other);
+    }
+};
+
+template<>
+struct test_expression_compare<double> {
+    static bool compare(const double& val, const double& other) {
+        return nearly_equal(val, other);
+    }
+};
+
+inline std::string get_value_str(SIPLUS_NAMESPACE::text::UnknownDataTypeContainer val) {
+    if(val.is<double>()) {
+        return to_string(val.as<double>());
+    } else if(val.is<float>()) {
+        return to_string(val.as<float>());
+    } else if(val.is<std::string>()) {
+        return val.as<std::string>();
+    } else {
+        return "<unknown>";
+    }
+}
+
+template<typename T>
 int test_expression(std::string expression, T value) {
     auto retriever = get_test_context().get_expression(expression);
     auto result = retriever->retrieve(SIPlus::text::make_data(test_data()));
 
-    if(!result.template is<T>()) return 1;
-    if(result.template as<T>() != value) return 1;
+    if(!result.template is<T>()) {
+        std::cout << "Expression \"" << expression << "\" failed: Expected type " 
+            << get_type_name(typeid(T)) << " recieved value of type " 
+            << get_type_name(result.type) << "." << std::endl;
+        return 1;
+    }
+
+    if(!test_expression_compare<T>::compare(result.template as<T>(), value)) {
+        std::cout 
+            << "Expression \"" << expression << "\" failed: Expected " 
+            << get_type_name(typeid(T)) << " " << to_string(value) 
+            << " recieved value " 
+            << get_type_name(result.type) << " " << get_value_str(result)
+            << "." << std::endl;
+        return 1;
+    }
 
     return 0;
 }

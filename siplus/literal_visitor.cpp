@@ -2,6 +2,8 @@
 #include "Token.h"
 #include "generated/StringInterpolatorLexer.h"
 #include "siplus/text/data.h"
+#include <cstdlib>
+#include <string>
 
 namespace SIPLUS_NAMESPACE {
 
@@ -41,7 +43,7 @@ long parse_int(std::string text) {
 
 //FLOAT: ( [0-9]+ '.' [0-9]* ) | ( '.' [0-9]+ ) ;
 double parse_float(const std::string& text) {
-    return 0;
+    return std::stod(text);
 }
 
 bool parse_bool(const std::string& text) {
