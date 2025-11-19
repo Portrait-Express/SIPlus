@@ -2,6 +2,7 @@
 #define INCLUDE_FUNCTIONS_TEXT_H_
 
 #include "siplus/config.h"
+#include "siplus/stl/functions/converting_operator.h"
 
 #ifdef SIPLUS_INCLUDE_STDLIB
 
@@ -99,6 +100,28 @@ struct lower_function : Function {
 
 private:
     std::weak_ptr<SIPlusParserContext> ctx_;
+};
+
+struct string_concatenator : operator_impl {
+    text::UnknownDataTypeContainer 
+    invoke(
+        std::shared_ptr<SIPlusParserContext> context,
+        text::UnknownDataTypeContainer lhs, 
+        text::UnknownDataTypeContainer rhs
+    ) override;
+
+    bool can_handle(std::type_index lhs, std::type_index rhs) const override;
+};
+
+struct string_comparator : operator_impl {
+    text::UnknownDataTypeContainer 
+    invoke(
+        std::shared_ptr<SIPlusParserContext> context,
+        text::UnknownDataTypeContainer lhs, 
+        text::UnknownDataTypeContainer rhs
+    ) override;
+
+    bool can_handle(std::type_index lhs, std::type_index rhs) const override;
 };
 
 } /* stl */

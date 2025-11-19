@@ -141,25 +141,29 @@ public:
 
 
     template<typename T, typename ...Ts, typename = std::enable_if_t<std::is_base_of_v<Function, T>>>
-    void emplace_function(std::string name, Ts&&... args) {
-        T *ptr = new T{args...};
-        std::unique_ptr<Function> unique{ptr};
-        functions_[name] = std::move(unique);
+    std::shared_ptr<T> emplace_function(std::string name, Ts&&... args) {
+        auto function = std::make_shared<T>(std::forward<Ts>(args)...);
+        functions_[name] = function;
+        return function;
     }
 
     template<typename T, typename ...Ts, typename = std::enable_if_t<std::is_base_of_v<text::Accessor, T>>>
-    void emplace_accessor(Ts&&... args) {
-        accessors_.emplace_back(std::make_shared<T>(std::forward<Ts>(args)...));
+    std::shared_ptr<T> emplace_accessor(Ts&&... args) {
+        auto accessor = std::make_shared<T>(std::forward<Ts>(args)...);
+        accessors_.emplace_back(accessor);
+        return accessor;
     }
 
     template<typename T, typename ...Ts, typename = std::enable_if_t<std::is_base_of_v<text::IteratorProvider, T>>>
-    void emplace_iterator(Ts&&... args) {
-        iterators_.emplace_back(std::make_shared<T>(std::forward<Ts>(args)...));
+    std::shared_ptr<T> emplace_iterator(Ts&&... args) {
+        auto iterator = std::make_shared<T>(std::forward<Ts>(args)...);
+        iterators_.emplace_back(iterator);
+        return iterator;
     }
 
     template<typename T, typename ...Ts, typename = std::enable_if_t<std::is_base_of_v<text::Converter, T>>>
-    void emplace_converter(Ts&&... args) {
-        converters_.emplace_item<T>(std::forward<Ts>(args)...);
+    std::shared_ptr<T> emplace_converter(Ts&&... args) {
+        return converters_.emplace_item<T>(std::forward<Ts>(args)...);
     }
 
 private:
@@ -169,7 +173,7 @@ private:
     internal::BinaryTypeCache<text::Converter, &text::Converter::can_convert> converters_;
 
     //storage
-    std::unordered_map<std::string, std::unique_ptr<Function>> functions_;
+    std::unordered_map<std::string, std::shared_ptr<Function>> functions_;
     std::vector<std::shared_ptr<text::Accessor>> accessors_;
     std::vector<std::shared_ptr<text::IteratorProvider>> iterators_;
 };

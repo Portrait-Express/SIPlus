@@ -26,13 +26,16 @@ set(SIPLUS_SOURCES
     siplus/parser_impl.cpp
     siplus/statement_visitor.cpp
     siplus/text.cpp
+    siplus/util.cpp
     siplus/visitor.cpp
 )
 
 if(SIPLUS_INCLUDE_STDLIB)
-    set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/standardlib.cpp)
+    set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/arithmetic.cpp)
+    set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/comparison.cpp)
     set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/converting_operator.cpp)
     set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/converters.cpp)
+    set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/standardlib.cpp)
     set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/text.cpp)
     set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/util.cpp)
 endif()

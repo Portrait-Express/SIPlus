@@ -9,86 +9,6 @@
 namespace SIPLUS_NAMESPACE {
 namespace stl {
 
-bool operator_impl::btcache_can_handle(std::type_index lhs, std::type_index rhs) {
-    return can_handle(lhs, rhs);
-}
-
-text::UnknownDataTypeContainer 
-numeric_adder::invoke(
-    std::shared_ptr<SIPlusParserContext> context,
-    text::UnknownDataTypeContainer       lhs, 
-    text::UnknownDataTypeContainer       rhs
-) {
-    lhs = as_base(context, lhs);
-    rhs = as_base(context, rhs);
-
-    if(lhs.is<long>()) {
-        long val = lhs.as<long>();
-
-        if(rhs.is<long>()) { 
-            return text::make_data(val + rhs.as<long>());
-        } else if(rhs.is<double>()) {
-            return text::make_data(val + rhs.as<double>());
-        } else {
-            throw std::runtime_error{"Cannot add types long and " + get_type_name(rhs.type)};
-        }
-    } else if(lhs.is<double>()) {
-        double val = lhs.as<double>();
-
-        if(rhs.is<long>()) { 
-            return text::make_data(val + rhs.as<long>());
-        } else if(rhs.is<double>()) {
-            return text::make_data(val + rhs.as<double>());
-        } else {
-            throw std::runtime_error{"Cannot add types double and " + get_type_name(rhs.type)};
-        }
-    } else {
-        throw std::runtime_error{"Cannot add types " + get_type_name(lhs.type) 
-            + " and " + get_type_name(rhs.type)};
-    }
-}
-
-bool numeric_adder::is_numeric(std::type_index type) const {
-    return type == typeid(long) || type == typeid(int) || type == typeid(short)
-        || type == typeid(float) || type == typeid(double);
-}
-
-text::UnknownDataTypeContainer 
-numeric_adder::as_base(
-    std::shared_ptr<SIPlusParserContext> ctx,
-    text::UnknownDataTypeContainer       value
-) const {
-    if(value.is<long>() || value.is<double>()) {
-        return value;
-    } else if(value.is<int>() || value.is<short>()) {
-        return ctx->convert<long>(value);
-    } else if(value.is<float>()) {
-        return ctx->convert<float>(value);
-    } else {
-        throw std::runtime_error{"numeric_adder cannot add type " + get_type_name(value.type)};
-    }
-}
-
-bool
-numeric_adder::can_handle(std::type_index lhs, std::type_index rhs) const {
-    return is_numeric(lhs) && is_numeric(rhs);
-}
-
-text::UnknownDataTypeContainer string_concatenator::invoke(
-    std::shared_ptr<SIPlusParserContext> ctx,
-    text::UnknownDataTypeContainer       lhs,
-    text::UnknownDataTypeContainer       rhs
-) {
-    if(!lhs.is<std::string>() || !rhs.is<std::string>()) {
-        throw std::runtime_error{"String concatenator can only handle std::string"};
-    }
-    return text::make_data(lhs.as<std::string>() + rhs.as<std::string>());
-}
-
-bool string_concatenator::can_handle(std::type_index lhs, std::type_index rhs) const {
-    return lhs == typeid(std::string) && rhs == typeid(std::string);
-}
-
 namespace {
 
 struct converting_operator_impl : text::ValueRetriever {
@@ -110,6 +30,10 @@ private:
 };
 
 } /* anonymous */
+
+bool operator_impl::btcache_can_handle(std::type_index lhs, std::type_index rhs) {
+    return can_handle(lhs, rhs);
+}
 
 bool 
 converting_operator_function::has_impl(std::type_index lhs, std::type_index rhs) const {

@@ -262,5 +262,42 @@ lower_impl::retrieve(const text::UnknownDataTypeContainer& value) const {
     return text::make_data(str);
 }
 
+text::UnknownDataTypeContainer string_concatenator::invoke(
+    std::shared_ptr<SIPlusParserContext> ctx,
+    text::UnknownDataTypeContainer       lhs,
+    text::UnknownDataTypeContainer       rhs
+) {
+    if(!lhs.is<std::string>() || !rhs.is<std::string>()) {
+        throw std::runtime_error{"String concatenator can only handle std::string"};
+    }
+    return text::make_data(lhs.as<std::string>() + rhs.as<std::string>());
+}
+
+bool string_concatenator::can_handle(std::type_index lhs, std::type_index rhs) const {
+    return lhs == typeid(std::string) && rhs == typeid(std::string);
+}
+
+text::UnknownDataTypeContainer 
+string_comparator::invoke(
+    std::shared_ptr<SIPlusParserContext> context,
+    text::UnknownDataTypeContainer lhs, 
+    text::UnknownDataTypeContainer rhs
+) {
+    auto strl = lhs.as<std::string>();
+    auto strr = rhs.as<std::string>();
+
+    if(strl < strr) {
+        return text::make_data(-1L);
+    } else if(strl > strr) {
+        return text::make_data(1L);
+    } else {
+        return text::make_data(0L);
+    }
+}
+
+bool string_comparator::can_handle(std::type_index lhs, std::type_index rhs) const {
+    return lhs == typeid(std::string) && rhs == typeid(std::string);
+}
+
 } /* stl */
 } /* SIPLUS_NAMESPACE */

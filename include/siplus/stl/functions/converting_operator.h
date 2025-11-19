@@ -49,35 +49,6 @@ private:
     internal::BinaryTypeCache<operator_impl, &operator_impl::btcache_can_handle> cache_;
 };
 
-struct numeric_adder : operator_impl {
-    text::UnknownDataTypeContainer 
-    invoke(
-        std::shared_ptr<SIPlusParserContext> context,
-        text::UnknownDataTypeContainer lhs, 
-        text::UnknownDataTypeContainer rhs
-    ) override;
-
-    bool can_handle(std::type_index lhs, std::type_index rhs) const override;
-
-private:
-    bool is_numeric(std::type_index type) const;
-    text::UnknownDataTypeContainer as_base(
-        std::shared_ptr<SIPlusParserContext> ctx,
-        text::UnknownDataTypeContainer       value
-    ) const;
-};
-
-struct string_concatenator : operator_impl {
-    text::UnknownDataTypeContainer 
-    invoke(
-        std::shared_ptr<SIPlusParserContext> context,
-        text::UnknownDataTypeContainer lhs, 
-        text::UnknownDataTypeContainer rhs
-    ) override;
-
-    bool can_handle(std::type_index lhs, std::type_index rhs) const override;
-};
-
 } /* stl */
 } /* SIPLUS_NAMESPACE  */
 

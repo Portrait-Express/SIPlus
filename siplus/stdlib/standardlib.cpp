@@ -1,3 +1,4 @@
+#include "siplus/function.h"
 #include "siplus/internal/vector_iterator_provider.h"
 #include "siplus/stl.h"
 #include "siplus/stl/converters/numeric.h"
@@ -6,7 +7,7 @@
 #include "siplus/text/data.h"
 #include "siplus/text/iterator.h"
 #include "siplus/text/value_retrievers/retriever.h"
-#include "siplus/util.h"
+#include "util.h"
 #include <functional>
 #include <memory>
 #include <vector>
@@ -190,26 +191,6 @@ if_func_retriever::retrieve(const text::UnknownDataTypeContainer& value) const {
     }
 }
 
-std::shared_ptr<text::ValueRetriever> lt_func::value(
-    std::shared_ptr<text::ValueRetriever> parent, 
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
-) const {
-}
-
-std::shared_ptr<text::ValueRetriever> gt_func::value(
-    std::shared_ptr<text::ValueRetriever> parent, 
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
-) const {
-
-}
-
-std::shared_ptr<text::ValueRetriever> cmp_func::value(
-    std::shared_ptr<text::ValueRetriever> parent, 
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
-) const {
-
-}
-
 
 //----------------------------
 // Free Functions
@@ -236,9 +217,13 @@ void attach_stl_functions(SIPlusParserContext& context) {
     add_func.emplace_impl<numeric_adder>();
     context.emplace_function<converting_operator_function>("add", add_func);
 
-    context.emplace_function<lt_func>("lt", context.shared_from_this());
-    context.emplace_function<gt_func>("gt", context.shared_from_this());
-    context.emplace_function<cmp_func>("cmp", context.shared_from_this());
+    auto cmp_func = converting_operator_function{context.shared_from_this()};
+    auto cmp_ptr = context.emplace_function<converting_operator_function>("cmp", cmp_func);
+    cmp_ptr->emplace_impl<string_comparator>();
+    cmp_ptr->emplace_impl<numeric_comparator>();
+    context.emplace_function<lt_func>("lt", context.shared_from_this(), cmp_ptr);
+    context.emplace_function<gt_func>("gt", context.shared_from_this(), cmp_ptr);
+    context.emplace_function<eq_func>("eq", context.shared_from_this(), cmp_ptr);
 
     context.emplace_function<replace_function>("replace", context.shared_from_this());
     context.emplace_function<pad_end_function>("padEnd", context.shared_from_this());

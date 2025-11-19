@@ -23,9 +23,11 @@ struct BinaryTypeCache {
     const_iterator end() const { return items_.end(); }
 
     template<std::derived_from<T> U, typename... Ts>
-    void emplace_item(Ts&&... args) {
+    std::shared_ptr<U> emplace_item(Ts&&... args) {
         //put at front to prioritized newest entries.
-        items_.push_front(std::static_pointer_cast<T>(std::make_shared<U>(std::forward<Ts>(args)...)));
+        auto value = std::make_shared<U>(std::forward<Ts>(args)...);
+        items_.push_front(std::static_pointer_cast<T>(value));
+        return value;
     }
 
     iterator find(std::type_index first, std::type_index second) {
