@@ -3,7 +3,7 @@
 #include <cfloat>
 
 #include "siplus/parser.h"
-#include "siplus/stl/converters/numeric.h"
+#include "siplus/stl/converters.h"
 #include "siplus/text/data.h"
 
 #include "common.hxx"
@@ -62,6 +62,26 @@ int test_map() {
     });
 }
 
+int test_length() {
+    return test("length", [](const Parser& parser) {
+        return tests(
+            test_expression(". | length", std::vector{1,2,3}, 3L),
+            test_expression(". | length", std::vector<int>{}, 0L),
+            test_expression(". | length", std::vector<std::string>{"1"}, 1L)
+        );
+    });
+}
+
+int test_join() {
+    return test("join", [](const Parser& parser) {
+        return tests(
+            test_expression<std::string>(R"(. | join ", ")", std::vector{1,2,3}, "1, 2, 3"),
+            test_expression<std::string>(R"(. | join "some text")", std::vector<int>{}, ""),
+            test_expression<std::string>(R"(. | join 2)", std::vector<std::string>{"1"}, "1")
+        );
+    });
+}
+
 int test_and() {
     return test("and", [](const Parser& parser) {
         return tests(
@@ -88,6 +108,15 @@ int test_xor() {
             test_expression("xor true false", true),
             test_expression("xor true true", false),
             test_expression("xor false false", false)
+        );
+    });
+}
+
+int test_not() {
+    return test("not", [](const Parser& parser) {
+        return tests(
+            test_expression("not true", false),
+            test_expression("not false", true)
         );
     });
 }
@@ -224,27 +253,48 @@ int test_float_converter() {
 
 int test_numeric_string_converter() {
     return test("numeric_string_converter", [](const Parser& parser) {
-        stl::numeric_string_converter converter;
+        stl::numeric_string_converter converter{parser.context().shared_from_this()};
 
         return tests(
-            test_conversion<stl::numeric_string_converter, short, std::string>(1, "1"),
-            test_conversion<stl::numeric_string_converter, int, std::string>(1, "1"),
-            test_conversion<stl::numeric_string_converter, long, std::string>(1, "1"),
-            test_conversion<stl::numeric_string_converter, float, std::string>(1, "1"),
-            test_conversion<stl::numeric_string_converter, double, std::string>(1, "1")
+            test_conversion<stl::numeric_string_converter, short, std::string>(converter, 1, "1"),
+            test_conversion<stl::numeric_string_converter, int, std::string>(converter, 1, "1"),
+            test_conversion<stl::numeric_string_converter, long, std::string>(converter, 1, "1"),
+            test_conversion<stl::numeric_string_converter, float, std::string>(converter, 1, "1"),
+            test_conversion<stl::numeric_string_converter, double, std::string>(converter, 1, "1")
         );
     });
 }
 
 int test_numeric_bool_converter() {
     return test("numeric_bool_converter", [](const Parser& parser) {
+        stl::numeric_bool_converter converter{parser.context().shared_from_this()};
+
         return tests(
-            test_conversion<stl::numeric_bool_converter, short, bool>(1, true),
-            test_conversion<stl::numeric_bool_converter, int, bool>(0, false),
-            test_conversion<stl::numeric_bool_converter, long, bool>(11212521L, true),
-            test_conversion<stl::numeric_bool_converter, long, bool>(0, false),
-            test_conversion<stl::numeric_bool_converter, float, bool>(1.3, true),
-            test_conversion<stl::numeric_bool_converter, double, bool>(0, false)
+            test_conversion<stl::numeric_bool_converter, short, bool>(converter, 1, true),
+            test_conversion<stl::numeric_bool_converter, int, bool>(converter, 0, false),
+            test_conversion<stl::numeric_bool_converter, long, bool>(converter, 11212521L, true),
+            test_conversion<stl::numeric_bool_converter, long, bool>(converter, 0, false),
+            test_conversion<stl::numeric_bool_converter, float, bool>(converter, 1.3, true),
+            test_conversion<stl::numeric_bool_converter, double, bool>(converter, 0, false)
+        );
+    });
+}
+
+int test_string_bool_converter() {
+    return test("string_bool_converter", [](const Parser& parser) {
+        return tests(
+            test_conversion<stl::string_bool_converter, std::string, bool>(" ", true),
+            test_conversion<stl::string_bool_converter, std::string, bool>("Hello, World", true),
+            test_conversion<stl::string_bool_converter, std::string, bool>("", false)
+        );
+    });
+}
+
+int test_bool_string_converter() {
+    return test("bool_string_converter", [](const Parser& parser) {
+        return tests(
+            test_conversion<stl::bool_string_converter, bool, std::string>(true, "true"),
+            test_conversion<stl::bool_string_converter, bool, std::string>(false, "false")
         );
     });
 }
@@ -252,19 +302,27 @@ int test_numeric_bool_converter() {
 int test_functions() {
     return group("functions", []() {
         return tests(
-            test_add(),
             test_str(),
-            test_map(),
             test_if(),
+
+            test_add(),
+
+            test_length(),
+            test_join(),
+            test_map(),
+
             test_and(),
             test_xor(),
             test_or(),
+            test_not(),
+
             test_replace(),
             test_padEnd(),
             test_padStart(),
             test_trim(),
             test_lower(),
             test_upper(),
+
             test_cmp(),
             test_lt(),
             test_gt(),

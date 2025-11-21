@@ -5,8 +5,9 @@
 
 #ifdef SIPLUS_INCLUDE_STDLIB
 
-#include "siplus/stl/functions.h"
 #include "siplus/stl/converters.h"
+#include "siplus/stl/functions.h"
+#include "siplus/stl/iterators.h"
 
 namespace SIPLUS_NAMESPACE {
 namespace stl {
@@ -18,7 +19,11 @@ void attach_stl(SIPlusParserContext& context);
 
 #else 
 
+#ifndef SIPLUS_SUPRESS_WARN_NO_STL
+
 #warning "SIPlus was compiled with SIPLUS_INCLUDE_STDLIB OFF. STL not included."
+
+#endif
 
 #endif  // SIPLUS_INCLUDE_STDLIB
 

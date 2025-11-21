@@ -13,7 +13,7 @@ bool is_numeric(std::type_index type) {
 }
 
 text::UnknownDataTypeContainer as_base(
-    std::shared_ptr<SIPlusParserContext> ctx,
+    std::shared_ptr<const SIPlusParserContext> ctx,
     text::UnknownDataTypeContainer       value
 ) {
     if(value.is<long>() || value.is<double>()) {

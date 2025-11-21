@@ -85,11 +85,13 @@ std::any ExpressionVisitor::visitField(StringInterpolatorParser::FieldContext *c
         }
     }
 
-    if(!existing)
-        return std::make_shared<text::DummyValueRetriever>();
-
-    value_ = std::static_pointer_cast<text::ValueRetriever>(existing);
-    return value_;
+    if(!existing) {
+        value_ = std::make_shared<text::DummyValueRetriever>();
+        return std::static_pointer_cast<text::ValueRetriever>(value_);
+    } else {
+        value_ = std::static_pointer_cast<text::ValueRetriever>(existing);
+        return value_;
+    }
 }
 
 }

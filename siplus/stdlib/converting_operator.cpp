@@ -31,10 +31,6 @@ private:
 
 } /* anonymous */
 
-bool operator_impl::btcache_can_handle(std::type_index lhs, std::type_index rhs) {
-    return can_handle(lhs, rhs);
-}
-
 bool 
 converting_operator_function::has_impl(std::type_index lhs, std::type_index rhs) const {
     return cache_.find(lhs, rhs) != cache_.end();;

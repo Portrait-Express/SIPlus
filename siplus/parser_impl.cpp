@@ -124,6 +124,10 @@ SIPlusParserContext& Parser::context() {
     return impl_->context();
 }
 
+const SIPlusParserContext& Parser::context() const {
+    return impl_->context();
+}
+
 ParserImpl::ParserImpl() {
     context_ = std::make_shared<SIPlusParserContext>();
 }

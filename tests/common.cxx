@@ -19,7 +19,7 @@
 #include "siplus/context.h"
 #include "siplus/parser.h"
 #include "siplus/text/data.h"
-#include "siplus/internal/vector_iterator_provider.h"
+#include "siplus/stl/iterators/vector_iterator_provider.h"
 
 #include "common.hxx"
 
@@ -115,7 +115,13 @@ Parser& get_test_context() {
 
         parser.context().emplace_accessor<data_accessor>();
         parser.context().emplace_accessor<user_accessor>();
-        parser.context().emplace_iterator<internal::vector_iterator<User>>();
+        parser.context().emplace_iterator<stl::vector_iterator<User>>();
+        parser.context().emplace_iterator<stl::vector_iterator<long>>();
+        parser.context().emplace_iterator<stl::vector_iterator<int>>();
+        parser.context().emplace_iterator<stl::vector_iterator<short>>();
+        parser.context().emplace_iterator<stl::vector_iterator<double>>();
+        parser.context().emplace_iterator<stl::vector_iterator<float>>();
+        parser.context().emplace_iterator<stl::vector_iterator<std::string>>();
 
         g_parser_init = true;
     }

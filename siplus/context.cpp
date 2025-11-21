@@ -13,7 +13,7 @@ namespace SIPLUS_NAMESPACE {
 
 SIPlusParserContext::SIPlusParserContext() { }
 
-Function& SIPlusParserContext::function(const std::string& name) {
+Function& SIPlusParserContext::function(const std::string& name) const {
     auto it = functions_.find(name);
 
     if(it == functions_.end()) {
@@ -24,7 +24,7 @@ Function& SIPlusParserContext::function(const std::string& name) {
 }
 
 std::shared_ptr<text::Accessor> 
-SIPlusParserContext::accessor(const text::UnknownDataTypeContainer& value) {
+SIPlusParserContext::accessor(const text::UnknownDataTypeContainer& value) const {
     auto it = accessors_cache_.find(value.type);
     if(it != accessors_cache_.end()) {
         return it->second;
@@ -42,7 +42,7 @@ SIPlusParserContext::accessor(const text::UnknownDataTypeContainer& value) {
 
 
 std::shared_ptr<text::IteratorProvider> 
-SIPlusParserContext::iterator(const text::UnknownDataTypeContainer& value) {
+SIPlusParserContext::iterator(const text::UnknownDataTypeContainer& value) const {
     auto it = iterators_cache_.find(value.type);
     if(it != iterators_cache_.end()) {
         return it->second;
@@ -61,7 +61,7 @@ SIPlusParserContext::iterator(const text::UnknownDataTypeContainer& value) {
 
 
 std::shared_ptr<text::Converter> 
-SIPlusParserContext::converter(std::type_index from, std::type_index to) {
+SIPlusParserContext::converter(std::type_index from, std::type_index to) const {
     auto ret = try_converter(from, to);
 
     if(!ret) {
@@ -73,7 +73,7 @@ SIPlusParserContext::converter(std::type_index from, std::type_index to) {
 }
 
 std::shared_ptr<text::Converter> 
-SIPlusParserContext::try_converter(std::type_index from, std::type_index to) {
+SIPlusParserContext::try_converter(std::type_index from, std::type_index to) const {
     auto it = converters_.find(from, to);
 
     if(it == converters_.end()) {

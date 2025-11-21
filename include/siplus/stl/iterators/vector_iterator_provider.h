@@ -1,12 +1,25 @@
-#ifndef INCLUDE_INTERNAL_VECTOR_ITERATOR_PROVIDER_H_
-#define INCLUDE_INTERNAL_VECTOR_ITERATOR_PROVIDER_H_
+#ifndef INCLUDE_ITERATORS_VECTOR_ITERATOR_PROVIDER_H_
+#define INCLUDE_ITERATORS_VECTOR_ITERATOR_PROVIDER_H_
 
 #include "siplus/config.h"
+
+// Not checking SIPLUS_INCLUDE_STDLIB as nothing here relies on STL object files.
+// Users are free to include and instantiate the classes below, as they are 
+// contained in their entirety due to being templates
+
 #include "siplus/text/iterator.h"
 
 namespace SIPLUS_NAMESPACE {
-namespace internal {
+namespace stl {
 
+namespace {
+
+/**
+ * struct vector_iterator_impl - Implementation for vector_iterator. Do not 
+ * use this class yourself.
+ *
+ * @tparam T 
+ */
 template<typename T>
 struct vector_iterator_impl : text::Iterator {
 public:
@@ -16,7 +29,11 @@ public:
     ) : begin(begin), cur(begin), end(end) { }
 
     bool more() override {
-        return cur < end - 1;
+        if(begun_) {
+            return cur < end - 1;
+        } else {
+            return cur < end;
+        }
     }
 
     void next() override {
@@ -40,6 +57,8 @@ public:
             throw std::runtime_error{"next() has not been called. call more()&&next()"};
         }
 
+        //Exception for text::UnknownDataTypeContainer, as we would return a 
+        //container in a container, which is not desirable.
         return text::make_data(*cur);
     }
 
@@ -54,6 +73,14 @@ private:
     std::vector<T>::const_iterator cur;
 };
 
+} /* anonymous */
+
+/**
+ * struct vector_iterator - IteratorProvider class implementation for a 
+ * std::vector holding any type.
+ *
+ * @tparam T Contents of the vector.
+ */
 template<typename T>
 struct vector_iterator : public SIPLUS_NAMESPACE::text::IteratorProvider {
     std::unique_ptr<text::Iterator> iterator(const text::UnknownDataTypeContainer &value) override {
@@ -68,7 +95,7 @@ struct vector_iterator : public SIPLUS_NAMESPACE::text::IteratorProvider {
     }
 };
 
-}
-}
+} /* stl */
+} /* SIPLUS_NAMESPACE */
 
-#endif  // INCLUDE_INTERNAL_VECTOR_ITERATOR_PROVIDER_H_
+#endif  // INCLUDE_ITERATORS_VECTOR_ITERATOR_PROVIDER_H_

@@ -48,8 +48,7 @@ template<>
 bool conversion_equal<double>(double first, double second);
 
 template<typename T, typename V, typename To> requires std::is_base_of_v<SIPlus::text::Converter, T>
-int test_conversion(V&& val, To&& result) {
-    T converter;
+int test_conversion(const T& converter, const V& val, const To& result) {
     SIPlus::text::UnknownDataTypeContainer container;
 
     if(converter.can_convert(typeid(V), typeid(To))) {
@@ -75,6 +74,12 @@ int test_conversion(V&& val, To&& result) {
             << ". Recieved " << get_type_name(container.type) << std::endl;
         return 1;
     }
+}
+
+template<typename T, typename V, typename To> requires std::is_base_of_v<SIPlus::text::Converter, T>
+int test_conversion(const V& val, const To& result) {
+    T converter;
+    return test_conversion<T, V, To>(converter, val, result);
 }
 
 template<typename T>
@@ -111,9 +116,14 @@ inline std::string get_value_str(SIPLUS_NAMESPACE::text::UnknownDataTypeContaine
 }
 
 template<typename T>
-int test_expression(std::string expression, T value) {
+int test_expression(const std::string& expression, const T& expected) {
+    return test_expression(expression, test_data{}, expected);
+}
+
+template<typename T, typename V>
+int test_expression(const std::string& expression, const V& data, const T& expected) {
     auto retriever = get_test_context().get_expression(expression);
-    auto result = retriever->retrieve(SIPlus::text::make_data(test_data()));
+    auto result = retriever->retrieve(SIPLUS_NAMESPACE::text::make_data(data));
 
     if(!result.template is<T>()) {
         std::cout << "Expression \"" << expression << "\" failed: Expected type " 
@@ -122,10 +132,10 @@ int test_expression(std::string expression, T value) {
         return 1;
     }
 
-    if(!test_expression_compare<T>::compare(result.template as<T>(), value)) {
+    if(!test_expression_compare<T>::compare(result.template as<T>(), expected)) {
         std::cout 
             << "Expression \"" << expression << "\" failed: Expected " 
-            << get_type_name(typeid(T)) << " " << to_string(value) 
+            << get_type_name(typeid(T)) << " " << to_string(expected) 
             << " recieved value " 
             << get_type_name(result.type) << " " << get_value_str(result)
             << "." << std::endl;

@@ -21,7 +21,6 @@ struct operator_impl {
     ) = 0;
 
     virtual bool can_handle(std::type_index lhs, std::type_index rhs) const = 0;
-    bool btcache_can_handle(std::type_index lhs, std::type_index rhs);
 
     virtual ~operator_impl() = default;
 };
@@ -46,7 +45,7 @@ struct converting_operator_function : Function {
 
 private:
     std::weak_ptr<SIPlusParserContext> context_;
-    internal::BinaryTypeCache<operator_impl, &operator_impl::btcache_can_handle> cache_;
+    internal::BinaryTypeCache<operator_impl, &operator_impl::can_handle> cache_;
 };
 
 } /* stl */

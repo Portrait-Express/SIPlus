@@ -11,7 +11,7 @@
 namespace SIPLUS_NAMESPACE {
 namespace internal {
 
-template<typename T, bool (T::*Handle)(std::type_index, std::type_index) = T::can_handle>
+template<typename T, bool (T::*Handle)(std::type_index, std::type_index) const = T::can_handle>
 struct BinaryTypeCache {
     using iterator = std::list<std::shared_ptr<T>>::iterator;
     using const_iterator = std::list<std::shared_ptr<T>>::const_iterator;

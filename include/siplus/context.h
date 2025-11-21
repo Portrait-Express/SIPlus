@@ -35,21 +35,21 @@ public:
      *
      * @param[int] name The name of the function to find.
      */
-    Function& function(const std::string& name);
+    Function& function(const std::string& name) const;
 
     /**
      * @brief Finds a property accessor for the container passed in. Throws if none found.
      *
      * @param[in] value The container to get an accessor for.
      */
-    std::shared_ptr<text::Accessor> accessor(const text::UnknownDataTypeContainer& value);
+    std::shared_ptr<text::Accessor> accessor(const text::UnknownDataTypeContainer& value) const;
 
     /**
      * @brief Gets the `IteratorProvider` for the type held in the container. Throws if none found.
      *
      * @param[in] value The container's type to check
      */
-    std::shared_ptr<text::IteratorProvider> iterator(const text::UnknownDataTypeContainer& value);
+    std::shared_ptr<text::IteratorProvider> iterator(const text::UnknownDataTypeContainer& value) const;
 
     /**
      * @brief Tries to find a converter aboe to convert from `from` to `to`. If no usable
@@ -58,7 +58,7 @@ public:
      * @param[in] from The type to convert from
      * @param[in] to The type to convert to
      */
-    std::shared_ptr<text::Converter> converter(std::type_index from, std::type_index to);
+    std::shared_ptr<text::Converter> converter(std::type_index from, std::type_index to) const;
 
     /**
      * @brief Tries to find a converter aboe to convert from `from` to `to`. Returned 
@@ -77,7 +77,7 @@ public:
      * @param[in] from The type to convert from
      * @param[in] to The type to convert to
      */
-    std::shared_ptr<text::Converter> try_converter(std::type_index from, std::type_index to);
+    std::shared_ptr<text::Converter> try_converter(std::type_index from, std::type_index to) const;
 
     /**
      * @brief Tries to find a converter able to convert from `from` to `to`. If no usable
@@ -88,7 +88,7 @@ public:
      */
     template<typename T, typename _T = std::remove_cvref_t<T>>
     std::shared_ptr<text::Converter> 
-    converter(const text::UnknownDataTypeContainer& from) { 
+    converter(const text::UnknownDataTypeContainer& from) const { 
         return converter(from.type, typeid(_T)); 
     }
 
@@ -111,7 +111,7 @@ public:
      */
     template<typename T>
     std::shared_ptr<text::Converter> 
-    try_converter(const text::UnknownDataTypeContainer& from) { 
+    try_converter(const text::UnknownDataTypeContainer& from) const { 
         return try_converter(from.type, typeid(T));
     }
 
@@ -123,7 +123,7 @@ public:
      */
     template<typename To, typename _T = std::remove_cvref_t<To>>
     text::UnknownDataTypeContainer 
-    convert(text::UnknownDataTypeContainer from) {
+    convert(text::UnknownDataTypeContainer from) const {
         return convert(from, typeid(_T));
     }
 
@@ -134,7 +134,7 @@ public:
      * @param[in] to The type to convert to
      */
     text::UnknownDataTypeContainer 
-    convert(text::UnknownDataTypeContainer from, std::type_index to) {
+    convert(text::UnknownDataTypeContainer from, std::type_index to) const {
         if(from.type == to) return from;
         return converter(from.type, to)->convert(from, to);
     }
@@ -168,8 +168,8 @@ public:
 
 private:
     //accessing caches
-    std::unordered_map<std::type_index, std::shared_ptr<text::Accessor>> accessors_cache_;
-    std::unordered_map<std::type_index, std::shared_ptr<text::IteratorProvider>> iterators_cache_;
+    mutable std::unordered_map<std::type_index, std::shared_ptr<text::Accessor>> accessors_cache_;
+    mutable std::unordered_map<std::type_index, std::shared_ptr<text::IteratorProvider>> iterators_cache_;
     internal::BinaryTypeCache<text::Converter, &text::Converter::can_convert> converters_;
 
     //storage

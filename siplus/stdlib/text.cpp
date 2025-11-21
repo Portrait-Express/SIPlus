@@ -1,4 +1,4 @@
-#include "util.h"
+#include "siplus/util.h"
 
 #include <algorithm>
 #include <cctype>
@@ -13,6 +13,20 @@ namespace SIPLUS_NAMESPACE {
 namespace stl {
 
 namespace {
+
+struct str_impl : public text::ValueRetriever {
+    str_impl(
+        std::shared_ptr<text::ValueRetriever> param,
+        std::weak_ptr<SIPlusParserContext> context
+    ) : param_(param), context_(context) {}
+
+    text::UnknownDataTypeContainer 
+    retrieve(const text::UnknownDataTypeContainer& value) const override;
+
+private:
+    std::weak_ptr<SIPlusParserContext> context_;
+    std::shared_ptr<text::ValueRetriever> param_;
+};
 
 struct replace_function_impl : text::ValueRetriever {
     replace_function_impl(
@@ -112,11 +126,27 @@ private:
 
 } /* anonymous */
 
+std::shared_ptr<text::ValueRetriever> 
+str_func::value(
+    std::shared_ptr<text::ValueRetriever> parent, 
+    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+) const {
+    auto [input] = util::get_parameters_first_parent<1>(parent, parameters);
+    return std::make_shared<str_impl>(input, context_);
+}
+
+text::UnknownDataTypeContainer 
+str_impl::retrieve(const text::UnknownDataTypeContainer& value) const {
+    auto ctx = context_.lock();
+    auto val = param_->retrieve(value);
+    return ctx->convert<std::string>(val);
+}
+
 std::shared_ptr<text::ValueRetriever> replace_function::value(
     std::shared_ptr<text::ValueRetriever> parent,
     std::vector<std::shared_ptr<text::ValueRetriever>> parameters
 ) const {
-    auto [input, target, value] = detail::get_parameters_first_parent<3>(parent, parameters);
+    auto [input, target, value] = util::get_parameters_first_parent<3>(parent, parameters);
     return std::make_shared<replace_function_impl>(ctx_, input, target, value);
 }
 
@@ -142,7 +172,7 @@ std::shared_ptr<text::ValueRetriever> pad_end_function::value(
     std::shared_ptr<text::ValueRetriever> parent,
     std::vector<std::shared_ptr<text::ValueRetriever>> parameters
 ) const {
-    auto [input, length, padding] = detail::get_parameters_first_parent<3>(parent, parameters);
+    auto [input, length, padding] = util::get_parameters_first_parent<3>(parent, parameters);
     return std::make_shared<pad_end_impl>(ctx_, input, length, padding);
 }
 
@@ -170,7 +200,7 @@ std::shared_ptr<text::ValueRetriever> pad_start_function::value(
     std::shared_ptr<text::ValueRetriever> parent,
     std::vector<std::shared_ptr<text::ValueRetriever>> parameters
 ) const {
-    auto [input, length, padding] = detail::get_parameters_first_parent<3>(parent, parameters);
+    auto [input, length, padding] = util::get_parameters_first_parent<3>(parent, parameters);
     return std::make_shared<pad_start_impl>(ctx_, input, length, padding);
 }
 
@@ -202,7 +232,7 @@ std::shared_ptr<text::ValueRetriever> trim_function::value(
     std::shared_ptr<text::ValueRetriever> parent,
     std::vector<std::shared_ptr<text::ValueRetriever>> parameters
 ) const {
-    auto [input] = detail::get_parameters_first_parent<1>(parent, parameters);
+    auto [input] = util::get_parameters_first_parent<1>(parent, parameters);
     return std::make_shared<trim_impl>(ctx_, input);
 }
 
@@ -226,7 +256,7 @@ std::shared_ptr<text::ValueRetriever> upper_function::value(
     std::shared_ptr<text::ValueRetriever> parent,
     std::vector<std::shared_ptr<text::ValueRetriever>> parameters
 ) const {
-    auto [input] = detail::get_parameters_first_parent<1>(parent, parameters); 
+    auto [input] = util::get_parameters_first_parent<1>(parent, parameters); 
     return std::make_shared<upper_impl>(ctx_, input);
 }
 
@@ -246,7 +276,7 @@ std::shared_ptr<text::ValueRetriever> lower_function::value(
     std::shared_ptr<text::ValueRetriever> parent,
     std::vector<std::shared_ptr<text::ValueRetriever>> parameters
 ) const {
-    auto [input] = detail::get_parameters_first_parent<1>(parent, parameters);
+    auto [input] = util::get_parameters_first_parent<1>(parent, parameters);
     return std::make_shared<lower_impl>(ctx_, input);
 }
 

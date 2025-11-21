@@ -5,17 +5,9 @@
 
 #ifdef SIPLUS_INCLUDE_STDLIB
 
-#include "siplus/context.h"
-
 #include "siplus/stl/converters/numeric.h"
-
-namespace SIPLUS_NAMESPACE {
-namespace stl {
-    
-void attach_stl_converters(SIPlusParserContext& context);
-
-} /* stl */
-} /* SIPLUS_NAMESPACE */
+#include "siplus/stl/converters/bool_string.h"
+#include "siplus/stl/converters/string_bool.h"
 
 #endif  // SIPLUS_INCLUDE_STDLIB
 
