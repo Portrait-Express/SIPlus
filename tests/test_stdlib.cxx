@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cfloat>
+#include <vector>
 
 #include "siplus/parser.h"
 #include "siplus/stl/converters.h"
@@ -187,6 +188,26 @@ int test_lower() {
         return tests(
             test_expression<std::string>(R"("Test" | lower)", "test"),
             test_expression<std::string>(R"("" | lower)", "")
+        );
+    });
+}
+
+int test_split() { 
+    return test("split", [](const Parser& parser) {
+        return tests(
+            test_expression<std::vector<std::string>>(R"("2.2.1" | split ".")", {"2", "2", "1"}),
+            test_expression<std::vector<std::string>>(R"("test" | split "")", {"t","e","s","t"}),
+            test_expression<std::vector<std::string>>(R"("banana and orange" | split "and")", {"banana", "orange"}),
+            test_expression<std::vector<std::string>>(R"("" | split "value")", {})
+        );
+    });
+}
+
+int test_substr() { 
+    return test("substr", [](const Parser& parser) {
+        return tests(
+            test_expression<std::string>(R"("abcd" | substr 2 4)", "cd"),
+            test_expression<std::string>(R"("Johnathan" | substr 4)", "John")
         );
     });
 }

@@ -124,6 +124,40 @@ private:
     std::shared_ptr<text::ValueRetriever> input_;
 };
 
+struct split_impl : text::ValueRetriever {
+    split_impl(
+        std::weak_ptr<SIPlusParserContext> ctx,
+        std::shared_ptr<text::ValueRetriever> input,
+        std::shared_ptr<text::ValueRetriever> delim
+    ) : ctx_(ctx), input_(input), delimiter_(delim) { }
+
+    text::UnknownDataTypeContainer 
+    retrieve(const text::UnknownDataTypeContainer& value) const override;
+
+private:
+    std::weak_ptr<SIPlusParserContext> ctx_;
+    std::shared_ptr<text::ValueRetriever> input_;
+    std::shared_ptr<text::ValueRetriever> delimiter_;
+};
+
+struct substr_impl : text::ValueRetriever {
+    substr_impl(
+        std::weak_ptr<SIPlusParserContext> ctx,
+        std::shared_ptr<text::ValueRetriever> input,
+        std::shared_ptr<text::ValueRetriever> begin,
+        std::shared_ptr<text::ValueRetriever> end
+    ) : ctx_(ctx), input_(input), begin_(begin), end_(end) { }
+
+    text::UnknownDataTypeContainer 
+    retrieve(const text::UnknownDataTypeContainer& value) const override;
+
+private:
+    std::weak_ptr<SIPlusParserContext> ctx_;
+    std::shared_ptr<text::ValueRetriever> input_;
+    std::shared_ptr<text::ValueRetriever> begin_;
+    std::shared_ptr<text::ValueRetriever> end_;
+};
+
 } /* anonymous */
 
 std::shared_ptr<text::ValueRetriever> 
@@ -290,6 +324,63 @@ lower_impl::retrieve(const text::UnknownDataTypeContainer& value) const {
     });
 
     return text::make_data(str);
+}
+
+std::shared_ptr<text::ValueRetriever>
+split_function::value(
+    std::shared_ptr<text::ValueRetriever> parent,
+    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+) const {
+    auto [input, delim] = util::get_parameters_first_parent<2>(parent, parameters);
+    return std::make_shared<split_impl>(ctx_, input, delim);
+}
+
+text::UnknownDataTypeContainer
+split_impl::retrieve(const text::UnknownDataTypeContainer& value) const {
+    auto ctx = ctx_.lock();
+    auto input_val = input_->retrieve(value);
+    auto delimiter_val = delimiter_->retrieve(value);
+    auto delimiter = ctx->convert<std::string>(delimiter_val).as<std::string>();
+    auto text = ctx->convert<std::string>(input_val).as<std::string>();
+
+    std::vector<std::string> ret;
+    auto last = 0;
+    auto idx = text.find(delimiter);
+    while(idx != std::string::npos && idx != text.size()) {
+        std::string substr = text.substr(last, idx);
+        ret.push_back(substr);
+
+        last = idx;
+        idx = text.find(delimiter, idx+delimiter.size());
+    }
+
+    return text::make_data(ret);
+}
+
+std::shared_ptr<text::ValueRetriever>
+substr_function::value(
+    std::shared_ptr<text::ValueRetriever> parent,
+    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+) const {
+    auto [input, begin, end] = util::get_parameters_first_parent<2, 1>(parent, parameters);
+    return std::make_shared<substr_impl>(ctx_, input, begin, end);
+}
+
+text::UnknownDataTypeContainer
+substr_impl::retrieve(const text::UnknownDataTypeContainer& value) const {
+    auto ctx = ctx_.lock();
+    text::UnknownDataTypeContainer input_val = input_->retrieve(value);
+    text::UnknownDataTypeContainer begin_val = begin_->retrieve(value);
+    std::string input = ctx->convert<std::string>(input_val).as<std::string>();
+    long begin = ctx->convert<long>(begin_val).as<long>();
+    long end = input.size();
+
+    if(end_) {
+        text::UnknownDataTypeContainer end_val = end_->retrieve(value);
+        end = ctx->convert<long>(end_val).as<long>();
+    }
+
+    return text::make_data(input.substr(begin, end));
 }
 
 text::UnknownDataTypeContainer string_concatenator::invoke(

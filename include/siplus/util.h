@@ -13,6 +13,23 @@
 #include <cxxabi.h>
 #endif
 
+template<typename T>
+std::stringstream& operator<<(std::stringstream& out, const std::vector<T>& val) {
+    out << '{';
+
+    for(int i = 0; i < val.size(); i++) {
+        out << '"' << val[i] << '"';
+        
+        if(i < val.size() - 1) {
+            out << ", ";
+        }
+    }
+
+    out << '}';
+
+    return out;
+}
+
 template<typename ...Ts>
 std::string to_string(const Ts&... value) {
     std::stringstream ss;
@@ -42,48 +59,78 @@ namespace util {
 
 namespace detail {
 
-template<size_t N, size_t I, int O, typename... Ts>
-auto constexpr get_parameters_first_parent_set(
+template<size_t A, size_t B>
+auto constexpr tmin() {
+    if constexpr (A < B) {
+        return A;
+    } else {
+        return B;
+    }
+}
+
+template<
+    size_t N, 
+    size_t __TupleStart, 
+    size_t __CurrentIndex = 0, 
+    typename... Ts
+>
+std::tuple<Ts...> constexpr get_parameters_first_parent_set(
     std::tuple<Ts...>& tuple,
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    const std::vector<std::shared_ptr<text::ValueRetriever>>& parameters
 ) {
-    if constexpr (N - I == 0) {
+    if constexpr (__CurrentIndex >= N) {
         return tuple;
     } else {
-        std::get<I>(tuple) = parameters[I + O];
-        return get_parameters_first_parent_set<N, I + 1, O>(tuple, parameters);
+        if(__CurrentIndex < parameters.size()) {
+            std::get<__TupleStart + __CurrentIndex>(tuple) = parameters[__CurrentIndex];
+        }
+        return get_parameters_first_parent_set<N, __TupleStart, __CurrentIndex + 1>(tuple, parameters);
     }
 }
 
 template<size_t, typename T>
 using T_ = T;
 
-template<size_t N, size_t... I>
-auto constexpr get_parameters_first_parent_(
-    std::shared_ptr<text::ValueRetriever> parent,
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters,
+template<size_t N, size_t NO, size_t... I>
+std::tuple<T_<I, std::shared_ptr<text::ValueRetriever>>...> 
+constexpr get_parameters_first_parent_(
+    const std::shared_ptr<text::ValueRetriever>& parent,
+    const std::vector<std::shared_ptr<text::ValueRetriever>>& parameters,
     std::index_sequence<I...> p
 ) {
     std::tuple<T_<I, std::shared_ptr<text::ValueRetriever>>...> tuple;
+    size_t num_params = parameters.size();
 
     if(parent) {
         std::get<0>(tuple) = parent;
 
-        if(parameters.size() != N - 1) {
+        if(num_params < N - 1) {
             std::stringstream ss;
-            ss << "Expected " << N << " parameters. Got " << parameters.size()+1;
+            ss << "Expected at least " << N << " parameters. Got " << num_params+1;
             throw std::runtime_error{ss.str()};
         }
 
-        return get_parameters_first_parent_set<N, 1, -1>(tuple, parameters);
+        if(num_params > N + NO - 1) {
+            std::stringstream ss;
+            ss << "Expected at most " << N + NO << " parameters. Got " << num_params+1;
+            throw std::runtime_error{ss.str()};
+        }
+
+        return get_parameters_first_parent_set<N + NO - 1, 1>(tuple, parameters);
     } else {
-        if(parameters.size() != N) {
+        if(num_params < N) {
             std::stringstream ss;
-            ss << "Expected " << N << " parameters. Got " << parameters.size();
+            ss << "Expected at least " << N << " parameters. Got " << num_params;
             throw std::runtime_error{ss.str()};
         }
 
-        return get_parameters_first_parent_set<N, 0, 0>(tuple, parameters);
+        if(num_params > N + NO) {
+            std::stringstream ss;
+            ss << "Expected at most " << N + NO << " parameters. Got " << num_params;
+            throw std::runtime_error{ss.str()};
+        }
+
+        return get_parameters_first_parent_set<N + NO, 0>(tuple, parameters);
     }
 }
 
@@ -124,31 +171,16 @@ text::UnknownDataTypeContainer as_base(
  * @endcode
  *
  * @tparam N The number of parameters you expect.
+ * @tparam NO The number of optional parameters that can be specified after the last parameter.
  * @param[in] parent The parent passed to Function::value
  * @param[in] parameters The parameters passed to Function::value
  */
-template<size_t N>
+template<size_t N, size_t NO = 0>
 auto constexpr get_parameters_first_parent(
-    std::shared_ptr<text::ValueRetriever> parent,
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    const std::shared_ptr<text::ValueRetriever>& parent,
+    const std::vector<std::shared_ptr<text::ValueRetriever>>& parameters
 ) {
-    if constexpr (N < 2) {
-        std::tuple<std::shared_ptr<text::ValueRetriever>> tuple;
-
-        if(parent) {
-            std::get<0>(tuple) = parent;
-        } else {
-            if(parameters.size() != 1) {
-                throw std::runtime_error{"Expected one parameter."};
-            }
-
-            std::get<0>(tuple) = parameters[0];
-        }
-
-        return tuple;
-    } else {
-        return detail::get_parameters_first_parent_<N>(parent, parameters, std::make_index_sequence<N>());
-    }
+    return detail::get_parameters_first_parent_<N, NO>(parent, parameters, std::make_index_sequence<N+NO>());
 }
 
 } /* stl */

@@ -114,6 +114,30 @@ private:
     std::weak_ptr<SIPlusParserContext> ctx_;
 };
 
+struct split_function : Function {
+    split_function(std::weak_ptr<SIPlusParserContext> context) : ctx_(context) {}
+
+    std::shared_ptr<text::ValueRetriever> value(
+        std::shared_ptr<text::ValueRetriever> parent,
+        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    ) const override;
+
+private:
+    std::weak_ptr<SIPlusParserContext> ctx_;
+};
+
+struct substr_function : Function {
+    substr_function(std::weak_ptr<SIPlusParserContext> context) : ctx_(context) {}
+
+    std::shared_ptr<text::ValueRetriever> value(
+        std::shared_ptr<text::ValueRetriever> parent,
+        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    ) const override;
+
+private:
+    std::weak_ptr<SIPlusParserContext> ctx_;
+};
+
 struct string_concatenator : operator_impl {
     text::UnknownDataTypeContainer 
     invoke(
