@@ -144,3 +144,22 @@ int test_expression(const std::string& expression, const V& data, const T& expec
 
     return 0;
 }
+
+template<typename V>
+int test_interpolation(const std::string& expression, const V& data, const std::string& expected) {
+    auto retriever = get_test_context().get_interpolation(expression);
+    auto result = retriever.construct_with(SIPLUS_NAMESPACE::text::make_data(data));
+
+    if(result != expected) {
+        std::cout 
+            << "Expression \"" << expression << "\" failed: Expected \"" 
+            << expected << "\" " << " recieved value \"" << result << "\"." << std::endl;
+        return 1;
+    }
+
+    return 0;
+}
+
+inline int test_interpolation(const std::string& expression, const std::string& expected) {
+    return test_interpolation<test_data>(expression, test_data{}, expected);
+}

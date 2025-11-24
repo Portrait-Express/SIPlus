@@ -374,4 +374,3 @@ int test_stdlib(int, char**) {
     });
     return res;
 }
-

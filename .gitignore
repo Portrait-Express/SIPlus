@@ -1,5 +1,5 @@
 .cache
-build
+uild
 compile_commands.json
 dist
 include/siplus/config.h

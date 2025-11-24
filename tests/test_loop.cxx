@@ -5,8 +5,11 @@
 
 int test_loop(int, char**) {
     return test("Looping statement", [](const SIPlus::Parser& parser) {
-        auto constructor = parser.get_interpolation("{# .users } Id { .id } is { .username } - { .email } {//}");
-        std::cout << constructor.construct(test_data{}) << std::endl;
+        return tests(
+            test_interpolation(
+                "{# .users } Id { .id } is { .username } - { .email } {//}",
+                " Id 1 is root - root@example.com  Id 2 is Admin - admin@example.com ")
+        );
 
         return 0;
     });
