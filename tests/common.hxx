@@ -1,5 +1,6 @@
 #include <cassert>
 #include <cfloat>
+#include <chrono>
 #include <iostream>
 
 #include "siplus/parser.h"
@@ -103,16 +104,16 @@ struct test_expression_compare<double> {
     }
 };
 
-inline std::string get_value_str(SIPLUS_NAMESPACE::text::UnknownDataTypeContainer val) {
-    if(val.is<double>()) {
-        return to_string(val.as<double>());
-    } else if(val.is<float>()) {
-        return to_string(val.as<float>());
-    } else if(val.is<std::string>()) {
-        return val.as<std::string>();
-    } else {
-        return "<unknown>";
+template<typename T>
+struct stringifier {
+    static std::string to_string(const T& val) {
+        return ::to_string(val);
     }
+};
+
+template<typename T>
+inline std::string get_value_str(SIPLUS_NAMESPACE::text::UnknownDataTypeContainer val) {
+    return stringifier<T>::to_string(val.as<T>());
 }
 
 template<typename T>
@@ -137,7 +138,7 @@ int test_expression(const std::string& expression, const V& data, const T& expec
             << "Expression \"" << expression << "\" failed: Expected " 
             << get_type_name(typeid(T)) << " " << to_string(expected) 
             << " recieved value " 
-            << get_type_name(result.type) << " " << get_value_str(result)
+            << get_type_name(result.type) << " " << get_value_str<T>(result)
             << "." << std::endl;
         return 1;
     }

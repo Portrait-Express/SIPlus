@@ -3,7 +3,6 @@
 
 #include "siplus/context.h"
 #include "siplus/text/data.h"
-#include <iostream>
 #include <memory>
 #include <sstream>
 #include <typeindex>

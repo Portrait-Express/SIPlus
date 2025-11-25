@@ -197,8 +197,8 @@ int test_split() {
         return tests(
             test_expression<std::vector<std::string>>(R"("2.2.1" | split ".")", {"2", "2", "1"}),
             test_expression<std::vector<std::string>>(R"("test" | split "")", {"t","e","s","t"}),
-            test_expression<std::vector<std::string>>(R"("banana and orange" | split "and")", {"banana", "orange"}),
-            test_expression<std::vector<std::string>>(R"("" | split "value")", {})
+            test_expression<std::vector<std::string>>(R"("banana and orange" | split " and ")", {"banana", "orange"}),
+            test_expression<std::vector<std::string>>(R"("" | split "value")", {""})
         );
     });
 }
@@ -207,7 +207,7 @@ int test_substr() {
     return test("substr", [](const Parser& parser) {
         return tests(
             test_expression<std::string>(R"("abcd" | substr 2 4)", "cd"),
-            test_expression<std::string>(R"("Johnathan" | substr 4)", "John")
+            test_expression<std::string>(R"("Johnathan" | substr 4)", "athan")
         );
     });
 }
@@ -343,6 +343,8 @@ int test_functions() {
             test_trim(),
             test_lower(),
             test_upper(),
+            test_split(),
+            test_substr(),
 
             test_cmp(),
             test_lt(),

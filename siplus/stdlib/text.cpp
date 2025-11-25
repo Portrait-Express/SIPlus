@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cstring>
+#include <iostream>
 
 #include "siplus/config.h"
 #include "siplus/text/data.h"
@@ -346,12 +347,19 @@ split_impl::retrieve(const text::UnknownDataTypeContainer& value) const {
     std::vector<std::string> ret;
     auto last = 0;
     auto idx = text.find(delimiter);
-    while(idx != std::string::npos && idx != text.size()) {
-        std::string substr = text.substr(last, idx);
-        ret.push_back(substr);
+    while(idx != std::string::npos) {
+        if(idx != last)  {
+            std::string substr = text.substr(last, idx-last);
+            ret.push_back(substr);
+        }
 
-        last = idx;
-        idx = text.find(delimiter, idx+delimiter.size());
+        last = idx + delimiter.size();
+        idx = text.find(delimiter, idx + std::max<size_t>(delimiter.size(), 1));
+    }
+
+    if(text.empty() || (idx != last && text.size() - last != 0)) {
+        std::string substr = text.substr(last, text.size() - last);
+        ret.push_back(substr);
     }
 
     return text::make_data(ret);

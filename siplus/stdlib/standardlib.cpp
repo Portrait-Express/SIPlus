@@ -1,3 +1,4 @@
+#include "siplus/stl/functions/text.h"
 #include "siplus/stl/functions/typed_operator.h"
 #include "siplus/text/data.h"
 #include "siplus/text/value_retrievers/retriever.h"
@@ -142,6 +143,8 @@ void attach_stl(SIPlusParserContext& context) {
     context.emplace_function<trim_function>("trim", context.shared_from_this());
     context.emplace_function<upper_function>("upper", context.shared_from_this());
     context.emplace_function<lower_function>("lower", context.shared_from_this());
+    context.emplace_function<split_function>("split", context.shared_from_this());
+    context.emplace_function<substr_function>("substr", context.shared_from_this());
 }
 
 } /* stl */
