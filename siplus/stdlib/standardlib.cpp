@@ -106,12 +106,6 @@ void attach_stl(SIPlusParserContext& context) {
     context.emplace_function<map_func>("map", context.shared_from_this());
     context.emplace_function<length_func>("length", context.shared_from_this());
     context.emplace_function<join_func>("join", context.shared_from_this());
-    context.emplace_iterator<vector_iterator<long>>(); //base type iterators
-    context.emplace_iterator<vector_iterator<int>>();
-    context.emplace_iterator<vector_iterator<short>>();
-    context.emplace_iterator<vector_iterator<double>>();
-    context.emplace_iterator<vector_iterator<float>>();
-    context.emplace_iterator<vector_iterator<std::string>>();
     context.emplace_iterator<vector_iterator<text::UnknownDataTypeContainer>>();
     context.emplace_iterator<string_iterator>();
 

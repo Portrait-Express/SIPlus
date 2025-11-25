@@ -344,13 +344,13 @@ split_impl::retrieve(const text::UnknownDataTypeContainer& value) const {
     auto delimiter = ctx->convert<std::string>(delimiter_val).as<std::string>();
     auto text = ctx->convert<std::string>(input_val).as<std::string>();
 
-    std::vector<std::string> ret;
+    std::vector<text::UnknownDataTypeContainer> ret;
     auto last = 0;
     auto idx = text.find(delimiter);
     while(idx != std::string::npos) {
         if(idx != last)  {
             std::string substr = text.substr(last, idx-last);
-            ret.push_back(substr);
+            ret.push_back(text::make_data(substr));
         }
 
         last = idx + delimiter.size();
@@ -359,7 +359,7 @@ split_impl::retrieve(const text::UnknownDataTypeContainer& value) const {
 
     if(text.empty() || (idx != last && text.size() - last != 0)) {
         std::string substr = text.substr(last, text.size() - last);
-        ret.push_back(substr);
+        ret.push_back(text::make_data(substr));
     }
 
     return text::make_data(ret);

@@ -2,7 +2,7 @@
 
 #include "siplus/context.h"
 #include "siplus/function.h"
-#include "siplus/text/data.h"
+#include "siplus/text/text.h"
 #include "siplus/util.h"
 
 #ifdef SIPLUS_INCLUDE_STDLIB
@@ -37,7 +37,7 @@ SIPlusParserContext::accessor(const text::UnknownDataTypeContainer& value) const
         }
     }
 
-    throw std::runtime_error{"No accessor available able to handle " + get_type_name(value.type)};
+    throw std::runtime_error{"No accessor available able to handle " + text::get_type_name(value.type)};
 }
 
 
@@ -56,7 +56,7 @@ SIPlusParserContext::iterator(const text::UnknownDataTypeContainer& value) const
     }
 
     throw std::runtime_error{"No iterator provider available able to iterate " 
-        + get_type_name(value.type)};
+        + text::get_type_name(value.type)};
 }
 
 
@@ -66,7 +66,7 @@ SIPlusParserContext::converter(std::type_index from, std::type_index to) const {
 
     if(!ret) {
         throw std::runtime_error{"No converter available to convert from " 
-            + get_type_name(from) + " to " + get_type_name(to)};
+            + text::get_type_name(from) + " to " + text::get_type_name(to)};
     }
 
     return ret;

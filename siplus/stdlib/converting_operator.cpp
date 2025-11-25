@@ -1,5 +1,6 @@
 #include "siplus/stl/functions/converting_operator.h"
 #include "siplus/text/data.h"
+#include "siplus/text/text.h"
 #include "siplus/text/value_retrievers/retriever.h"
 #include "siplus/util.h"
 #include <memory>
@@ -89,7 +90,7 @@ converting_operator_impl::retrieve(const text::UnknownDataTypeContainer& value) 
 
     } else {
         throw std::runtime_error{"Unsure how to operate on " + 
-            get_type_name(lhs.type) + " and " + get_type_name(rhs.type)};
+            text::get_type_name(lhs.type) + " and " + text::get_type_name(rhs.type)};
     }
 }
 

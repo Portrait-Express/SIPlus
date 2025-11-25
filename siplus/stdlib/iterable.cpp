@@ -5,7 +5,6 @@
 #include "siplus/stl/iterators/string_iterator_provider.h"
 #include "siplus/stl/functions/iterable.h"
 #include "siplus/util.h"
-#include <iostream>
 #include <sstream>
 
 namespace SIPLUS_NAMESPACE {

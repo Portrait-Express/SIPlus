@@ -88,8 +88,7 @@ UnknownDataTypeContainer make_data(const T& value) {
     return make_data(new std::remove_cvref_t<T>(value), true);
 }
 
-
-}
-}
+} /* text */
+} /* SIPLUS_NAMESPACE */
 
 #endif

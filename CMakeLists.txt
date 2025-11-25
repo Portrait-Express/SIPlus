@@ -38,7 +38,6 @@ if(SIPLUS_INCLUDE_STDLIB)
     set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/iterable.cpp)
     set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/standardlib.cpp)
     set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/text.cpp)
-    set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/util.cpp)
 endif()
 
 add_library(siplus ${SIPLUS_SOURCES})

@@ -1,11 +1,11 @@
 #include "siplus/util.h"
 #include "siplus/context.h"
-#include "siplus/text/data.h"
+#include "siplus/text/text.h"
 #include <memory>
 #include <typeindex>
 
 namespace SIPLUS_NAMESPACE {
-namespace util {
+namespace text {
 
 bool is_numeric(std::type_index type) {
     return type == typeid(long) || type == typeid(int) || type == typeid(short)
@@ -23,9 +23,9 @@ text::UnknownDataTypeContainer as_base(
     } else if(value.is<float>()) {
         return ctx->convert<double>(value);
     } else {
-        throw std::runtime_error{"numeric_adder cannot add type " + get_type_name(value.type)};
+        throw std::runtime_error{"numeric_adder cannot add type " + text::get_type_name(value.type)};
     }
 }
 
-} /* stl */
+} /* text */
 } /* SIPLUS_NAMESPACE */

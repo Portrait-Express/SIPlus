@@ -1,71 +1,15 @@
 #ifndef INCLUDE_SIPLUS_UTIL_H_
 #define INCLUDE_SIPLUS_UTIL_H_
 
-#include "siplus/context.h"
-#include "siplus/text/data.h"
+#include "siplus/text/value_retrievers/retriever.h"
 #include <memory>
 #include <sstream>
-#include <typeindex>
-
-#ifdef __GNUG__
-#include <cstdlib>
-#include <cxxabi.h>
-#endif
-
-template<typename T>
-std::stringstream& operator<<(std::stringstream& out, const std::vector<T>& val) {
-    out << '{';
-
-    for(int i = 0; i < val.size(); i++) {
-        out << '"' << val[i] << '"';
-        
-        if(i < val.size() - 1) {
-            out << ", ";
-        }
-    }
-
-    out << '}';
-
-    return out;
-}
-
-template<typename ...Ts>
-std::string to_string(const Ts&... value) {
-    std::stringstream ss;
-    (ss << ... << value);
-    return ss.str();
-}
-
-
-inline std::string get_type_name(const std::type_index& type) {
-    std::string name{type.name()};
-
-#ifdef __GNUG__
-    int status = -2;
-    char *buf = __cxxabiv1::__cxa_demangle(name.c_str(), NULL, NULL, &status);
-    if(status == 0) {
-        name = buf;
-    }
-    std::free(buf);
-#endif
-
-    return name;
-}
-
+#include <vector>
 
 namespace SIPLUS_NAMESPACE {
 namespace util {
 
 namespace detail {
-
-template<size_t A, size_t B>
-auto constexpr tmin() {
-    if constexpr (A < B) {
-        return A;
-    } else {
-        return B;
-    }
-}
 
 template<
     size_t N, 
@@ -135,31 +79,6 @@ constexpr get_parameters_first_parent_(
 
 } /* detail */
 
-/**
- * @brief Returns true if the type is one of the recognized numeric types
- * double, float, long, int, or short
- *
- * @param type The type to check
- * @return True if the type is numeric, false otherwise
- */
-bool is_numeric(std::type_index type);
-
-/**
- * @brief Converts any numeric type to its 'base' common form. Check 
- * `is_numeric` first.
- * double -> double;
- * float -> double;
- * long -> long;
- * int -> long;
- * short -> long;
- *
- * @param ctx Context for conversion
- * @param value The value to convert.
- */
-text::UnknownDataTypeContainer as_base(
-    std::shared_ptr<const SIPlusParserContext> ctx,
-    text::UnknownDataTypeContainer       value
-);
 
 /**
  * @brief Returns a set number of parameters, using the parent as the first 
@@ -182,7 +101,14 @@ auto constexpr get_parameters_first_parent(
     return detail::get_parameters_first_parent_<N, NO>(parent, parameters, std::make_index_sequence<N+NO>());
 }
 
-} /* stl */
+template<typename ...Ts>
+std::string to_string(const Ts&... value) {
+    std::stringstream ss;
+    (ss << ... << value);
+    return ss.str();
+}
+
+} /* util */
 } /* SIPLUS_NAMESPACE */
 
 #endif  // INCLUDE_SIPLUS_UTIL_H_

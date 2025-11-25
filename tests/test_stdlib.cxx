@@ -194,11 +194,12 @@ int test_lower() {
 
 int test_split() { 
     return test("split", [](const Parser& parser) {
+        using expected = std::vector<text::UnknownDataTypeContainer>;
         return tests(
-            test_expression<std::vector<std::string>>(R"("2.2.1" | split ".")", {"2", "2", "1"}),
-            test_expression<std::vector<std::string>>(R"("test" | split "")", {"t","e","s","t"}),
-            test_expression<std::vector<std::string>>(R"("banana and orange" | split " and ")", {"banana", "orange"}),
-            test_expression<std::vector<std::string>>(R"("" | split "value")", {""})
+            test_expression<std::vector<std::string>, expected>(R"("2.2.1" | split ".")", {"2", "2", "1"}),
+            test_expression<std::vector<std::string>, expected>(R"("test" | split "")", {"t","e","s","t"}),
+            test_expression<std::vector<std::string>, expected>(R"("banana and orange" | split " and ")", {"banana", "orange"}),
+            test_expression<std::vector<std::string>, expected>(R"("" | split "value")", {""})
         );
     });
 }
