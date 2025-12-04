@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "siplus/parser.h"
-#include "siplus/stl/converters.h"
 #include "siplus/text/data.h"
 
 #include "common.hxx"
@@ -68,7 +67,8 @@ int test_length() {
         return tests(
             test_expression(". | length", std::vector{1,2,3}, 3L),
             test_expression(". | length", std::vector<int>{}, 0L),
-            test_expression(". | length", std::vector<std::string>{"1"}, 1L)
+            test_expression(". | length", std::vector<std::string>{"1"}, 1L),
+            test_expression<long, std::string>(". | length", "Hello", 5L)
         );
     });
 }
@@ -244,7 +244,9 @@ int test_eq() {
     return test("eq", [](const Parser& parser) {
         return tests(
             test_expression(R"(eq 1 1)", true),
-            test_expression(R"(eq "a" "b")", false)
+            test_expression(R"(eq "a" "b")", false),
+            test_expression(R"(eq "1" 1)", true),
+            test_expression(R"(eq 1 "1")", true)
         );
     });
 }
@@ -362,7 +364,9 @@ int test_converters() {
             test_int_converter(),
             test_float_converter(),
             test_numeric_string_converter(),
-            test_numeric_bool_converter()
+            test_numeric_bool_converter(),
+            test_string_bool_converter(),
+            test_bool_string_converter()
         );
     });
 }

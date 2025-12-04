@@ -95,6 +95,8 @@ void attach_stl(SIPlusParserContext& context) {
     //Base converters
     context.emplace_converter<int_converter>();
     context.emplace_converter<float_converter>();
+    context.emplace_converter<string_bool_converter>();
+    context.emplace_converter<bool_string_converter>();
     context.emplace_converter<numeric_string_converter>(context.shared_from_this());
     context.emplace_converter<numeric_bool_converter>(context.shared_from_this());
 

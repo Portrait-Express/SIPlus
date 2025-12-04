@@ -67,7 +67,7 @@ struct string_iterator_impl : text::Iterator {
 
 private:
     std::string value_;
-    size_t index_ = -1;
+    long index_ = -1;
 };
 
 }
@@ -185,7 +185,7 @@ std::unique_ptr<text::Iterator> string_iterator::iterator(const text::UnknownDat
 }
 
 bool string_iterator_impl::more() {
-    return index_ < (value_.size() - 1);
+    return index_ < (static_cast<long>(value_.size()) - 1);
 }
 
 void string_iterator_impl::next() {
@@ -193,7 +193,7 @@ void string_iterator_impl::next() {
 }
 
 text::UnknownDataTypeContainer string_iterator_impl::current() {
-    return text::make_data(value_[index_]);
+    return text::make_data(std::string{value_[index_]});
 }
 
 
