@@ -22,7 +22,13 @@ public:
   /**
    * Visit parse trees produced by StringInterpolatorParser.
    */
-    virtual std::any visitField(StringInterpolatorParser::FieldContext *context) = 0;
+    virtual std::any visitProperty_name(StringInterpolatorParser::Property_nameContext *context) = 0;
+
+    virtual std::any visitProperty_index(StringInterpolatorParser::Property_indexContext *context) = 0;
+
+    virtual std::any visitProperty_item(StringInterpolatorParser::Property_itemContext *context) = 0;
+
+    virtual std::any visitProperty(StringInterpolatorParser::PropertyContext *context) = 0;
 
     virtual std::any visitString(StringInterpolatorParser::StringContext *context) = 0;
 

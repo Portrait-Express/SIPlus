@@ -123,6 +123,25 @@ struct test_expression_compare<std::vector<SIPlus::text::UnknownDataTypeContaine
     }
 };
 
+template<typename T>
+struct test_expression_compare<std::vector<SIPlus::text::UnknownDataTypeContainer>, std::vector<T>> {
+    static bool compare(
+        const std::vector<SIPlus::text::UnknownDataTypeContainer>& val, 
+        const std::vector<T>& other
+    ) {
+        if(val.size() != other.size()) return false;
+
+        for(int i = 0; i < val.size(); i++) {
+            if(!val[i].is<T>()) return false;
+            if(val[i].as<T>() != other[i]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+};
+
 template<typename T1, typename T2> 
 bool compare(const T1& v1, const T2& v2) {
     return test_expression_compare<T1, T2>::compare(v1, v2);

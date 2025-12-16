@@ -10,7 +10,10 @@ superClass='SIPLUS_NAMESPACE::internal::SIParser';
 }
 
 
-field: {enableChannel(antlr4::Token::HIDDEN_CHANNEL);} DOT ( ID ( DOT ID )* )? {disableChannel(antlr4::Token::HIDDEN_CHANNEL);};
+property_name: DOT ID ;
+property_index: DOT OPENB INT CLOSEB ;
+property_item: property_name | property_index;
+property: {enableChannel(antlr4::Token::HIDDEN_CHANNEL);} DOT | property_item+ {disableChannel(antlr4::Token::HIDDEN_CHANNEL);};
 
 string: STRING_START ( STRING_TEXT | STRING_ESCAPE )* STRING_END ;
 integer: INT ;
@@ -19,7 +22,7 @@ boolean: TRUE | FALSE ;
 
 literal: string | integer | float | boolean ;
 
-argument: expr_item | OPENP piped_expression CLOSEP ;
+argument: literal | property | array | OPENP piped_expression CLOSEP ;
 arg_list: argument? ( argument )*;
 
 func: ID arg_list ;
@@ -27,7 +30,7 @@ func: ID arg_list ;
 array_item: expr | OPENP expr CLOSEP ;
 array: OPENB (array_item COMMA)* (array_item)? CLOSEB ;
 
-expr_item: literal | field | func | array ;
+expr_item: literal | property | func | array ;
 
 piped_expression: expr_item PIPE expr ;
 
@@ -48,4 +51,5 @@ interpolated_str: ( normal | stmt )* ;
 
 expression_program: expr EOF;
 program: interpolated_str EOF;
+
 

@@ -23,12 +23,13 @@ public:
   };
 
   enum {
-    RuleField = 0, RuleString = 1, RuleInteger = 2, RuleFloat = 3, RuleBoolean = 4, 
-    RuleLiteral = 5, RuleArgument = 6, RuleArg_list = 7, RuleFunc = 8, RuleArray_item = 9, 
-    RuleArray = 10, RuleExpr_item = 11, RulePiped_expression = 12, RuleExpr = 13, 
-    RuleEval = 14, RuleLoop_start = 15, RuleLoop_end = 16, RuleLoop = 17, 
-    RuleStmt = 18, RuleNormal = 19, RuleInterpolated_str = 20, RuleExpression_program = 21, 
-    RuleProgram = 22
+    RuleProperty_name = 0, RuleProperty_index = 1, RuleProperty_item = 2, 
+    RuleProperty = 3, RuleString = 4, RuleInteger = 5, RuleFloat = 6, RuleBoolean = 7, 
+    RuleLiteral = 8, RuleArgument = 9, RuleArg_list = 10, RuleFunc = 11, 
+    RuleArray_item = 12, RuleArray = 13, RuleExpr_item = 14, RulePiped_expression = 15, 
+    RuleExpr = 16, RuleEval = 17, RuleLoop_start = 18, RuleLoop_end = 19, 
+    RuleLoop = 20, RuleStmt = 21, RuleNormal = 22, RuleInterpolated_str = 23, 
+    RuleExpression_program = 24, RuleProgram = 25
   };
 
   explicit StringInterpolatorParser(antlr4::TokenStream *input);
@@ -48,7 +49,10 @@ public:
   antlr4::atn::SerializedATNView getSerializedATN() const override;
 
 
-  class FieldContext;
+  class Property_nameContext;
+  class Property_indexContext;
+  class Property_itemContext;
+  class PropertyContext;
   class StringContext;
   class IntegerContext;
   class FloatContext;
@@ -72,21 +76,64 @@ public:
   class Expression_programContext;
   class ProgramContext; 
 
-  class  FieldContext : public antlr4::ParserRuleContext {
+  class  Property_nameContext : public antlr4::ParserRuleContext {
   public:
-    FieldContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    Property_nameContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    std::vector<antlr4::tree::TerminalNode *> DOT();
-    antlr4::tree::TerminalNode* DOT(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> ID();
-    antlr4::tree::TerminalNode* ID(size_t i);
+    antlr4::tree::TerminalNode *DOT();
+    antlr4::tree::TerminalNode *ID();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
    
   };
 
-  FieldContext* field();
+  Property_nameContext* property_name();
+
+  class  Property_indexContext : public antlr4::ParserRuleContext {
+  public:
+    Property_indexContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *DOT();
+    antlr4::tree::TerminalNode *OPENB();
+    antlr4::tree::TerminalNode *INT();
+    antlr4::tree::TerminalNode *CLOSEB();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Property_indexContext* property_index();
+
+  class  Property_itemContext : public antlr4::ParserRuleContext {
+  public:
+    Property_itemContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    Property_nameContext *property_name();
+    Property_indexContext *property_index();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Property_itemContext* property_item();
+
+  class  PropertyContext : public antlr4::ParserRuleContext {
+  public:
+    PropertyContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *DOT();
+    std::vector<Property_itemContext *> property_item();
+    Property_itemContext* property_item(size_t i);
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  PropertyContext* property();
 
   class  StringContext : public antlr4::ParserRuleContext {
   public:
@@ -166,7 +213,9 @@ public:
   public:
     ArgumentContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    Expr_itemContext *expr_item();
+    LiteralContext *literal();
+    PropertyContext *property();
+    ArrayContext *array();
     antlr4::tree::TerminalNode *OPENP();
     Piped_expressionContext *piped_expression();
     antlr4::tree::TerminalNode *CLOSEP();
@@ -244,7 +293,7 @@ public:
     Expr_itemContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     LiteralContext *literal();
-    FieldContext *field();
+    PropertyContext *property();
     FuncContext *func();
     ArrayContext *array();
 

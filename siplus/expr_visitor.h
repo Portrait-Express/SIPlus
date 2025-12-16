@@ -18,7 +18,7 @@ public:
 
     std::any visitFunc(StringInterpolatorParser::FuncContext *ctx) override;
     std::any visitLiteral(StringInterpolatorParser::LiteralContext *ctx) override;
-    std::any visitField(StringInterpolatorParser::FieldContext *ctx) override;
+    std::any visitProperty(StringInterpolatorParser::PropertyContext *ctx) override;
     std::any visitArray(StringInterpolatorParser::ArrayContext *ctx) override;
 
 private:

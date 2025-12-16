@@ -18,7 +18,19 @@
 class  StringInterpolatorParserBaseVisitor : public StringInterpolatorParserVisitor {
 public:
 
-  virtual std::any visitField(StringInterpolatorParser::FieldContext *ctx) override {
+  virtual std::any visitProperty_name(StringInterpolatorParser::Property_nameContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitProperty_index(StringInterpolatorParser::Property_indexContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitProperty_item(StringInterpolatorParser::Property_itemContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitProperty(StringInterpolatorParser::PropertyContext *ctx) override {
     return visitChildren(ctx);
   }
 

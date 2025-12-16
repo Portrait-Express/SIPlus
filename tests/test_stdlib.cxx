@@ -32,33 +32,10 @@ int test_str() {
 
 int test_map() {
     return test("map", [](const Parser& parser) {
-        auto data = test_data{};
-
-        auto expr = parser.get_expression(".users | map .id");
-        auto val = expr->retrieve(text::make_data(test_data{}));
-
-        if(!val.is<std::vector<text::UnknownDataTypeContainer>>()) {
-            return 1;
-        }
-
-        const std::vector<text::UnknownDataTypeContainer>& vec = 
-            val.as<std::vector<text::UnknownDataTypeContainer>>();
-
-        if(!std::all_of(vec.begin(), vec.end(), [](text::UnknownDataTypeContainer val) {
-            return val.is<int>();
-        })) {
-            return 1;
-        }
-
-        std::vector<int> result{};
-        result.reserve(vec.size());
-
-        std::transform(vec.begin(), vec.end(), std::back_inserter(result), 
-                       [](text::UnknownDataTypeContainer val) {
-            return val.as<int>();
-        });
-
-        return result == std::vector<int>{1, 2} ? 0 : 1;
+        return tests(
+            test_expression<std::vector<int>, std::vector<text::UnknownDataTypeContainer>>(
+                R"(.users | map .id)", std::vector<int>{1,2})
+        );
     });
 }
 
