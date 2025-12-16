@@ -1,7 +1,4 @@
 
-#include "../si_parser.h"
-
-
 // Generated from StringInterpolatorParser.g4 by ANTLR 4.13.2
 
 #pragma once
@@ -12,7 +9,7 @@
 
 
 
-class  StringInterpolatorParser : public SIPLUS_NAMESPACE::internal::SIParser {
+class  StringInterpolatorParser : public antlr4::Parser {
 public:
   enum {
     NORMAL_TEXT = 1, NORMAL_ESCAPE = 2, OPEN = 3, TRUE = 4, FALSE = 5, DOT = 6, 
@@ -213,12 +210,12 @@ public:
   public:
     ArgumentContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    LiteralContext *literal();
-    PropertyContext *property();
-    ArrayContext *array();
+    Expr_itemContext *expr_item();
     antlr4::tree::TerminalNode *OPENP();
-    Piped_expressionContext *piped_expression();
     antlr4::tree::TerminalNode *CLOSEP();
+    Piped_expressionContext *piped_expression();
+    std::vector<antlr4::tree::TerminalNode *> WS();
+    antlr4::tree::TerminalNode* WS(size_t i);
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -233,6 +230,8 @@ public:
     virtual size_t getRuleIndex() const override;
     std::vector<ArgumentContext *> argument();
     ArgumentContext* argument(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> WS();
+    antlr4::tree::TerminalNode* WS(size_t i);
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -247,6 +246,8 @@ public:
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *ID();
     Arg_listContext *arg_list();
+    std::vector<antlr4::tree::TerminalNode *> WS();
+    antlr4::tree::TerminalNode* WS(size_t i);
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -262,6 +263,8 @@ public:
     ExprContext *expr();
     antlr4::tree::TerminalNode *OPENP();
     antlr4::tree::TerminalNode *CLOSEP();
+    std::vector<antlr4::tree::TerminalNode *> WS();
+    antlr4::tree::TerminalNode* WS(size_t i);
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -311,6 +314,8 @@ public:
     Expr_itemContext *expr_item();
     antlr4::tree::TerminalNode *PIPE();
     ExprContext *expr();
+    std::vector<antlr4::tree::TerminalNode *> WS();
+    antlr4::tree::TerminalNode* WS(size_t i);
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -340,6 +345,8 @@ public:
     antlr4::tree::TerminalNode *OPEN();
     ExprContext *expr();
     antlr4::tree::TerminalNode *CLOSE();
+    std::vector<antlr4::tree::TerminalNode *> WS();
+    antlr4::tree::TerminalNode* WS(size_t i);
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -356,6 +363,8 @@ public:
     antlr4::tree::TerminalNode *HASH();
     ExprContext *expr();
     antlr4::tree::TerminalNode *CLOSE();
+    std::vector<antlr4::tree::TerminalNode *> WS();
+    antlr4::tree::TerminalNode* WS(size_t i);
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -372,6 +381,8 @@ public:
     std::vector<antlr4::tree::TerminalNode *> SLASH();
     antlr4::tree::TerminalNode* SLASH(size_t i);
     antlr4::tree::TerminalNode *CLOSE();
+    std::vector<antlr4::tree::TerminalNode *> WS();
+    antlr4::tree::TerminalNode* WS(size_t i);
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -447,6 +458,8 @@ public:
     virtual size_t getRuleIndex() const override;
     ExprContext *expr();
     antlr4::tree::TerminalNode *EOF();
+    std::vector<antlr4::tree::TerminalNode *> WS();
+    antlr4::tree::TerminalNode* WS(size_t i);
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;

@@ -1,19 +1,13 @@
 parser grammar StringInterpolatorParser;
 
 options { 
-tokenVocab=StringInterpolatorLexer; 
-superClass='SIPLUS_NAMESPACE::internal::SIParser';
+tokenVocab=StringInterpolatorLexer;
 }
-
-@header {
-#include "../si_parser.h"
-}
-
 
 property_name: DOT ID ;
 property_index: DOT OPENB INT CLOSEB ;
 property_item: property_name | property_index;
-property: {enableChannel(antlr4::Token::HIDDEN_CHANNEL);} DOT | property_item+ {disableChannel(antlr4::Token::HIDDEN_CHANNEL);};
+property: DOT | property_item+ ;
 
 string: STRING_START ( STRING_TEXT | STRING_ESCAPE )* STRING_END ;
 integer: INT ;
@@ -22,34 +16,33 @@ boolean: TRUE | FALSE ;
 
 literal: string | integer | float | boolean ;
 
-argument: literal | property | array | OPENP piped_expression CLOSEP ;
-arg_list: argument? ( argument )*;
+argument: expr_item | OPENP WS* ( expr_item | piped_expression ) WS* CLOSEP ;
+arg_list: argument? ( WS+ argument )*;
 
-func: ID arg_list ;
+func: ID ( WS+ arg_list )? ;
 
-array_item: expr | OPENP expr CLOSEP ;
+array_item: WS* ( expr | OPENP WS* expr WS* CLOSEP ) WS* ;
 array: OPENB (array_item COMMA)* (array_item)? CLOSEB ;
 
 expr_item: literal | property | func | array ;
 
-piped_expression: expr_item PIPE expr ;
+piped_expression: expr_item WS* PIPE WS* expr ;
 
 expr: expr_item | piped_expression;
 
-eval: OPEN expr CLOSE ;
+eval: OPEN WS* expr WS* CLOSE ;
 
-loop_start: OPEN HASH expr CLOSE;
-loop_end: OPEN SLASH SLASH CLOSE ;
+loop_start: OPEN HASH WS* expr WS* CLOSE;
+loop_end: OPEN SLASH SLASH WS* CLOSE ;
 loop: loop_start interpolated_str loop_end;
 
-stmt: eval
-    | loop;
+stmt: eval | loop;
 
 normal: ( NORMAL_TEXT | NORMAL_ESCAPE )+ ;
 
 interpolated_str: ( normal | stmt )* ;
 
-expression_program: expr EOF;
+expression_program: WS* expr WS* EOF;
 program: interpolated_str EOF;
 
 

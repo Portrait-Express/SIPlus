@@ -1,5 +1,6 @@
 #include "ANTLRInputStream.h"
 #include "BaseErrorListener.h"
+#include "BufferedTokenStream.h"
 #include "ConsoleErrorListener.h"
 #include "DFA.h"
 #include "Recognizer.h"
@@ -13,7 +14,6 @@
 
 #include "parser_impl.h"
 #include "interpolation_visitor.h"
-#include "token_stream.h"
 #include <sstream>
 
 namespace SIPLUS_NAMESPACE {
@@ -135,7 +135,7 @@ ParserImpl::ParserImpl() {
 text::TextConstructor ParserImpl::get_interpolation(const std::string& text) const {
     antlr4::ANTLRInputStream stream{text};
     StringInterpolatorLexer lexer{&stream};
-    internal::MultiChannelTokenStream tokens{&lexer};
+    antlr4::BufferedTokenStream tokens{&lexer};
     StringInterpolatorParser parser{&tokens};
 
     ErrorListener errors;
@@ -154,7 +154,7 @@ text::TextConstructor ParserImpl::get_interpolation(const std::string& text) con
 std::shared_ptr<text::ValueRetriever> ParserImpl::get_expression(const std::string& text) const {
     antlr4::ANTLRInputStream stream{text};
     StringInterpolatorLexer lexer{&stream};
-    internal::MultiChannelTokenStream tokens{&lexer};
+    antlr4::BufferedTokenStream tokens{&lexer};
     StringInterpolatorParser parser{&tokens};
 
     ErrorListener errors;

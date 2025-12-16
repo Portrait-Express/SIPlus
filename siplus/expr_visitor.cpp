@@ -166,8 +166,15 @@ bool ExpressionVisitor::shouldVisitNextChild(antlr4::tree::ParseTree *node, cons
 
 std::any ExpressionVisitor::visitFunc(StringInterpolatorParser::FuncContext *ctx) {
     auto& function = context_->function(ctx->ID()->getText());
-    ArgListVisitor visitor{context_, tokens_};
-    auto val = ctx->arg_list()->accept(&visitor);
+
+    std::any val;
+    if(ctx->arg_list()) {
+        ArgListVisitor visitor{context_, tokens_};
+        val = ctx->arg_list()->accept(&visitor);
+    } else {
+        val = std::vector<std::shared_ptr<text::ValueRetriever>>{};
+    }
+
     auto args = std::any_cast<std::vector<std::shared_ptr<text::ValueRetriever>>>(val);
     value_ = function.value(value_, args);
     return value_;
@@ -203,6 +210,10 @@ std::any ExpressionVisitor::visitProperty(StringInterpolatorParser::PropertyCont
                 existing = std::make_shared<IndexValueRetriever>(context_, existing, idx);
             }
         }
+    }
+
+    if(!existing) {
+        existing = std::make_shared<DummyValueRetriever>();
     }
 
     value_ = std::static_pointer_cast<text::ValueRetriever>(existing);

@@ -16,8 +16,6 @@ file(GLOB GENERATED_SOURCES siplus/generated/*.cpp)
 
 set(SIPLUS_SOURCES 
     ${GENERATED_SOURCES}
-    siplus/token_stream.cpp
-    siplus/si_parser.cpp
     siplus/context.cpp
     siplus/data.cpp
     siplus/expr_visitor.cpp
