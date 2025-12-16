@@ -14,6 +14,9 @@ SLASH: '/' ;
 CLOSE: '}' -> mode(DEFAULT_MODE);
 OPENP: '(' ;
 CLOSEP: ')' ;
+OPENB: '[' ;
+CLOSEB: ']' ;
+COMMA: ',' ;
 PIPE: '|' ;
 BACKSLASH: '\\' ;
 STRING_START: '"' -> mode(STRING);
@@ -32,6 +35,7 @@ mode STRING;
 STRING_TEXT: ~["\\]+;
 STRING_ESCAPE: '\\' .;
 STRING_END: '"' -> mode(TEMPLATE);
+
 
 
 

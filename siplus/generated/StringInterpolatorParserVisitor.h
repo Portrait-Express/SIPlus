@@ -40,7 +40,13 @@ public:
 
     virtual std::any visitFunc(StringInterpolatorParser::FuncContext *context) = 0;
 
+    virtual std::any visitArray_item(StringInterpolatorParser::Array_itemContext *context) = 0;
+
+    virtual std::any visitArray(StringInterpolatorParser::ArrayContext *context) = 0;
+
     virtual std::any visitExpr_item(StringInterpolatorParser::Expr_itemContext *context) = 0;
+
+    virtual std::any visitPiped_expression(StringInterpolatorParser::Piped_expressionContext *context) = 0;
 
     virtual std::any visitExpr(StringInterpolatorParser::ExprContext *context) = 0;
 

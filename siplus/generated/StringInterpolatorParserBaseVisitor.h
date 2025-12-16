@@ -54,7 +54,19 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitArray_item(StringInterpolatorParser::Array_itemContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitArray(StringInterpolatorParser::ArrayContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitExpr_item(StringInterpolatorParser::Expr_itemContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitPiped_expression(StringInterpolatorParser::Piped_expressionContext *ctx) override {
     return visitChildren(ctx);
   }
 

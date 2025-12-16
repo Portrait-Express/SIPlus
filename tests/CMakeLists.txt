@@ -12,6 +12,7 @@ endif()
 add_subdirectory(util)
 
 set(TEST_SOURCES 
+    test_array.cxx
     test_expression.cxx
     test_interpolate.cxx
     test_loop.cxx

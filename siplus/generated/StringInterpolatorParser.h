@@ -16,17 +16,19 @@ class  StringInterpolatorParser : public SIPLUS_NAMESPACE::internal::SIParser {
 public:
   enum {
     NORMAL_TEXT = 1, NORMAL_ESCAPE = 2, OPEN = 3, TRUE = 4, FALSE = 5, DOT = 6, 
-    HASH = 7, SLASH = 8, CLOSE = 9, OPENP = 10, CLOSEP = 11, PIPE = 12, 
-    BACKSLASH = 13, STRING_START = 14, WS = 15, INT = 16, FLOAT = 17, ID = 18, 
-    ANY = 19, STRING_TEXT = 20, STRING_ESCAPE = 21, STRING_END = 22
+    HASH = 7, SLASH = 8, CLOSE = 9, OPENP = 10, CLOSEP = 11, OPENB = 12, 
+    CLOSEB = 13, COMMA = 14, PIPE = 15, BACKSLASH = 16, STRING_START = 17, 
+    WS = 18, INT = 19, FLOAT = 20, ID = 21, ANY = 22, STRING_TEXT = 23, 
+    STRING_ESCAPE = 24, STRING_END = 25
   };
 
   enum {
     RuleField = 0, RuleString = 1, RuleInteger = 2, RuleFloat = 3, RuleBoolean = 4, 
-    RuleLiteral = 5, RuleArgument = 6, RuleArg_list = 7, RuleFunc = 8, RuleExpr_item = 9, 
-    RuleExpr = 10, RuleEval = 11, RuleLoop_start = 12, RuleLoop_end = 13, 
-    RuleLoop = 14, RuleStmt = 15, RuleNormal = 16, RuleInterpolated_str = 17, 
-    RuleExpression_program = 18, RuleProgram = 19
+    RuleLiteral = 5, RuleArgument = 6, RuleArg_list = 7, RuleFunc = 8, RuleArray_item = 9, 
+    RuleArray = 10, RuleExpr_item = 11, RulePiped_expression = 12, RuleExpr = 13, 
+    RuleEval = 14, RuleLoop_start = 15, RuleLoop_end = 16, RuleLoop = 17, 
+    RuleStmt = 18, RuleNormal = 19, RuleInterpolated_str = 20, RuleExpression_program = 21, 
+    RuleProgram = 22
   };
 
   explicit StringInterpolatorParser(antlr4::TokenStream *input);
@@ -55,7 +57,10 @@ public:
   class ArgumentContext;
   class Arg_listContext;
   class FuncContext;
+  class Array_itemContext;
+  class ArrayContext;
   class Expr_itemContext;
+  class Piped_expressionContext;
   class ExprContext;
   class EvalContext;
   class Loop_startContext;
@@ -161,10 +166,9 @@ public:
   public:
     ArgumentContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    LiteralContext *literal();
-    FieldContext *field();
+    Expr_itemContext *expr_item();
     antlr4::tree::TerminalNode *OPENP();
-    ExprContext *expr();
+    Piped_expressionContext *piped_expression();
     antlr4::tree::TerminalNode *CLOSEP();
 
 
@@ -202,6 +206,39 @@ public:
 
   FuncContext* func();
 
+  class  Array_itemContext : public antlr4::ParserRuleContext {
+  public:
+    Array_itemContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    ExprContext *expr();
+    antlr4::tree::TerminalNode *OPENP();
+    antlr4::tree::TerminalNode *CLOSEP();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Array_itemContext* array_item();
+
+  class  ArrayContext : public antlr4::ParserRuleContext {
+  public:
+    ArrayContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *OPENB();
+    antlr4::tree::TerminalNode *CLOSEB();
+    std::vector<Array_itemContext *> array_item();
+    Array_itemContext* array_item(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> COMMA();
+    antlr4::tree::TerminalNode* COMMA(size_t i);
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  ArrayContext* array();
+
   class  Expr_itemContext : public antlr4::ParserRuleContext {
   public:
     Expr_itemContext(antlr4::ParserRuleContext *parent, size_t invokingState);
@@ -209,6 +246,7 @@ public:
     LiteralContext *literal();
     FieldContext *field();
     FuncContext *func();
+    ArrayContext *array();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -217,13 +255,27 @@ public:
 
   Expr_itemContext* expr_item();
 
+  class  Piped_expressionContext : public antlr4::ParserRuleContext {
+  public:
+    Piped_expressionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    Expr_itemContext *expr_item();
+    antlr4::tree::TerminalNode *PIPE();
+    ExprContext *expr();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Piped_expressionContext* piped_expression();
+
   class  ExprContext : public antlr4::ParserRuleContext {
   public:
     ExprContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     Expr_itemContext *expr_item();
-    ExprContext *expr();
-    antlr4::tree::TerminalNode *PIPE();
+    Piped_expressionContext *piped_expression();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -231,7 +283,7 @@ public:
   };
 
   ExprContext* expr();
-  ExprContext* expr(int precedence);
+
   class  EvalContext : public antlr4::ParserRuleContext {
   public:
     EvalContext(antlr4::ParserRuleContext *parent, size_t invokingState);
@@ -368,10 +420,6 @@ public:
 
   ProgramContext* program();
 
-
-  bool sempred(antlr4::RuleContext *_localctx, size_t ruleIndex, size_t predicateIndex) override;
-
-  bool exprSempred(ExprContext *_localctx, size_t predicateIndex);
 
   // By default the static state used to implement the parser is lazily initialized during the first
   // call to the constructor. You can call this function if you wish to initialize the static state

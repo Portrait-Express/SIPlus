@@ -13,9 +13,10 @@ class  StringInterpolatorLexer : public antlr4::Lexer {
 public:
   enum {
     NORMAL_TEXT = 1, NORMAL_ESCAPE = 2, OPEN = 3, TRUE = 4, FALSE = 5, DOT = 6, 
-    HASH = 7, SLASH = 8, CLOSE = 9, OPENP = 10, CLOSEP = 11, PIPE = 12, 
-    BACKSLASH = 13, STRING_START = 14, WS = 15, INT = 16, FLOAT = 17, ID = 18, 
-    ANY = 19, STRING_TEXT = 20, STRING_ESCAPE = 21, STRING_END = 22
+    HASH = 7, SLASH = 8, CLOSE = 9, OPENP = 10, CLOSEP = 11, OPENB = 12, 
+    CLOSEB = 13, COMMA = 14, PIPE = 15, BACKSLASH = 16, STRING_START = 17, 
+    WS = 18, INT = 19, FLOAT = 20, ID = 21, ANY = 22, STRING_TEXT = 23, 
+    STRING_ESCAPE = 24, STRING_END = 25
   };
 
   enum {

@@ -94,5 +94,39 @@ std::any ExpressionVisitor::visitField(StringInterpolatorParser::FieldContext *c
     }
 }
 
+struct LiteralArrayValueRetriever : public text::ValueRetriever {
+    LiteralArrayValueRetriever(std::vector<std::shared_ptr<text::ValueRetriever>> items) : items_(items) {}
+    
+    text::UnknownDataTypeContainer retrieve(const text::UnknownDataTypeContainer& value) const override;
+
+private:
+    std::vector<std::shared_ptr<text::ValueRetriever>> items_;
+};
+
+text::UnknownDataTypeContainer 
+LiteralArrayValueRetriever::retrieve(const text::UnknownDataTypeContainer& value) const {
+    std::vector<text::UnknownDataTypeContainer> ret;
+    ret.reserve(items_.size());
+
+    for(auto item : items_) {
+        ret.push_back(item->retrieve(value));
+    }
+
+    return text::make_data(ret);
+}
+
+std::any ExpressionVisitor::visitArray(StringInterpolatorParser::ArrayContext *ctx) {
+    std::vector<std::shared_ptr<text::ValueRetriever>> vals;
+
+    for(auto val : ctx->array_item()) {
+        ExpressionVisitor visitor{context_, tokens_};
+        auto result = val->accept(&visitor);
+        vals.push_back(std::any_cast<std::shared_ptr<text::ValueRetriever>>(result));
+    }
+
+    std::shared_ptr<text::ValueRetriever> ret = std::make_shared<LiteralArrayValueRetriever>(vals);
+    return ret;
+}
+
 }
 
