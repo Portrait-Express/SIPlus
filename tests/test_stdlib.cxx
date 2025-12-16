@@ -83,6 +83,16 @@ int test_join() {
     });
 }
 
+int test_contains() {
+    return test("contains", [](const Parser& parser) {
+        return tests(
+            test_expression(R"([1,2,3] | contains 2)", true),
+            test_expression(R"([1,2,3] | contains 4)", false),
+            test_expression(R"(["apple", "banana", "cherry"] | contains "apple")", true)
+        );
+    });
+}
+
 int test_and() {
     return test("and", [](const Parser& parser) {
         return tests(

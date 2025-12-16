@@ -1,6 +1,8 @@
 #include "siplus/context.h"
 #include "siplus/text/data.h"
 #include "siplus/text/iterator.h"
+#include "siplus/text/value_retrievers/dummy_retriever.h"
+#include "siplus/text/value_retrievers/literal_retriever.h"
 #include "siplus/text/value_retrievers/retriever.h"
 #include "siplus/stl/iterators/string_iterator_provider.h"
 #include "siplus/stl/functions/iterable.h"
@@ -56,6 +58,23 @@ private:
     std::weak_ptr<SIPlusParserContext> context_;
     std::shared_ptr<text::ValueRetriever> input_;
     std::shared_ptr<text::ValueRetriever> delimiter_;
+};
+
+struct contains_impl : public SIPlus::text::ValueRetriever {
+    contains_impl (
+        std::weak_ptr<SIPlusParserContext> context,
+        std::shared_ptr<text::ValueRetriever> input,
+        std::shared_ptr<text::ValueRetriever> value
+    ) : context_(context), input_(input), value_(value) {
+    }
+
+    text::UnknownDataTypeContainer 
+    retrieve(const text::UnknownDataTypeContainer &value) const override;
+
+private:
+    std::weak_ptr<SIPlusParserContext> context_;
+    std::shared_ptr<text::ValueRetriever> input_;
+    std::shared_ptr<text::ValueRetriever> value_;
 };
 
 struct string_iterator_impl : text::Iterator {
@@ -174,6 +193,39 @@ join_impl::retrieve(const text::UnknownDataTypeContainer& value) const {
     }
 
     return text::make_data(ss.str());
+}
+
+std::shared_ptr<text::ValueRetriever>
+contains_func::value(
+    std::shared_ptr<text::ValueRetriever> parent, 
+    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+) const {
+    auto [input, delim] = util::get_parameters_first_parent<2>(parent, parameters);
+    return std::make_shared<contains_impl>(context_, input, delim);
+}
+
+text::UnknownDataTypeContainer
+contains_impl::retrieve(const text::UnknownDataTypeContainer& value) const {
+    auto context = context_.lock();
+    auto iterable = input_->retrieve(value);
+
+    auto iterator = context->iterator(iterable)->iterator(iterable);
+
+    bool more = iterator->more();
+    while(more) {
+        iterator->next();
+        auto current = iterator->current();
+
+        auto retriever = std::make_shared<text::LiteralValueRetriever>(current);
+        auto fn = context->function("eq").value(retriever, {value_});
+        auto val = fn->retrieve(value);
+
+        if(val.is<bool>() && val.as<bool>()) return val;
+
+        more = iterator->more();
+    }
+
+    return text::make_data(false);
 }
 
 bool string_iterator::can_iterate(const text::UnknownDataTypeContainer& value) {
