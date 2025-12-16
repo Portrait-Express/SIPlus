@@ -39,39 +39,8 @@ if_func::value(
     std::shared_ptr<text::ValueRetriever> parent,
     std::vector<std::shared_ptr<text::ValueRetriever>> parameters
 ) const {
-    std::shared_ptr<text::ValueRetriever> condition;
-    std::shared_ptr<text::ValueRetriever> tVal;
-    std::shared_ptr<text::ValueRetriever> fVal;
-
-    if(parent) {
-        if(parameters.size() < 1) {
-            throw std::runtime_error{"Too few parameters specified for 'if'"};
-        }
-        if(parameters.size() > 2) {
-            throw std::runtime_error{"Too many parameters specified for 'if'"};
-        }
-        
-        condition = parent;
-        tVal = parameters[0];
-        if(parameters.size() == 2) {
-            fVal = parameters[1];
-        }
-    } else {
-        if(parameters.size() < 2) {
-            throw std::runtime_error{"Too few parameters specified for 'if'"};
-        }
-        if(parameters.size() > 3) {
-            throw std::runtime_error{"Too many parameters specified for 'if'"};
-        }
-
-        condition = parameters[0];
-        tVal = parameters[1];
-        if(parameters.size() == 3) {
-            fVal = parameters[2];
-        }
-    }
-
-    return std::make_shared<if_impl>(condition, tVal, fVal, context_);
+    auto [cond, t, f] = util::get_parameters_first_parent<3>(parent, parameters);
+    return std::make_shared<if_impl>(cond, t, f, context_);
 }
 
 text::UnknownDataTypeContainer

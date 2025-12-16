@@ -124,13 +124,9 @@ int test_not() {
 
 int test_if() {
     return test("if", [](const Parser& parser) {
-        auto value = parser.get_expression(R"(if .x .y "" | .b)");
-        auto result = value->retrieve(text::make_data(test_data()));
-
-        if(!result.is<short>()) return 1;
-        if(result.as<short>() != 1) return 1;
-
-        return 0;
+        return tests(
+            test_expression<short>(R"(if .x .y "" | .b)", 1)
+        );
     });
 }
 
