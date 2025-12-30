@@ -3,6 +3,7 @@
 
 #include "siplus/config.h"
 #include "siplus/stl/functions/converting_operator.h"
+#include "siplus/text/text.h"
 
 #ifdef SIPLUS_INCLUDE_STDLIB
 
@@ -14,18 +15,49 @@
 namespace SIPLUS_NAMESPACE {
 namespace stl {
 
-struct numeric_adder : operator_impl {
-    text::UnknownDataTypeContainer 
-    invoke(
-        std::shared_ptr<SIPlusParserContext> context,
-        text::UnknownDataTypeContainer lhs, 
-        text::UnknownDataTypeContainer rhs
-    ) override;
-
-    bool can_handle(std::type_index lhs, std::type_index rhs) const override;
+struct base_numeric_operator_impl : operator_impl {
+    bool can_handle(std::type_index lhs, std::type_index rhs) const override {
+        return text::is_numeric(lhs) && text::is_numeric(rhs);
+    }
 };
 
-struct numeric_comparator : operator_impl {
+struct numeric_adder : base_numeric_operator_impl {
+    text::UnknownDataTypeContainer 
+    invoke(
+        std::shared_ptr<SIPlusParserContext> context,
+        text::UnknownDataTypeContainer lhs, 
+        text::UnknownDataTypeContainer rhs
+    ) override;
+};
+
+struct numeric_subtractor : base_numeric_operator_impl {
+    text::UnknownDataTypeContainer 
+    invoke(
+        std::shared_ptr<SIPlusParserContext> context,
+        text::UnknownDataTypeContainer lhs, 
+        text::UnknownDataTypeContainer rhs
+    ) override;
+};
+
+struct numeric_multiplier : base_numeric_operator_impl {
+    text::UnknownDataTypeContainer 
+    invoke(
+        std::shared_ptr<SIPlusParserContext> context,
+        text::UnknownDataTypeContainer lhs, 
+        text::UnknownDataTypeContainer rhs
+    ) override;
+};
+
+struct numeric_divider : base_numeric_operator_impl {
+    text::UnknownDataTypeContainer 
+    invoke(
+        std::shared_ptr<SIPlusParserContext> context,
+        text::UnknownDataTypeContainer lhs, 
+        text::UnknownDataTypeContainer rhs
+    ) override;
+};
+
+struct numeric_comparator : base_numeric_operator_impl {
     text::UnknownDataTypeContainer 
     invoke(
         std::shared_ptr<SIPlusParserContext> context,
@@ -33,19 +65,6 @@ struct numeric_comparator : operator_impl {
         text::UnknownDataTypeContainer rhs
     ) override;
 
-    bool can_handle(std::type_index lhs, std::type_index rhs) const override;
-
-private:
-    template<typename T1, typename T2>
-    long compare(T1 a, T2 b) {
-        if(a < b) {
-            return -1;
-        } else if(a > b) {
-            return 1;
-        } else {
-            return 0;
-        }
-    }
 };
 
 } /* stl */

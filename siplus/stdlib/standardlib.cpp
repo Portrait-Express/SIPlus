@@ -1,3 +1,4 @@
+#include "siplus/stl/functions/arithmetic.h"
 #include "siplus/stl/functions/iterable.h"
 #include "siplus/stl/functions/text.h"
 #include "siplus/stl/functions/typed_operator.h"
@@ -90,9 +91,21 @@ void attach_stl(SIPlusParserContext& context) {
 
     //Arithmetic
     auto add_func = converting_operator_function{context.shared_from_this()};
-    add_func.emplace_impl<string_concatenator>();
-    add_func.emplace_impl<numeric_adder>();
+    add_func.emplace_impl<string_concatenator>().emplace_impl<numeric_adder>();
+
+    auto sub_func = converting_operator_function{context.shared_from_this()};
+    sub_func.emplace_impl<numeric_subtractor>();
+
+    auto mul_func = converting_operator_function{context.shared_from_this()};
+    mul_func.emplace_impl<numeric_multiplier>();
+
+    auto div_func = converting_operator_function{context.shared_from_this()};
+    div_func.emplace_impl<numeric_divider>();
+
     context.emplace_function<converting_operator_function>("add", add_func);
+    context.emplace_function<converting_operator_function>("sub", sub_func);
+    context.emplace_function<converting_operator_function>("mul", mul_func);
+    context.emplace_function<converting_operator_function>("div", div_func);
 
     //Comparison
     auto cmp_func = converting_operator_function{context.shared_from_this()};

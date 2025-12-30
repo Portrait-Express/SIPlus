@@ -1,11 +1,23 @@
 #include "siplus/stl/functions/arithmetic.h"
+#include "siplus/text/data.h"
 #include "siplus/text/text.h"
 
 namespace SIPLUS_NAMESPACE {
 namespace stl {
 
+/**
+ * @brief Invoke operate::invoke() with template arguments matching the types 
+ * in the UnknownDataTypeContainers.
+ *
+ * Only works if text::is_numeric(lhs) && text::is_numeric(rhs),
+ *
+ * @param[in] context The context
+ * @param[in] lhs Left-hand argument
+ * @param[in] rhs Right-hand argument
+ */
+template<template<typename _T1, typename _T2> typename operate>
 text::UnknownDataTypeContainer 
-SIPLUS_NAMESPACE::stl::numeric_adder::invoke(
+numerically_operate(
     std::shared_ptr<SIPlusParserContext> context,
     text::UnknownDataTypeContainer       lhs, 
     text::UnknownDataTypeContainer       rhs
@@ -17,9 +29,9 @@ SIPLUS_NAMESPACE::stl::numeric_adder::invoke(
         long val = lhs.as<long>();
 
         if(rhs.is<long>()) { 
-            return text::make_data(val + rhs.as<long>());
+            return text::make_data(operate<long, long>::invoke(val, rhs.as<long>()));
         } else if(rhs.is<double>()) {
-            return text::make_data(val + rhs.as<double>());
+            return text::make_data(operate<long, double>::invoke(val, rhs.as<double>()));
         } else {
             throw std::runtime_error{"Cannot add types long and " + text::get_type_name(rhs.type)};
         }
@@ -27,9 +39,9 @@ SIPLUS_NAMESPACE::stl::numeric_adder::invoke(
         double val = lhs.as<double>();
 
         if(rhs.is<long>()) { 
-            return text::make_data(val + rhs.as<long>());
+            return text::make_data(operate<double, long>::invoke(val, rhs.as<long>()));
         } else if(rhs.is<double>()) {
-            return text::make_data(val + rhs.as<double>());
+            return text::make_data(operate<double, double>::invoke(val, rhs.as<double>()));
         } else {
             throw std::runtime_error{"Cannot add types double and " + text::get_type_name(rhs.type)};
         }
@@ -39,10 +51,82 @@ SIPLUS_NAMESPACE::stl::numeric_adder::invoke(
     }
 }
 
-bool
-numeric_adder::can_handle(std::type_index lhs, std::type_index rhs) const {
-    return text::is_numeric(lhs) && text::is_numeric(rhs);
+template<typename _T1, typename _T2>
+struct add_operator {
+    static inline auto invoke(const _T1& a, const _T2& b) {
+        return a + b;
+    }
+};
+
+text::UnknownDataTypeContainer 
+SIPLUS_NAMESPACE::stl::numeric_adder::invoke(
+    std::shared_ptr<SIPlusParserContext> context,
+    text::UnknownDataTypeContainer       lhs, 
+    text::UnknownDataTypeContainer       rhs
+) {
+    return numerically_operate<add_operator>(context, lhs, rhs);
 }
+
+template<typename _T1, typename _T2>
+struct subtract_operator {
+    static inline auto invoke(const _T1& a, const _T2& b) {
+        return a - b;
+    }
+};
+
+text::UnknownDataTypeContainer 
+SIPLUS_NAMESPACE::stl::numeric_subtractor::invoke(
+    std::shared_ptr<SIPlusParserContext> context,
+    text::UnknownDataTypeContainer       lhs, 
+    text::UnknownDataTypeContainer       rhs
+) {
+    return numerically_operate<subtract_operator>(context, lhs, rhs);
+}
+
+template<typename _T1, typename _T2>
+struct multiply_operator {
+    static inline auto invoke(const _T1& a, const _T2& b) {
+        return a * b;
+    }
+};
+
+text::UnknownDataTypeContainer 
+SIPLUS_NAMESPACE::stl::numeric_multiplier::invoke(
+    std::shared_ptr<SIPlusParserContext> context,
+    text::UnknownDataTypeContainer       lhs, 
+    text::UnknownDataTypeContainer       rhs
+) {
+    return numerically_operate<multiply_operator>(context, lhs, rhs);
+}
+
+template<typename _T1, typename _T2>
+struct divide_operator {
+    static inline auto invoke(const _T1& a, const _T2& b) {
+        return static_cast<double>(a) / b;
+    }
+};
+
+text::UnknownDataTypeContainer 
+SIPLUS_NAMESPACE::stl::numeric_divider::invoke(
+    std::shared_ptr<SIPlusParserContext> context,
+    text::UnknownDataTypeContainer       lhs, 
+    text::UnknownDataTypeContainer       rhs
+) {
+    return numerically_operate<divide_operator>(context, lhs, rhs);
+}
+
+template<typename T1, typename T2>
+struct compare_operator {
+    static inline long invoke(T1 a, T2 b) {
+        if(a < b) {
+            return -1;
+        } else if(a > b) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+};
 
 text::UnknownDataTypeContainer 
 numeric_comparator::invoke(
@@ -50,29 +134,7 @@ numeric_comparator::invoke(
     text::UnknownDataTypeContainer lhs, 
     text::UnknownDataTypeContainer rhs
 ) {
-    auto b_lhs = text::as_base(context, lhs);
-    auto b_rhs = text::as_base(context, rhs);
-    
-    if(b_lhs.is<long>()) {
-        if(b_rhs.is<long>()) {
-            return text::make_data(compare(b_lhs.as<long>(), b_rhs.as<long>()));
-        } else if(b_rhs.is<double>()) {
-            return text::make_data(compare(b_lhs.as<long>(), b_rhs.as<double>()));
-        } 
-    } else if(b_lhs.is<double>()) {
-        if(b_rhs.is<long>()) {
-            return text::make_data(compare(b_lhs.as<double>(), b_rhs.as<long>()));
-        } else if(b_rhs.is<double>()) {
-            return text::make_data(compare(b_lhs.as<double>(), b_rhs.as<double>()));
-        } 
-    }
-
-    throw std::runtime_error{"Uncomparable types " + text::get_type_name(b_lhs.type) 
-        + " and " + text::get_type_name(b_rhs.type)};
-}
-
-bool numeric_comparator::can_handle(std::type_index lhs, std::type_index rhs) const {
-    return text::is_numeric(lhs) && text::is_numeric(rhs);
+    return numerically_operate<compare_operator>(context, lhs, rhs);
 }
 
 } /* stl */

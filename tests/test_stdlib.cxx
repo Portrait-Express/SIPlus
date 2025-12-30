@@ -22,6 +22,33 @@ int test_add() {
     });
 }
 
+int test_sub() {
+    return test("sub", [](const Parser& parser) {
+        return tests(
+            test_expression("sub 1.2 2", -0.8),
+            test_expression("sub 10 4", 6L)
+        );
+    });
+}
+
+int test_mul() {
+    return test("mul", [](const Parser& parser) {
+        return tests(
+            test_expression("mul 2 3", 6L),
+            test_expression<double>("mul 2.2 5", 11)
+        );
+    });
+}
+
+int test_div() {
+    return test("div", [](const Parser& parser) {
+        return tests(
+            test_expression<double>("div 6 2", 3),
+            test_expression("div 10 4", 2.5)
+        );
+    });
+}
+
 int test_str() {
     return test("str", [](const Parser& parser) {
         return tests(
@@ -313,6 +340,9 @@ int test_functions() {
             test_if(),
 
             test_add(),
+            test_sub(),
+            test_mul(),
+            test_div(),
 
             test_length(),
             test_join(),

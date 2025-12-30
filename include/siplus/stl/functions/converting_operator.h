@@ -36,8 +36,9 @@ struct converting_operator_function : Function {
     ) const override;
 
     template<typename T, typename... Ts>
-    void emplace_impl(const Ts&&... args) {
+    converting_operator_function& emplace_impl(const Ts&&... args) {
         cache_.emplace_item<T>(std::forward<Ts>(args)...);
+        return *this;
     }
 
     bool has_impl(std::type_index lhs, std::type_index rhs) const;
