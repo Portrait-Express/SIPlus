@@ -24,14 +24,6 @@ UInt rand() {
     return dist(engine);
 }
 
-template<std::unsigned_integral UInt = uint64_t, 
-    std::uniform_random_bit_generator E = std::mt19937>
-UInt rand_safe() {
-    static util::detail::spinlock lock;
-    std::lock_guard<util::detail::spinlock> guard(lock);
-    return rand<UInt, E>();
-}
-
 struct rand_impl : text::ValueRetriever {
     rand_impl(
         std::weak_ptr<SIPlusParserContext> context,
