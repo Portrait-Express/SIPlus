@@ -15,6 +15,12 @@
 namespace SIPLUS_NAMESPACE {
 namespace stl {
 
+//These are meant to be used as implementations for a converting_operator_function
+
+/**
+ * struct base_numeric_operator_impl - Base class for numeric operator 
+ * implementations. Implements `can_handle`.
+ */
 struct base_numeric_operator_impl : operator_impl {
     bool can_handle(std::type_index lhs, std::type_index rhs) const override {
         return text::is_numeric(lhs) && text::is_numeric(rhs);

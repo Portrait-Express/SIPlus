@@ -2,6 +2,8 @@
 #define INCLUDE_SIPLUS_UTIL_H_
 
 #include "siplus/text/value_retrievers/retriever.h"
+
+#include <atomic>
 #include <memory>
 #include <sstream>
 #include <vector>
@@ -10,6 +12,30 @@ namespace SIPLUS_NAMESPACE {
 namespace util {
 
 namespace detail {
+
+class spinlock {
+    /* https://rigtorp.se/spinlock/ */
+    std::atomic<bool> lock_;
+
+public:
+
+    void lock() { 
+        for(;;) {
+            if(!lock_.exchange(true, std::memory_order_acquire))
+                break;
+
+            while(lock_.load(std::memory_order_relaxed)) {
+                __builtin_ia32_pause();
+            } 
+        }
+    }
+
+    void unlock() { lock_.store(false, std::memory_order_acquire); }
+
+    bool try_lock() {
+        return !lock_.exchange(true, std::memory_order_acquire);
+    }
+};
 
 template<
     size_t N, 

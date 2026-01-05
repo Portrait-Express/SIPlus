@@ -7,6 +7,12 @@
 #include "siplus/text/data.h"
 #include "siplus/text/text.h"
 
+template<typename _OStream, typename T>
+_OStream& operator<<(_OStream& stream, std::function<T> func) {
+    stream << "(function)";
+    return stream;
+}
+
 struct User {
     int id;
     std::string username;
@@ -102,6 +108,13 @@ template<>
 struct test_expression_compare<double, double> {
     static bool compare(const double& val, const double& other) {
         return nearly_equal(val, other);
+    }
+};
+
+template<typename T>
+struct test_expression_compare<T, std::function<bool (const T&)>> {
+    static bool compare(const T& val, const std::function<bool (const T&)> test) {
+        return test(val);
     }
 };
 

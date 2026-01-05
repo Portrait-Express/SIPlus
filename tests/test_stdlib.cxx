@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <cassert>
 #include <cfloat>
 #include <vector>
@@ -132,6 +131,36 @@ int test_not() {
         return tests(
             test_expression("not true", false),
             test_expression("not false", true)
+        );
+    });
+}
+
+int test_rand() {
+    return test("rand", [](const Parser& parser) {
+        return tests(
+            test_expression<std::function<bool (const double&)>, double>(
+                "rand", 
+                [](const double& v) { return v > 0 && v < 1; }
+            ),
+            test_expression<std::function<bool (const long&)>, long>(
+                "rand 1 3", 
+                [](const long& v) { return v >= 1 && v <= 3; }
+            )
+        );
+    });
+}
+
+int test_rand_str() {
+    return test("randstr", [](const Parser &parser) {
+        return tests(
+            test_expression<std::function<bool (const std::string &)>, std::string>(
+                R"(randstr "0123456789abcdef" 3)", 
+                [](const std::string &v) { return v.length() == 3; }
+            ),
+            test_expression<std::function<bool (const std::string &)>, std::string>(
+                R"(randstr "abcdefghijklmnopqrstuvwxyz" 12)", 
+                [](const std::string &v) { return v.length() == 12; }
+            )
         );
     });
 }
@@ -352,6 +381,9 @@ int test_functions() {
             test_xor(),
             test_or(),
             test_not(),
+
+            test_rand(),
+            test_rand_str(),
 
             test_replace(),
             test_padEnd(),

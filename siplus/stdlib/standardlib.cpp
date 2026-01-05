@@ -1,3 +1,4 @@
+#include "siplus/stl/functions/rand.h"
 #include "siplus/stl/functions/arithmetic.h"
 #include "siplus/stl/functions/iterable.h"
 #include "siplus/stl/functions/text.h"
@@ -88,6 +89,9 @@ void attach_stl(SIPlusParserContext& context) {
     context.emplace_function<typed_binary_operator_function<bool, bool>>("or", context.shared_from_this(), std::logical_or<bool>());
     context.emplace_function<typed_binary_operator_function<bool, bool>>("xor", context.shared_from_this(), std::not_equal_to<bool>());
     context.emplace_function<typed_unary_operator_function<bool, bool>>("not", context.shared_from_this(), std::logical_not<bool>());
+
+    context.emplace_function<rand_func>("rand", context.shared_from_this());
+    context.emplace_function<rand_str_func>("randstr", context.shared_from_this());
 
     //Arithmetic
     auto add_func = converting_operator_function{context.shared_from_this()};
