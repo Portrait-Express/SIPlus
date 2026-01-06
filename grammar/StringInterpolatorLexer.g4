@@ -21,7 +21,7 @@ PIPE: '|' ;
 BACKSLASH: '\\' ;
 STRING_START: '"' -> mode(STRING);
 
-WS: [ \t\r\n]+ -> channel(HIDDEN);
+WS: [ \t\r\n]+;
 
 INT: ('0'[xboXBO])?[0-9_]+ ;
 FLOAT: ( [0-9]+ '.' [0-9]* ) | ( '.' [0-9]+ ) ;
