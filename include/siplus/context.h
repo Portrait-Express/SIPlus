@@ -19,6 +19,42 @@ namespace SIPLUS_NAMESPACE {
  * @brief The context object passed around between SIPlus objects to communicate converters,
  * accesors, iterators, and other data related information.
  */
+class SIPlusParserContext;
+
+/**
+ * struct ContextInvocationContextBuilder - Builder class for a root `InvocationContext`
+ */
+struct ContextInvocationContextBuilder {
+    friend class SIPlusParserContext;
+
+    /**
+     * @brief Set the default data for this invocation. The data accessible at `$0` or `.`.
+     * Calling `with("0", data)`, is an equivalent call, but prefer this.
+     *
+     * @param data The data to use
+     */
+    ContextInvocationContextBuilder& use_default(text::UnknownDataTypeContainer data);
+
+    /**
+     * @brief Add an additional variable accessible at `$name`
+     *
+     * @param name The name of the variable to add
+     * @param data The data to use at the variable
+     */
+    ContextInvocationContextBuilder& with(std::string name, text::UnknownDataTypeContainer data);
+
+    /**
+     * @brief Return the build `InvocationContext`
+     */
+    std::shared_ptr<InvocationContext> build() const;
+
+private:
+    ContextInvocationContextBuilder(std::shared_ptr<const SIPlusParserContext> context) : context_(context) {}
+
+    std::shared_ptr<const SIPlusParserContext> context_;
+    std::unordered_map<std::string, text::UnknownDataTypeContainer> variables_;
+};
+
 class SIPlusParserContext : public std::enable_shared_from_this<SIPlusParserContext> {
 public:
     SIPlusParserContext();
@@ -78,6 +114,13 @@ public:
      * @param[in] to The type to convert to
      */
     std::shared_ptr<text::Converter> try_converter(std::type_index from, std::type_index to) const;
+
+    /**
+     * @brief Create a builder to make an `InvocationContext`
+     *
+     * @return A builder object
+     */
+    ContextInvocationContextBuilder builder() const;
 
     /**
      * @brief Tries to find a converter able to convert from `from` to `to`. If no usable

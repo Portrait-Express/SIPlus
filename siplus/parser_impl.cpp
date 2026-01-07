@@ -4,6 +4,7 @@
 #include "ConsoleErrorListener.h"
 #include "DFA.h"
 #include "Recognizer.h"
+#include "block_visitor.h"
 #include "expr_visitor.h"
 #include "generated/StringInterpolatorLexer.h"
 #include "generated/StringInterpolatorParser.h"
@@ -145,7 +146,8 @@ text::TextConstructor ParserImpl::get_interpolation(const std::string& text) con
     parser.addErrorListener(&errors);
     
     antlr4::tree::ParseTree *tree = parser.program();
-    InterpolationVisitor visitor{context_, tokens};
+    std::shared_ptr<BuildContext> buildContext = std::make_shared<BuildContext>();
+    InterpolationVisitor visitor{context_, buildContext, tokens};
     auto val = tree->accept(&visitor);
 
     return std::any_cast<text::TextConstructor>(val);
@@ -164,8 +166,9 @@ std::shared_ptr<text::ValueRetriever> ParserImpl::get_expression(const std::stri
     parser.addErrorListener(&errors);
     
     lexer.mode = StringInterpolatorLexer::TEMPLATE;
-    antlr4::tree::ParseTree *tree = parser.expression_program();
-    ExpressionVisitor visitor{context_, tokens};
+    auto tree = parser.expression_program();
+    std::shared_ptr<BuildContext> buildContext = std::make_shared<BuildContext>();
+    BlockVisitor visitor{context_, buildContext, tokens};
     auto val = tree->accept(&visitor);
 
     return std::any_cast<std::shared_ptr<text::ValueRetriever>>(val);

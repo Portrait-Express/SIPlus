@@ -3,14 +3,22 @@
 
 #include "BufferedTokenStream.h"
 
+#include "build_context.h"
 #include "siplus/context.h"
+#include "siplus/text/constructor_steps/constructor_step.h"
 #include "visitor.h"
 
 namespace SIPLUS_NAMESPACE {
 
+SIPLUS_DECLARE_NODE_RESULT(StringInterpolatorParser::StmtContext, std::shared_ptr<text::TextConstructorStep>);
+
 class StatementVisitor : public SIPlusParseTreeVisitor {
 public:
-    StatementVisitor(std::shared_ptr<SIPlusParserContext> context, const antlr4::BufferedTokenStream& tokens);
+    StatementVisitor(
+        std::shared_ptr<SIPlusParserContext> context, 
+        std::shared_ptr<BuildContext> buildContext, 
+        const antlr4::BufferedTokenStream& tokens
+    );
 
     bool shouldVisitNextChild(antlr4::tree::ParseTree *node, const std::any& currentResult) override;
 
@@ -19,6 +27,7 @@ public:
     
 private:
     std::shared_ptr<SIPlusParserContext> context_;
+    std::shared_ptr<BuildContext> buildContext_;
     const antlr4::BufferedTokenStream& tokens_;
 };
 

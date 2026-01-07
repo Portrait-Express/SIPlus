@@ -173,7 +173,14 @@ int test_expression(const std::string& expression, const T& expected) {
 template<typename T, typename V, typename _ExpectedType = T>
 int test_expression(const std::string& expression, const V& data, const T& expected) {
     auto retriever = get_test_context().get_expression(expression);
-    auto result = retriever->retrieve(SIPLUS_NAMESPACE::text::make_data(data));
+
+    auto invoCtx = get_test_context()
+        .context()
+        .builder()
+        .use_default(SIPlus::text::make_data(data))
+        .build();
+
+    auto result = retriever->retrieve(*invoCtx);
 
     if(!result.template is<_ExpectedType>()) {
         std::cout << "Expression \"" << expression << "\" failed: Expected type " 
@@ -196,7 +203,14 @@ int test_expression(const std::string& expression, const V& data, const T& expec
 template<typename V>
 int test_interpolation(const std::string& expression, const V& data, const std::string& expected) {
     auto retriever = get_test_context().get_interpolation(expression);
-    auto result = retriever.construct_with(SIPLUS_NAMESPACE::text::make_data(data));
+
+    auto invoCtx = get_test_context()
+        .context()
+        .builder()
+        .use_default(SIPlus::text::make_data(data))
+        .build();
+
+    auto result = retriever.construct_with(invoCtx);
 
     if(result != expected) {
         std::cout 
@@ -210,4 +224,14 @@ int test_interpolation(const std::string& expression, const V& data, const std::
 
 inline int test_interpolation(const std::string& expression, const std::string& expected) {
     return test_interpolation<test_data>(expression, test_data{}, expected);
+}
+
+inline int expect_throw(std::function<void ()> func) {
+    try {
+        func();
+        std::cout << "Expected a test to throw. It did not." << std::endl;
+        return 1;
+    } catch(std::runtime_error e) {
+        return 0;
+    }
 }

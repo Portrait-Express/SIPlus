@@ -1,5 +1,6 @@
 #include "siplus/stl/functions/comparison.h"
 #include "siplus/context.h"
+#include "siplus/invocation_context.h"
 #include "siplus/text/data.h"
 #include "siplus/text/value_retrievers/retriever.h"
 #include <memory>
@@ -18,7 +19,7 @@ struct lt_impl : text::ValueRetriever  {
     ) : ctx_(context), cmp_(cmp) { }
 
     text::UnknownDataTypeContainer 
-    retrieve(const text::UnknownDataTypeContainer& value) const;
+    retrieve(InvocationContext& value) const override;
 
 private:
     std::weak_ptr<SIPlusParserContext> ctx_;
@@ -34,7 +35,7 @@ struct gt_impl : text::ValueRetriever  {
     explicit gt_impl(std::weak_ptr<SIPlusParserContext> context) { }
 
     text::UnknownDataTypeContainer 
-    retrieve(const text::UnknownDataTypeContainer& value) const;
+    retrieve(InvocationContext& value) const override;
 
 private:
     std::weak_ptr<SIPlusParserContext> ctx_;
@@ -48,7 +49,7 @@ struct eq_impl : text::ValueRetriever  {
     ) : ctx_(context), cmp_(cmp) { }
 
     text::UnknownDataTypeContainer 
-    retrieve(const text::UnknownDataTypeContainer& value) const;
+    retrieve(InvocationContext& value) const override;
 
 private:
     std::weak_ptr<SIPlusParserContext> ctx_;
@@ -66,7 +67,7 @@ std::shared_ptr<text::ValueRetriever> lt_func::value(
 }
 
 text::UnknownDataTypeContainer 
-lt_impl::retrieve(const text::UnknownDataTypeContainer& val) const {
+lt_impl::retrieve(InvocationContext& val) const {
     auto ctx = ctx_.lock();
     auto cmp_val = cmp_->retrieve(val);
     auto result = ctx->convert<long>(cmp_val).as<long>();
@@ -82,7 +83,7 @@ std::shared_ptr<text::ValueRetriever> gt_func::value(
 }
 
 text::UnknownDataTypeContainer 
-gt_impl::retrieve(const text::UnknownDataTypeContainer& val) const {
+gt_impl::retrieve(InvocationContext& val) const {
     auto ctx = ctx_.lock();
     auto cmp_val = cmp_->retrieve(val);
     auto result = ctx->convert<long>(cmp_val).as<long>();
@@ -98,7 +99,7 @@ std::shared_ptr<text::ValueRetriever> eq_func::value(
 }
 
 text::UnknownDataTypeContainer 
-eq_impl::retrieve(const text::UnknownDataTypeContainer& val) const {
+eq_impl::retrieve(InvocationContext& val) const {
     auto ctx = ctx_.lock();
     auto cmp_val = cmp_->retrieve(val);
     auto result = ctx->convert<long>(cmp_val).as<long>();

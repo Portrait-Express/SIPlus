@@ -6,8 +6,8 @@
 #include <vector>
 
 #include "siplus/config.h"
+#include "siplus/invocation_context.h"
 #include "siplus/text/constructor_steps/constructor_step.h"
-#include "siplus/text/data.h"
 
 namespace SIPLUS_NAMESPACE {
 namespace text {
@@ -16,12 +16,7 @@ class TextConstructor {
 public:
     void addStep(std::shared_ptr<TextConstructorStep>);
 
-    template<typename T>
-    std::string construct(const T&& value) {
-        return construct_with(make_data<const T&&>(value));
-    }
-
-    std::string construct_with(UnknownDataTypeContainer data);
+    std::string construct_with(std::shared_ptr<InvocationContext> data);
 private:
 
     std::vector<std::shared_ptr<TextConstructorStep>> steps_;

@@ -1,6 +1,8 @@
 #include <sstream>
 
+#include "invocation_context_impl.h"
 #include "siplus/context.h"
+#include "siplus/invocation_context.h"
 #include "siplus/text/constructor.h"
 #include "siplus/text/constructor_steps/literal_step.h"
 #include "siplus/text/constructor_steps/repeated_constructor_step.h"
@@ -9,8 +11,6 @@
 #include "siplus/text/value_retrievers/literal_retriever.h"
 #include "siplus/text/value_retrievers/accessor_retriever.h"
 
-#include "siplus/util.h"
-
 namespace SIPLUS_NAMESPACE {
 namespace text {
 
@@ -18,11 +18,11 @@ void TextConstructor::addStep(std::shared_ptr<TextConstructorStep> step) {
     steps_.push_back(step);
 }
 
-std::string TextConstructor::construct_with(UnknownDataTypeContainer data) {
+std::string TextConstructor::construct_with(std::shared_ptr<InvocationContext> data) {
     std::stringstream ss;
 
     for(auto& step : steps_) {
-        ss << (*step).getPart(data);
+        ss << (*step).getPart(*data);
     }
 
     return ss.str();
@@ -30,7 +30,7 @@ std::string TextConstructor::construct_with(UnknownDataTypeContainer data) {
 
 LiteralConstructorStep::LiteralConstructorStep(std::string val) : part_(val) {}
 
-std::string LiteralConstructorStep::getPart(const UnknownDataTypeContainer&) {
+std::string LiteralConstructorStep::getPart(InvocationContext&) {
     return part_;
 }
 
@@ -40,7 +40,7 @@ RepeatedConstructorConstructorStep::RepeatedConstructorConstructorStep(
         text::TextConstructor sub
 ) : context_(context), retriever_(retriever), sub_(sub) { }
 
-std::string RepeatedConstructorConstructorStep::getPart(const UnknownDataTypeContainer& val) {
+std::string RepeatedConstructorConstructorStep::getPart(InvocationContext& val) {
     UnknownDataTypeContainer iterable = retriever_->retrieve(val);
 
     auto provider = context_->iterator(iterable);
@@ -54,12 +54,13 @@ std::string RepeatedConstructorConstructorStep::getPart(const UnknownDataTypeCon
 
         more = iterator->more();
 
-        if(more) {
+        if(!more) {
             // "Last" handling will go here later
             // For now this will get optimized out
         }
-
-        ss << sub_.construct_with(iterator->current());
+        
+        auto scope = wrap_scope(val.shared_from_this()).use_default(iterator->current()).build();
+        ss << sub_.construct_with(scope);
     }
 
     return ss.str();
@@ -70,7 +71,7 @@ ValueRetrieverConstructorStep::ValueRetrieverConstructorStep(
     std::shared_ptr<ValueRetriever> retriever
 ) : context_(context), retriever_(retriever) {}
 
-std::string ValueRetrieverConstructorStep::getPart(const UnknownDataTypeContainer& part) {
+std::string ValueRetrieverConstructorStep::getPart(InvocationContext& part) {
     auto value = retriever_->retrieve(part);
 
     if(!value.is<std::string>()) {
@@ -82,7 +83,7 @@ std::string ValueRetrieverConstructorStep::getPart(const UnknownDataTypeContaine
 
 LiteralValueRetriever::LiteralValueRetriever(UnknownDataTypeContainer value) : value_(value) {}
 
-UnknownDataTypeContainer LiteralValueRetriever::retrieve(const UnknownDataTypeContainer& value) const {
+UnknownDataTypeContainer LiteralValueRetriever::retrieve(InvocationContext& value) const {
     return value_;
 }
 
@@ -97,18 +98,16 @@ AccessorValueRetriever::AccessorValueRetriever(
     std::string name
 ) : context_(context), parent_(parent), name_(name) {}
 
-UnknownDataTypeContainer AccessorValueRetriever::retrieve(const UnknownDataTypeContainer& value) const {
-
+UnknownDataTypeContainer AccessorValueRetriever::retrieve(InvocationContext& value) const {
     if(parent_) {
         auto parent = parent_->retrieve(value);
         auto accessor = context_->accessor(parent);
         return accessor->access(parent, name_);
     } else {
-        auto accessor = context_->accessor(value);
-        return accessor->access(value, name_);
+        auto accessor = context_->accessor(value.default_data());
+        return accessor->access(value.default_data(), name_);
     }
 }
-
 
 }
 }

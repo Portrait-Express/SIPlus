@@ -32,7 +32,7 @@ struct rand_impl : text::ValueRetriever {
         std::shared_ptr<text::ValueRetriever> seed
     ) : context_(context), begin_(begin), end_(end), seed_(seed) {}
 
-    virtual text::UnknownDataTypeContainer retrieve(const text::UnknownDataTypeContainer& value) const;
+    virtual text::UnknownDataTypeContainer retrieve(InvocationContext& value) const override;
 
 private:
     std::weak_ptr<SIPlusParserContext> context_;
@@ -48,7 +48,7 @@ struct rand_str_impl : text::ValueRetriever {
         std::shared_ptr<text::ValueRetriever> length
     ) : context_(context), characters_(characters), length_(length) {}
 
-    virtual text::UnknownDataTypeContainer retrieve(const text::UnknownDataTypeContainer& value) const;
+    virtual text::UnknownDataTypeContainer retrieve(InvocationContext& value) const override;
 
 private:
     std::weak_ptr<SIPlusParserContext> context_;
@@ -67,7 +67,7 @@ std::shared_ptr<text::ValueRetriever> rand_func::value(
 }
 
 text::UnknownDataTypeContainer 
-rand_impl::retrieve(const text::UnknownDataTypeContainer& container) const {
+rand_impl::retrieve(InvocationContext& container) const {
     auto ctx = context_.lock();
 
     unsigned long seed;
@@ -102,7 +102,7 @@ std::shared_ptr<text::ValueRetriever> rand_str_func::value(
 }
 
 text::UnknownDataTypeContainer 
-rand_str_impl::retrieve(const text::UnknownDataTypeContainer& value) const {
+rand_str_impl::retrieve(InvocationContext& value) const {
     auto ctx = context_.lock();
     auto characters = ctx->convert<std::string>(characters_->retrieve(value)).as<std::string>();
     auto length = ctx->convert<long>(length_->retrieve(value)).as<long>();

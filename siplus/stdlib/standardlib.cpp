@@ -1,3 +1,4 @@
+#include "siplus/invocation_context.h"
 #include "siplus/stl/functions/rand.h"
 #include "siplus/stl/functions/arithmetic.h"
 #include "siplus/stl/functions/iterable.h"
@@ -25,7 +26,7 @@ struct if_impl : public text::ValueRetriever {
     ) : condition(condition), tVal(tVal), fVal(fVal), context_(context) {}
 
     text::UnknownDataTypeContainer 
-    retrieve(const text::UnknownDataTypeContainer& value) const override;
+    retrieve(InvocationContext& value) const override;
 
     std::shared_ptr<text::ValueRetriever> condition;
     std::shared_ptr<text::ValueRetriever> tVal;
@@ -47,7 +48,7 @@ if_func::value(
 }
 
 text::UnknownDataTypeContainer
-if_impl::retrieve(const text::UnknownDataTypeContainer& value) const {
+if_impl::retrieve(InvocationContext& value) const {
     auto ctx = context_.lock();
     auto cond = condition->retrieve(value);
 

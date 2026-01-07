@@ -1,7 +1,8 @@
 #include "siplus/context.h"
+#include "siplus/invocation_context.h"
 #include "siplus/text/data.h"
 #include "siplus/text/iterator.h"
-#include "siplus/text/value_retrievers/dummy_retriever.h"
+#include "../invocation_context_impl.h"
 #include "siplus/text/value_retrievers/literal_retriever.h"
 #include "siplus/text/value_retrievers/retriever.h"
 #include "siplus/stl/iterators/string_iterator_provider.h"
@@ -22,7 +23,7 @@ struct map_impl : public SIPlus::text::ValueRetriever {
     ) : context_(context), input_(input), map_expr_(expr) {}
 
     text::UnknownDataTypeContainer 
-    retrieve(const text::UnknownDataTypeContainer &value) const override;
+    retrieve(InvocationContext& value) const override;
 
 private:
     std::weak_ptr<SIPlusParserContext> context_;
@@ -37,7 +38,7 @@ struct length_impl : public SIPlus::text::ValueRetriever {
     ) : context_(context), input_(input) {}
 
     text::UnknownDataTypeContainer 
-    retrieve(const text::UnknownDataTypeContainer &value) const override;
+    retrieve(InvocationContext& value) const override;
 
 private:
     std::weak_ptr<SIPlusParserContext> context_;
@@ -52,7 +53,7 @@ struct join_impl : public SIPlus::text::ValueRetriever {
     ) : context_(context), input_(input), delimiter_(delim) {}
 
     text::UnknownDataTypeContainer 
-    retrieve(const text::UnknownDataTypeContainer &value) const override;
+    retrieve(InvocationContext& value) const override;
 
 private:
     std::weak_ptr<SIPlusParserContext> context_;
@@ -69,7 +70,7 @@ struct contains_impl : public SIPlus::text::ValueRetriever {
     }
 
     text::UnknownDataTypeContainer 
-    retrieve(const text::UnknownDataTypeContainer &value) const override;
+    retrieve(InvocationContext& value) const override;
 
 private:
     std::weak_ptr<SIPlusParserContext> context_;
@@ -101,11 +102,11 @@ map_func::value(
 }
 
 text::UnknownDataTypeContainer
-map_impl::retrieve(const text::UnknownDataTypeContainer& val) const {
+map_impl::retrieve(InvocationContext& val) const {
     using vec_type = std::vector<text::UnknownDataTypeContainer>;
 
     std::unique_ptr<vec_type> ret = std::make_unique<vec_type>();
-    text::UnknownDataTypeContainer iterable = val;
+    text::UnknownDataTypeContainer iterable = val.default_data();
     auto context = context_.lock();
 
     if(input_) {
@@ -119,7 +120,9 @@ map_impl::retrieve(const text::UnknownDataTypeContainer& val) const {
         iterator->next();
 
         auto current = iterator->current();
-        auto mapped_val = map_expr_->retrieve(current);
+
+        auto scope = wrap_scope(val.shared_from_this()).use_default(current).build();
+        auto mapped_val = map_expr_->retrieve(*scope);
 
         ret->push_back(mapped_val);
 
@@ -139,7 +142,7 @@ length_func::value(
 }
 
 text::UnknownDataTypeContainer
-length_impl::retrieve(const text::UnknownDataTypeContainer& value) const {
+length_impl::retrieve(InvocationContext& value) const {
     std::stringstream ss;
     auto context = context_.lock();
     auto iterable = input_->retrieve(value);
@@ -170,7 +173,7 @@ join_func::value(
 }
 
 text::UnknownDataTypeContainer
-join_impl::retrieve(const text::UnknownDataTypeContainer& value) const {
+join_impl::retrieve(InvocationContext& value) const {
     std::stringstream ss;
     auto context = context_.lock();
     auto iterable = input_->retrieve(value);
@@ -205,7 +208,7 @@ contains_func::value(
 }
 
 text::UnknownDataTypeContainer
-contains_impl::retrieve(const text::UnknownDataTypeContainer& value) const {
+contains_impl::retrieve(InvocationContext& value) const {
     auto context = context_.lock();
     auto iterable = input_->retrieve(value);
 

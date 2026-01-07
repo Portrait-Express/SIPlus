@@ -73,7 +73,8 @@ struct user_accessor : public SIPlus::text::Accessor {
 struct data_accessor : public SIPlus::text::Accessor {
     text::UnknownDataTypeContainer access(
         const text::UnknownDataTypeContainer &value, 
-        const std::string &name) override {
+        const std::string &name
+    ) override {
         if(value.is<struct test_data::y>()) {
             return text::make_data(value.as<struct test_data::y>().b);
         }

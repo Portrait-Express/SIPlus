@@ -15,8 +15,7 @@ set(TEST_SOURCES
     test_array.cxx
     test_expression.cxx
     test_interpolate.cxx
-    test_loop.cxx
-    test_function.cxx
+    test_variable.cxx
 )
 
 if(SIPLUS_INCLUDE_STDLIB)

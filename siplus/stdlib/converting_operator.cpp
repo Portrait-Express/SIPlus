@@ -1,8 +1,8 @@
 #include "siplus/stl/functions/converting_operator.h"
+#include "siplus/invocation_context.h"
 #include "siplus/text/data.h"
 #include "siplus/text/text.h"
 #include "siplus/text/value_retrievers/retriever.h"
-#include "siplus/util.h"
 #include <memory>
 #include <stdexcept>
 #include <vector>
@@ -21,7 +21,7 @@ struct converting_operator_impl : text::ValueRetriever {
     ) : parent_(parent), ctx_(ctx), lhs_(lhs), rhs_(rhs) { }
 
     text::UnknownDataTypeContainer 
-    retrieve(const text::UnknownDataTypeContainer& value) const override;
+    retrieve(InvocationContext& value) const override;
 
 private:
     const converting_operator_function& parent_;
@@ -71,7 +71,7 @@ converting_operator_function::value(
 }
 
 text::UnknownDataTypeContainer
-converting_operator_impl::retrieve(const text::UnknownDataTypeContainer& value) const {
+converting_operator_impl::retrieve(InvocationContext& value) const {
     std::shared_ptr<SIPlusParserContext> ctx = ctx_.lock();
     text::UnknownDataTypeContainer lhs = lhs_->retrieve(value);
     text::UnknownDataTypeContainer rhs = rhs_->retrieve(value);

@@ -1,9 +1,9 @@
+#include "siplus/invocation_context.h"
 #include "siplus/util.h"
 
 #include <algorithm>
 #include <cctype>
 #include <cstring>
-#include <iostream>
 
 #include "siplus/config.h"
 #include "siplus/text/data.h"
@@ -22,7 +22,7 @@ struct str_impl : public text::ValueRetriever {
     ) : param_(param), context_(context) {}
 
     text::UnknownDataTypeContainer 
-    retrieve(const text::UnknownDataTypeContainer& value) const override;
+    retrieve(InvocationContext& value) const override;
 
 private:
     std::weak_ptr<SIPlusParserContext> context_;
@@ -38,7 +38,7 @@ struct replace_function_impl : text::ValueRetriever {
     ) : ctx_(ctx), input_(input), target_(target), value_(value) { }
 
     text::UnknownDataTypeContainer 
-    retrieve(const text::UnknownDataTypeContainer& value) const override;
+    retrieve(InvocationContext& value) const override;
 
 private:
     std::weak_ptr<SIPlusParserContext> ctx_;
@@ -56,7 +56,7 @@ struct pad_end_impl : text::ValueRetriever {
     ) : ctx_(ctx), input_(input), length_(length), padding_(padding) { }
 
     text::UnknownDataTypeContainer 
-    retrieve(const text::UnknownDataTypeContainer& value) const override;
+    retrieve(InvocationContext& value) const override;
 
 private:
     std::weak_ptr<SIPlusParserContext> ctx_;
@@ -74,7 +74,7 @@ struct pad_start_impl : text::ValueRetriever {
     ) : ctx_(ctx), input_(input), length_(length), padding_(padding) { }
 
     text::UnknownDataTypeContainer 
-    retrieve(const text::UnknownDataTypeContainer& value) const override;
+    retrieve(InvocationContext& value) const override;
 
 private:
     std::weak_ptr<SIPlusParserContext> ctx_;
@@ -90,7 +90,7 @@ struct trim_impl : text::ValueRetriever {
     ) : ctx_(ctx), input_(input) { }
 
     text::UnknownDataTypeContainer 
-    retrieve(const text::UnknownDataTypeContainer& value) const override;
+    retrieve(InvocationContext& value) const override;
 
 private:
     std::weak_ptr<SIPlusParserContext> ctx_;
@@ -104,7 +104,7 @@ struct upper_impl : text::ValueRetriever {
     ) : ctx_(ctx), input_(input) { }
 
     text::UnknownDataTypeContainer 
-    retrieve(const text::UnknownDataTypeContainer& value) const override;
+    retrieve(InvocationContext& value) const override;
 
 private:
     std::weak_ptr<SIPlusParserContext> ctx_;
@@ -118,7 +118,7 @@ struct lower_impl : text::ValueRetriever {
     ) : ctx_(ctx), input_(input) { }
 
     text::UnknownDataTypeContainer 
-    retrieve(const text::UnknownDataTypeContainer& value) const override;
+    retrieve(InvocationContext& value) const override;
 
 private:
     std::weak_ptr<SIPlusParserContext> ctx_;
@@ -133,7 +133,7 @@ struct split_impl : text::ValueRetriever {
     ) : ctx_(ctx), input_(input), delimiter_(delim) { }
 
     text::UnknownDataTypeContainer 
-    retrieve(const text::UnknownDataTypeContainer& value) const override;
+    retrieve(InvocationContext& value) const override;
 
 private:
     std::weak_ptr<SIPlusParserContext> ctx_;
@@ -150,7 +150,7 @@ struct substr_impl : text::ValueRetriever {
     ) : ctx_(ctx), input_(input), begin_(begin), end_(end) { }
 
     text::UnknownDataTypeContainer 
-    retrieve(const text::UnknownDataTypeContainer& value) const override;
+    retrieve(InvocationContext& value) const override;
 
 private:
     std::weak_ptr<SIPlusParserContext> ctx_;
@@ -171,7 +171,7 @@ str_func::value(
 }
 
 text::UnknownDataTypeContainer 
-str_impl::retrieve(const text::UnknownDataTypeContainer& value) const {
+str_impl::retrieve(InvocationContext& value) const {
     auto ctx = context_.lock();
     auto val = param_->retrieve(value);
     return ctx->convert<std::string>(val);
@@ -186,7 +186,7 @@ std::shared_ptr<text::ValueRetriever> replace_function::value(
 }
 
 text::UnknownDataTypeContainer
-replace_function_impl::retrieve(const text::UnknownDataTypeContainer& value) const {
+replace_function_impl::retrieve(InvocationContext& value) const {
     std::shared_ptr<SIPlusParserContext> ctx = ctx_.lock();
     auto input = ctx->convert<std::string>(input_->retrieve(value)).as<std::string>();
     auto target = ctx->convert<std::string>(target_->retrieve(value)).as<std::string>();
@@ -212,7 +212,7 @@ std::shared_ptr<text::ValueRetriever> pad_end_function::value(
 }
 
 text::UnknownDataTypeContainer 
-pad_end_impl::retrieve(const text::UnknownDataTypeContainer& value) const {
+pad_end_impl::retrieve(InvocationContext& value) const {
     std::shared_ptr<SIPlusParserContext> ctx = ctx_.lock();
     auto val = ctx->convert<std::string>(input_->retrieve(value)).as<std::string>();
     auto length = ctx->convert<long>(length_->retrieve(value)).as<long>();
@@ -240,7 +240,7 @@ std::shared_ptr<text::ValueRetriever> pad_start_function::value(
 }
 
 text::UnknownDataTypeContainer 
-pad_start_impl::retrieve(const text::UnknownDataTypeContainer& value) const {
+pad_start_impl::retrieve(InvocationContext& value) const {
     std::shared_ptr<SIPlusParserContext> ctx = ctx_.lock();
     auto val = ctx->convert<std::string>(input_->retrieve(value)).as<std::string>();
     auto length = ctx->convert<long>(length_->retrieve(value)).as<long>();
@@ -272,7 +272,7 @@ std::shared_ptr<text::ValueRetriever> trim_function::value(
 }
 
 text::UnknownDataTypeContainer
-trim_impl::retrieve(const text::UnknownDataTypeContainer& value) const {
+trim_impl::retrieve(InvocationContext& value) const {
     auto ctx = ctx_.lock();
     auto str = ctx->convert<std::string>(input_->retrieve(value)).as<std::string>();
     
@@ -296,7 +296,7 @@ std::shared_ptr<text::ValueRetriever> upper_function::value(
 }
 
 text::UnknownDataTypeContainer
-upper_impl::retrieve(const text::UnknownDataTypeContainer& value) const {
+upper_impl::retrieve(InvocationContext& value) const {
     auto ctx = ctx_.lock();
     auto str = ctx->convert<std::string>(input_->retrieve(value)).as<std::string>();
     
@@ -316,7 +316,7 @@ std::shared_ptr<text::ValueRetriever> lower_function::value(
 }
 
 text::UnknownDataTypeContainer
-lower_impl::retrieve(const text::UnknownDataTypeContainer& value) const {
+lower_impl::retrieve(InvocationContext& value) const {
     auto ctx = ctx_.lock();
     auto str = ctx->convert<std::string>(input_->retrieve(value)).as<std::string>();
     
@@ -337,7 +337,7 @@ split_function::value(
 }
 
 text::UnknownDataTypeContainer
-split_impl::retrieve(const text::UnknownDataTypeContainer& value) const {
+split_impl::retrieve(InvocationContext& value) const {
     auto ctx = ctx_.lock();
     auto input_val = input_->retrieve(value);
     auto delimiter_val = delimiter_->retrieve(value);
@@ -375,7 +375,7 @@ substr_function::value(
 }
 
 text::UnknownDataTypeContainer
-substr_impl::retrieve(const text::UnknownDataTypeContainer& value) const {
+substr_impl::retrieve(InvocationContext& value) const {
     auto ctx = ctx_.lock();
     text::UnknownDataTypeContainer input_val = input_->retrieve(value);
     text::UnknownDataTypeContainer begin_val = begin_->retrieve(value);

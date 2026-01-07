@@ -12,8 +12,8 @@ class DummyValueRetriever : public ValueRetriever {
 public:
     DummyValueRetriever() {}
 
-    UnknownDataTypeContainer retrieve(const UnknownDataTypeContainer& value) const override {
-        return value;
+    UnknownDataTypeContainer retrieve(InvocationContext& value) const override {
+        return value.default_data();
     };
 };
 

@@ -1,15 +1,15 @@
-
 #ifndef INCLUDE_FUNCTIONS_BOOLEAN_H_
 #define INCLUDE_FUNCTIONS_BOOLEAN_H_
 
 #include "siplus/config.h"
-#include "siplus/text/data.h"
-#include "siplus/util.h"
 
 #ifdef SIPLUS_INCLUDE_STDLIB
 
 #include <memory>
 
+#include "siplus/text/data.h"
+#include "siplus/invocation_context.h"
+#include "siplus/util.h"
 #include "siplus/context.h"
 #include "siplus/function.h"
 
@@ -43,7 +43,7 @@ struct typed_binary_operator_function : Function {
         ) : context_(context), operator_(operate), a_(a), b_(b) {}
 
         text::UnknownDataTypeContainer
-        retrieve(const text::UnknownDataTypeContainer &value) const override {
+        retrieve(InvocationContext& value) const override {
             auto ctx = context_.lock();
 
             T a = ctx->convert<T>(a_->retrieve(value)).template as<T>();
@@ -90,7 +90,7 @@ struct typed_unary_operator_function : Function {
         ) : context_(context), operator_(operate), a_(a) {}
 
         text::UnknownDataTypeContainer
-        retrieve(const text::UnknownDataTypeContainer &value) const override {
+        retrieve(InvocationContext& value) const override {
             auto ctx = context_.lock();
             text::UnknownDataTypeContainer a = ctx->convert<T>(a_->retrieve(value));
             return text::make_data(operator_(a.as<T>()));

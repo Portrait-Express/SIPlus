@@ -16,7 +16,7 @@ public:
     explicit ValueRetrieverConstructorStep(
         std::shared_ptr<SIPlusParserContext> context, std::shared_ptr<ValueRetriever> retriever);
 
-    std::string getPart(const UnknownDataTypeContainer& value) override;
+    std::string getPart(InvocationContext& value) override;
 
 private:
     std::shared_ptr<ValueRetriever> retriever_;

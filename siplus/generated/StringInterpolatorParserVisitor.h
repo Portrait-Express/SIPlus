@@ -27,6 +27,8 @@ public:
 
     virtual std::any visitProperty(StringInterpolatorParser::PropertyContext *context) = 0;
 
+    virtual std::any visitVariable_reference(StringInterpolatorParser::Variable_referenceContext *context) = 0;
+
     virtual std::any visitString(StringInterpolatorParser::StringContext *context) = 0;
 
     virtual std::any visitInteger(StringInterpolatorParser::IntegerContext *context) = 0;
@@ -52,6 +54,22 @@ public:
     virtual std::any visitPiped_expression(StringInterpolatorParser::Piped_expressionContext *context) = 0;
 
     virtual std::any visitExpr(StringInterpolatorParser::ExprContext *context) = 0;
+
+    virtual std::any visitAssign_stmt(StringInterpolatorParser::Assign_stmtContext *context) = 0;
+
+    virtual std::any visitFunction_parameter(StringInterpolatorParser::Function_parameterContext *context) = 0;
+
+    virtual std::any visitFunction_parameters(StringInterpolatorParser::Function_parametersContext *context) = 0;
+
+    virtual std::any visitFunction_def_stmt(StringInterpolatorParser::Function_def_stmtContext *context) = 0;
+
+    virtual std::any visitSimple_expr_stmt(StringInterpolatorParser::Simple_expr_stmtContext *context) = 0;
+
+    virtual std::any visitExpr_stmt(StringInterpolatorParser::Expr_stmtContext *context) = 0;
+
+    virtual std::any visitExpr_block_contents(StringInterpolatorParser::Expr_block_contentsContext *context) = 0;
+
+    virtual std::any visitExpr_block(StringInterpolatorParser::Expr_blockContext *context) = 0;
 
     virtual std::any visitEval(StringInterpolatorParser::EvalContext *context) = 0;
 

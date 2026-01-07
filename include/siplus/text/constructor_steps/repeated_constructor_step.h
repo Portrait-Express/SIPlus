@@ -5,6 +5,7 @@
 
 #include "siplus/config.h"
 #include "siplus/context.h"
+#include "siplus/invocation_context.h"
 #include "siplus/text/constructor.h"
 #include "siplus/text/constructor_steps/constructor_step.h"
 #include "siplus/text/value_retrievers/retriever.h"
@@ -19,7 +20,7 @@ public:
         std::shared_ptr<ValueRetriever> retriever,
         text::TextConstructor sub);
 
-    std::string getPart(const UnknownDataTypeContainer& value) override;
+    std::string getPart(InvocationContext& value) override;
 
 private:
     TextConstructor sub_;

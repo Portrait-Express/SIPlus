@@ -3,6 +3,7 @@
 
 #include "siplus/config.h"
 #include "siplus/context.h"
+#include "siplus/invocation_context.h"
 #include "siplus/text/value_retrievers/retriever.h"
 
 namespace SIPLUS_NAMESPACE {
@@ -13,7 +14,7 @@ public:
     AccessorValueRetriever(std::shared_ptr<SIPlusParserContext> accessor, std::string name);
     AccessorValueRetriever(std::shared_ptr<SIPlusParserContext> accessor, std::shared_ptr<ValueRetriever> parent, std::string name);
 
-    UnknownDataTypeContainer retrieve(const UnknownDataTypeContainer& value) const override;
+    UnknownDataTypeContainer retrieve(InvocationContext& value) const override;
 
 private:
     std::shared_ptr<ValueRetriever> parent_;

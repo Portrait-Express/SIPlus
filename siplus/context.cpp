@@ -1,15 +1,35 @@
 #include <string>
 
 #include "siplus/context.h"
+#include "invocation_context_impl.h"
 #include "siplus/function.h"
 #include "siplus/text/text.h"
-#include "siplus/util.h"
 
 #ifdef SIPLUS_INCLUDE_STDLIB
 #include "siplus/stl.h"
 #endif
 
 namespace SIPLUS_NAMESPACE {
+
+ContextInvocationContextBuilder& ContextInvocationContextBuilder::use_default(text::UnknownDataTypeContainer data) {
+    with("0", data);
+    return *this;
+}
+
+ContextInvocationContextBuilder& ContextInvocationContextBuilder::with(std::string name, text::UnknownDataTypeContainer data) {
+    variables_["0"] = data;
+    return *this;
+}
+
+std::shared_ptr<InvocationContext> ContextInvocationContextBuilder::build() const {
+    auto ctx = std::make_shared<ContextInvocationContext>(context_);
+
+    for(auto [k, v] : variables_) {
+        ctx->variables_[k] = v;
+    }
+
+    return ctx;
+}
 
 SIPlusParserContext::SIPlusParserContext() { }
 
@@ -81,6 +101,10 @@ SIPlusParserContext::try_converter(std::type_index from, std::type_index to) con
     }
 
     return *it;
+}
+
+ContextInvocationContextBuilder SIPlusParserContext::builder() const {
+    return ContextInvocationContextBuilder{shared_from_this()};
 }
 
 #ifdef SIPLUS_INCLUDE_STDLIB

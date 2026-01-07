@@ -18,6 +18,12 @@ OPENB: '[' ;
 CLOSEB: ']' ;
 COMMA: ',' ;
 PIPE: '|' ;
+DOLLAR: '$' ;
+SEMICOLON: ';' ;
+QUESTION: '?' ;
+AT: '@' ;
+EQUAL: '=' ;
+ARROW: '=>' ;
 BACKSLASH: '\\' ;
 STRING_START: '"' -> mode(STRING);
 
@@ -35,7 +41,6 @@ mode STRING;
 STRING_TEXT: ~["\\]+;
 STRING_ESCAPE: '\\' .;
 STRING_END: '"' -> mode(TEMPLATE);
-
 
 
 

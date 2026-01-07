@@ -4,6 +4,7 @@
 #include <any>
 
 #include "siplus/config.h"
+#include "siplus/invocation_context.h"
 #include "siplus/text/data.h"
 #include "siplus/text/value_retrievers/retriever.h"
 
@@ -14,7 +15,7 @@ class LiteralValueRetriever : public ValueRetriever {
 public:
     explicit LiteralValueRetriever(UnknownDataTypeContainer value);
 
-    virtual UnknownDataTypeContainer retrieve(const UnknownDataTypeContainer& value) const override;
+    virtual UnknownDataTypeContainer retrieve(InvocationContext& value) const override;
 
 private:
     UnknownDataTypeContainer value_;

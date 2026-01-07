@@ -60,8 +60,9 @@ bool parse_bool(const std::string& text) {
 
 LiteralVisitor::LiteralVisitor(
     std::shared_ptr<SIPlusParserContext> context, 
+    std::shared_ptr<BuildContext> buildContext, 
     const antlr4::BufferedTokenStream& tokens) 
-: context_(context), tokens_(tokens) {}
+: context_(context), buildContext_(buildContext), tokens_(tokens) {}
 
 
 bool LiteralVisitor::shouldVisitNextChild(antlr4::tree::ParseTree *node, const std::any& currentResult) {

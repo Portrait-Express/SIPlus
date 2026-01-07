@@ -30,8 +30,9 @@ std::string get_escape(const std::string& escape) {
 
 InterpolationVisitor::InterpolationVisitor(
     std::shared_ptr<SIPlusParserContext> context,
+    std::shared_ptr<BuildContext> buildContext, 
     const antlr4::BufferedTokenStream& tokens
-) : context_(context), tokens_(tokens) {}
+) : context_(context), buildContext_(buildContext), tokens_(tokens) {}
 
 bool InterpolationVisitor::shouldVisitNextChild(antlr4::tree::ParseTree *node, const std::any& currentResult) {
     return dynamic_cast<StringInterpolatorParser::NormalContext*>(node) == nullptr && 
@@ -58,8 +59,8 @@ std::any InterpolationVisitor::visitNormal(StringInterpolatorParser::NormalConte
 }
 
 std::any InterpolationVisitor::visitStmt(StringInterpolatorParser::StmtContext *ctx) {
-    StatementVisitor visitor{context_, tokens_};
-    auto step = std::any_cast<std::shared_ptr<text::TextConstructorStep>>(visitor.visit(ctx));
+    StatementVisitor visitor{context_, buildContext_, tokens_};
+    auto step = visitor.visit(ctx);
     constructor_.addStep(step);
 
     return constructor_;
