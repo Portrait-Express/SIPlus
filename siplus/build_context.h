@@ -3,6 +3,7 @@
 
 #include "siplus/function.h"
 #include "siplus/invocation_context.h"
+#include "siplus/parser.h"
 #include "siplus/text/data.h"
 #include "siplus/text/value_retrievers/retriever.h"
 #include "siplus/util.h"
@@ -57,13 +58,19 @@ private:
     std::unordered_map<std::string, std::unique_ptr<Function>> functions_;
 };
 
-inline std::shared_ptr<BuildContext> make_build_context() {
-    return std::make_shared<BuildContext>();
-}
-     
-inline std::shared_ptr<BuildContext> make_build_context(std::shared_ptr<BuildContext> parent) {
-    return std::make_shared<BuildContext>(parent);
-}
+/**
+ * @brief Make a root build context
+ *
+ * @param opts The parser options
+ */
+std::shared_ptr<BuildContext> make_build_context(const ParseOpts opts);
+
+/**
+ * @brief Make a scoped build context
+ *
+ * @param parent The parent build context
+ */
+std::shared_ptr<BuildContext> make_build_context(std::shared_ptr<BuildContext> parent);
      
 } /* SIPLUS_NAMESPACE */
 

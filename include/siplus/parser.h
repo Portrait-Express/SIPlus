@@ -9,6 +9,10 @@
 
 namespace SIPLUS_NAMESPACE {
 
+struct ParseOpts {
+    std::vector<std::string> globals;
+};
+
 class ParserImpl;
 class Parser {
 public:
@@ -27,8 +31,8 @@ public:
         swap(first.impl_, second.impl_);
     }
 
-    text::TextConstructor get_interpolation(const std::string& text) const;
-    std::shared_ptr<text::ValueRetriever> get_expression(const std::string& expression) const;
+    text::TextConstructor get_interpolation(const std::string& text, const ParseOpts& opts) const;
+    std::shared_ptr<text::ValueRetriever> get_expression(const std::string& expression, const ParseOpts& opts) const;
 
 
     SIPlusParserContext& context();

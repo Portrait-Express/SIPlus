@@ -5,6 +5,7 @@
 #include "DFA.h"
 #include "Recognizer.h"
 #include "block_visitor.h"
+#include "build_context.h"
 #include "expr_visitor.h"
 #include "generated/StringInterpolatorLexer.h"
 #include "generated/StringInterpolatorParser.h"
@@ -113,12 +114,12 @@ Parser::~Parser() {
     //is destroyed.
 } 
 
-text::TextConstructor Parser::get_interpolation(const std::string& text) const {
-    return impl_->get_interpolation(text);
+text::TextConstructor Parser::get_interpolation(const std::string& text, const ParseOpts& opts) const {
+    return impl_->get_interpolation(text, opts);
 }
 
-std::shared_ptr<text::ValueRetriever> Parser::get_expression(const std::string& text) const {
-    return impl_->get_expression(text);
+std::shared_ptr<text::ValueRetriever> Parser::get_expression(const std::string& text, const ParseOpts& opts) const {
+    return impl_->get_expression(text, opts);
 }
 
 SIPlusParserContext& Parser::context() {
@@ -133,7 +134,7 @@ ParserImpl::ParserImpl() {
     context_ = std::make_shared<SIPlusParserContext>();
 }
 
-text::TextConstructor ParserImpl::get_interpolation(const std::string& text) const {
+text::TextConstructor ParserImpl::get_interpolation(const std::string& text, const ParseOpts& opts) const {
     antlr4::ANTLRInputStream stream{text};
     StringInterpolatorLexer lexer{&stream};
     antlr4::BufferedTokenStream tokens{&lexer};
@@ -147,13 +148,13 @@ text::TextConstructor ParserImpl::get_interpolation(const std::string& text) con
     
     antlr4::tree::ParseTree *tree = parser.program();
     std::shared_ptr<BuildContext> buildContext = std::make_shared<BuildContext>();
-    InterpolationVisitor visitor{context_, buildContext, tokens};
+    InterpolationVisitor visitor{context_, make_build_context(opts), tokens};
     auto val = tree->accept(&visitor);
 
     return std::any_cast<text::TextConstructor>(val);
 }
 
-std::shared_ptr<text::ValueRetriever> ParserImpl::get_expression(const std::string& text) const {
+std::shared_ptr<text::ValueRetriever> ParserImpl::get_expression(const std::string& text, const ParseOpts& opts) const {
     antlr4::ANTLRInputStream stream{text};
     StringInterpolatorLexer lexer{&stream};
     antlr4::BufferedTokenStream tokens{&lexer};
@@ -167,8 +168,7 @@ std::shared_ptr<text::ValueRetriever> ParserImpl::get_expression(const std::stri
     
     lexer.mode = StringInterpolatorLexer::TEMPLATE;
     auto tree = parser.expression_program();
-    std::shared_ptr<BuildContext> buildContext = std::make_shared<BuildContext>();
-    BlockVisitor visitor{context_, buildContext, tokens};
+    BlockVisitor visitor{context_, make_build_context(opts), tokens};
     auto val = tree->accept(&visitor);
 
     return std::any_cast<std::shared_ptr<text::ValueRetriever>>(val);

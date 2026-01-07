@@ -1,10 +1,37 @@
 # SIPlus - Interoperable Sring Templating Library
 
-SIPlus (String Interpolation Plus) is a solution to string templating across multiple platforms. Using this you can create a template in one system and bring it to a different system, and use it there (assuming the two SIPlus instances are configured similarly).
+SIPlus (String Interpolation Plus) (placeholder name) is a solution to string templating across multiple platforms. Using this you can 
+create a template in one system and bring it to a different system, and use it there (assuming the two SIPlus instances 
+are configured similarly).
+
+SIPlus is best used in bindings in other languages that have full reflection, but it is possible to do in C++, although 
+it is not trivial. This is implemented in C++ for smaller binary sizes, and platform independence. Special consideration
+was taken for WASM compatibility.
+
+
+## Installation \[Recommended] (CMake)(FetchContent)
+```
+FetchContent_Declare(
+  siplus
+  GIT_REPOSITORY https://github.com/Portrait-Express/siplus
+  GIT_TAG        1.1.0
+)
+
+FetchContent_MakeAvailable(siplus)
+
+target_link_libraries(myproject siplus)
+```
+
+## Installation (Other languages)
+(Limited) Bindings are available for some other languages.
+- @portrait-express/siplus [siplus-js](https://github.com/Portrait-Express/siplus-js)
+
+## Language Syntax
+Syntax for the language can be found [here](./docs/syntax.md).
 
 ## Usage
 
-WARNING: Current this library is VERY in development. NONE of the APIs are stable. It is recommended to currently pin a commit hash to keep a stable API. Public API aspects will be changing frequently.
+WARNING: Current this library is still in development (despite a >1.0.0 semver). It is recommended to currently pin a commit hash to keep a stable API. Public API aspects will be changing frequently until a good patern is decided.
 
 Below is a minimal example.
 
@@ -36,16 +63,21 @@ struct PersonAccessor : text::Accessor {
 };
 
 int main() {
-    Parser parser;
+    Parser c;
+    c.context().use_stl();
     c.context().emplace_accessor<PersonAccessor>();
 
-    text::TextConstructor c = parser.get_interpolation("Im sorry { .name }.");
+    auto data = c.context().builder().use_default(text::make_data(person)).build();
 
-    std::string text = c.construct(person);
+    text::TextConstructor c = parser.get_interpolation("Im sorry { .name }.");
+    std::string text = c.construct(data);
 
     return 0;
 }
 ```
+
+---
+## Issues in CPP
 
 The main problem we have to work around is that, in CPP, there is no way to access a member of an object at runtime if you only have the string name of that member. We get around this by adding `Accessor`s which are type-specific handlers that are able to resolve these properties.  
 

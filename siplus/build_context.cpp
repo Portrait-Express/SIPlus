@@ -72,4 +72,18 @@ Function& BuildContext::function(const std::string& name) {
     }
 }
 
+std::shared_ptr<BuildContext> make_build_context(const ParseOpts opts) {
+    auto res = std::make_shared<BuildContext>();
+
+    for(auto global : opts.globals) {
+        res->get_variable(global, true);
+    }
+
+    return res;
+}
+     
+std::shared_ptr<BuildContext> make_build_context(std::shared_ptr<BuildContext> parent) {
+    return std::make_shared<BuildContext>(parent);
+}
+
 } /* SIPLUS_NAMESPACE */

@@ -2,7 +2,10 @@
 #include <cfloat>
 #include <iostream>
 #include <string>
+#include <tuple>
 
+#include "siplus/context.h"
+#include "siplus/parser.h"
 #include "siplus/siplus.h"
 #include "siplus/text/data.h"
 #include "siplus/text/text.h"
@@ -165,22 +168,25 @@ bool compare(const T& v1, const T& v2) {
     return compare<T, T>(v1, v2);
 }
 
-template<typename T, typename _ExpectedType = T>
-int test_expression(const std::string& expression, const T& expected) {
-    return test_expression<T, test_data, _ExpectedType>(expression, test_data{}, expected);
-}
-
 template<typename T, typename V, typename _ExpectedType = T>
-int test_expression(const std::string& expression, const V& data, const T& expected) {
-    auto retriever = get_test_context().get_expression(expression);
+int test_expression(
+    const std::string& expression, 
+    const SIPLUS_NAMESPACE::ParseOpts& opts,
+    const V& data, 
+    const T& expected
+) {
+    auto retriever = get_test_context().get_expression(expression, opts);
 
-    auto invoCtx = get_test_context()
-        .context()
-        .builder()
-        .use_default(SIPlus::text::make_data(data))
-        .build();
+    std::shared_ptr<SIPLUS_NAMESPACE::InvocationContext> ctx;
+    if constexpr (std::is_same_v<V, std::shared_ptr<SIPLUS_NAMESPACE::InvocationContext>>) {
+        ctx = data;
+    } else {
+        ctx = get_test_context().context().builder()
+            .use_default(SIPlus::text::make_data(data))
+            .build();
+    }
 
-    auto result = retriever->retrieve(*invoCtx);
+    auto result = retriever->retrieve(*ctx);
 
     if(!result.template is<_ExpectedType>()) {
         std::cout << "Expression \"" << expression << "\" failed: Expected type " 
@@ -200,9 +206,28 @@ int test_expression(const std::string& expression, const V& data, const T& expec
     return 0;
 }
 
+template<typename T, typename _ExpectedType = T>
+int test_expression(const std::string& expression, const T& expected) {
+    return test_expression<T, test_data, _ExpectedType>(expression, SIPLUS_NAMESPACE::ParseOpts{}, test_data{}, expected);
+}
+
+template<typename T, typename V, typename _ExpectedType = T>
+int test_expression(
+    const std::string& expression, 
+    const V& data, 
+    const T& expected
+) {
+    return test_expression<T, V, _ExpectedType>(expression, SIPLUS_NAMESPACE::ParseOpts{}, data, expected);
+}
+
 template<typename V>
-int test_interpolation(const std::string& expression, const V& data, const std::string& expected) {
-    auto retriever = get_test_context().get_interpolation(expression);
+int test_interpolation(
+    const std::string& expression, 
+    const SIPLUS_NAMESPACE::ParseOpts& opts,
+    const V& data, 
+    const std::string& expected
+) {
+    auto retriever = get_test_context().get_interpolation(expression, opts);
 
     auto invoCtx = get_test_context()
         .context()
@@ -223,7 +248,7 @@ int test_interpolation(const std::string& expression, const V& data, const std::
 }
 
 inline int test_interpolation(const std::string& expression, const std::string& expected) {
-    return test_interpolation<test_data>(expression, test_data{}, expected);
+    return test_interpolation<test_data>(expression, SIPLUS_NAMESPACE::ParseOpts{}, test_data{}, expected);
 }
 
 inline int expect_throw(std::function<void ()> func) {

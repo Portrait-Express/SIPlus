@@ -17,7 +17,7 @@ ContextInvocationContextBuilder& ContextInvocationContextBuilder::use_default(te
 }
 
 ContextInvocationContextBuilder& ContextInvocationContextBuilder::with(std::string name, text::UnknownDataTypeContainer data) {
-    variables_["0"] = data;
+    variables_[name] = data;
     return *this;
 }
 
