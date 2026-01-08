@@ -64,6 +64,11 @@ You can even use piped expressions as parameters to functions, by wrapping it wi
 { substr .first_name ( 0 | add 2 ) } // hn
 ```
 
+You can also use accessors on a piped value.
+```
+{ .contact | .address } is equivalent to { .contact.address }
+```
+
 ## Expression mode
 Before we dive deeper into more complicated features, the other powerful feature SIPlus provides, is "Expression Parsing". 
 If you call `parse_expression` instead of `parse_interpolation`, you are able to get essentially a transformer 

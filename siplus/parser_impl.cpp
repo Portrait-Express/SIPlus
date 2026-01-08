@@ -10,12 +10,14 @@
 #include "generated/StringInterpolatorLexer.h"
 #include "generated/StringInterpolatorParser.h"
 
+#include "siplus/invocation_context.h"
 #include "siplus/parser.h"
 #include "siplus/context.h"
 #include "siplus/text/constructor.h"
 
 #include "parser_impl.h"
 #include "interpolation_visitor.h"
+#include "siplus/text/data.h"
 #include <sstream>
 
 namespace SIPLUS_NAMESPACE {
@@ -102,6 +104,20 @@ void ErrorListener::reportContextSensitivity(
 
 }
 
+/**
+ * struct NewScopeValueRetriever - Wraps the passed scope in a new scope to avoid variable propagation.
+ */
+struct NewScopeValueRetriever : text::ValueRetriever {
+    NewScopeValueRetriever(std::shared_ptr<text::ValueRetriever> expr) : expr_(expr) {}
+
+    text::UnknownDataTypeContainer retrieve(InvocationContext &value) const override {
+        auto wrapped = wrap_scope(value.shared_from_this()).build();
+        return expr_->retrieve(*wrapped);
+    }
+
+private:
+    std::shared_ptr<text::ValueRetriever> expr_;
+};
 
 } /* anonymous */
 
@@ -171,7 +187,8 @@ std::shared_ptr<text::ValueRetriever> ParserImpl::get_expression(const std::stri
     BlockVisitor visitor{context_, make_build_context(opts), tokens};
     auto val = tree->accept(&visitor);
 
-    return std::any_cast<std::shared_ptr<text::ValueRetriever>>(val);
+    auto retriever = std::any_cast<std::shared_ptr<text::ValueRetriever>>(val);
+    return std::make_shared<NewScopeValueRetriever>(retriever);
 }
 
 

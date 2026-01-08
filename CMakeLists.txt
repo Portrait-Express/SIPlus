@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 
 option(SIPLUS_INCLUDE_STDLIB "Include standard library base for siplus. Can be disabled to reduce binary size" ON)
 option(SIPLUS_SANITIZE_ADDRESS "Set -fsanitize=address for memory leak testing" OFF)
+option(SIPLUS_BUILD_EXAMPLES "Build Examples" OFF)
 set(SIPLUS_NAMESPACE SIPlus CACHE STRING "Optionally specify a different root namespace")
 
 project(siplus VERSION 1.0.2)
@@ -44,6 +45,10 @@ if(SIPLUS_INCLUDE_STDLIB)
 endif()
 
 add_library(siplus ${SIPLUS_SOURCES})
+
+if(SIPLUS_BUILD_EXAMPLES)
+    add_subdirectory(example)
+endif()
 
 if(SIPLUS_SANITIZE_ADDRESS)
     target_compile_options(siplus PUBLIC -fsanitize=address)

@@ -19,6 +19,8 @@ void TextConstructor::addStep(std::shared_ptr<TextConstructorStep> step) {
 }
 
 std::string TextConstructor::construct_with(std::shared_ptr<InvocationContext> data) {
+    data = wrap_scope(data).build(); //Wrap as to not alter passed data
+
     std::stringstream ss;
 
     for(auto& step : steps_) {
