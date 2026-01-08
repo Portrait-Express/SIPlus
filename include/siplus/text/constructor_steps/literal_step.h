@@ -1,9 +1,10 @@
 #ifndef INCLUDE_SIPLUS_TEXT_LITERAL_STEP_H_
 #define INCLUDE_SIPLUS_TEXT_LITERAL_STEP_H_
 
+#include <string>
+
 #include "siplus/invocation_context.h"
 #include "siplus/text/constructor_steps/constructor_step.h"
-#include "siplus/text/value_retrievers/retriever.h"
 
 namespace SIPLUS_NAMESPACE {
 namespace text {

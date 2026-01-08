@@ -1,7 +1,10 @@
 #ifndef INCLUDE_SIPLUS_PARSER_H
 #define INCLUDE_SIPLUS_PARSER_H
 
+#include <algorithm>
 #include <memory>
+#include <string>
+#include <vector>
 
 #include "siplus/context.h"
 #include "siplus/text/constructor.h"

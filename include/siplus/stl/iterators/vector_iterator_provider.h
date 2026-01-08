@@ -1,13 +1,16 @@
 #ifndef INCLUDE_ITERATORS_VECTOR_ITERATOR_PROVIDER_H_
 #define INCLUDE_ITERATORS_VECTOR_ITERATOR_PROVIDER_H_
 
+#include <memory>
+#include <stdexcept>
+#include <vector>
+
 #include "siplus/config.h"
+#include "siplus/text/iterator.h"
 
 // Not checking SIPLUS_INCLUDE_STDLIB as nothing here relies on STL object files.
 // Users are free to include and instantiate the classes below, as they are 
 // contained in their entirety due to being templates
-
-#include "siplus/text/iterator.h"
 
 namespace SIPLUS_NAMESPACE {
 namespace stl {

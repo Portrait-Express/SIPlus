@@ -6,6 +6,7 @@
 #ifdef SIPLUS_INCLUDE_STDLIB
 
 #include <memory>
+#include <vector>
 
 #include "siplus/text/data.h"
 #include "siplus/invocation_context.h"

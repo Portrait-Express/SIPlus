@@ -1,6 +1,9 @@
 #ifndef INCLUDE_SIPLUS_TEXT_ACCESSOR_RETRIEVER_H_
 #define INCLUDE_SIPLUS_TEXT_ACCESSOR_RETRIEVER_H_
 
+#include <memory>
+#include <string>
+
 #include "siplus/config.h"
 #include "siplus/context.h"
 #include "siplus/invocation_context.h"

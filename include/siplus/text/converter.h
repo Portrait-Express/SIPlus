@@ -1,9 +1,10 @@
 #ifndef INCLUDE_SIPLUS_TEXT_CONVERTER_H_
 #define INCLUDE_SIPLUS_TEXT_CONVERTER_H_
 
+#include <typeindex>
+
 #include "siplus/config.h"
 #include "siplus/text/data.h"
-#include <typeindex>
 
 namespace SIPLUS_NAMESPACE {
 namespace text {

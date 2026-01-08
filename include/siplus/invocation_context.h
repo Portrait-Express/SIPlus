@@ -1,8 +1,12 @@
 #ifndef INCLUDE_SIPLUS_INVOCATION_CONTEXT_H_
 #define INCLUDE_SIPLUS_INVOCATION_CONTEXT_H_
 
-#include "siplus/text/data.h"
 #include <memory>
+#include <string>
+#include <unordered_map>
+
+#include "siplus/config.h"
+#include "siplus/text/data.h"
 
 namespace SIPLUS_NAMESPACE {
     
@@ -11,6 +15,7 @@ struct InvocationContext : public std::enable_shared_from_this<InvocationContext
     virtual bool variable_defined(std::string key) const = 0;
     virtual const text::UnknownDataTypeContainer variable(std::string key) const = 0;
     virtual void set_variable(std::string key, const text::UnknownDataTypeContainer& val) = 0;
+    virtual ~InvocationContext() = default;
 };
 
 /**

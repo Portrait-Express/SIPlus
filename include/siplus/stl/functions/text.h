@@ -2,12 +2,15 @@
 #define INCLUDE_FUNCTIONS_TEXT_H_
 
 #include "siplus/config.h"
-#include "siplus/stl/functions/converting_operator.h"
 
 #ifdef SIPLUS_INCLUDE_STDLIB
 
+#include <memory>
+#include <vector>
+
 #include "siplus/context.h"
 #include "siplus/function.h"
+#include "siplus/stl/functions/converting_operator.h"
 
 namespace SIPLUS_NAMESPACE {
 namespace stl {

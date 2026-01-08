@@ -1,6 +1,8 @@
 #ifndef INCLUDE_ITERATORS_STRING_ITERATOR_PROVIDER_H_
 #define INCLUDE_ITERATORS_STRING_ITERATOR_PROVIDER_H_
 
+#include <memory>
+
 #include "siplus/config.h"
 
 #ifdef SIPLUS_INCLUDE_STDLIB

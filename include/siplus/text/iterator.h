@@ -1,9 +1,10 @@
 #ifndef INCLUDE_SIPLUS_TEXT_ITERATOR_H_
 #define INCLUDE_SIPLUS_TEXT_ITERATOR_H_
 
+#include <memory>
+
 #include "siplus/config.h"
 #include "siplus/text/data.h"
-#include <memory>
 
 namespace SIPLUS_NAMESPACE {
 namespace text {

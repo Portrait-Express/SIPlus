@@ -45,6 +45,7 @@ if(SIPLUS_INCLUDE_STDLIB)
 endif()
 
 add_library(siplus ${SIPLUS_SOURCES})
+target_precompile_headers(siplus PRIVATE "${PROJECT_SOURCE_DIR}/include/siplus/pch.h")
 
 if(SIPLUS_BUILD_EXAMPLES)
     add_subdirectory(example)

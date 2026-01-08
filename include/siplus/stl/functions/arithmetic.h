@@ -2,15 +2,15 @@
 #define INCLUDE_FUNCTIONS_ARITHMETIC_H_
 
 #include "siplus/config.h"
-#include "siplus/stl/functions/converting_operator.h"
-#include "siplus/text/text.h"
 
 #ifdef SIPLUS_INCLUDE_STDLIB
 
 #include <memory>
 
 #include "siplus/context.h"
+#include "siplus/stl/functions/converting_operator.h"
 #include "siplus/text/data.h"
+#include "siplus/text/text.h"
 
 namespace SIPLUS_NAMESPACE {
 namespace stl {

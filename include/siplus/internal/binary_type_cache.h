@@ -1,12 +1,12 @@
 #ifndef INCLUDE_INTERNAL_BINARY_TYPE_CACHE_H_
 #define INCLUDE_INTERNAL_BINARY_TYPE_CACHE_H_
 
-#include "siplus/config.h"
-#include <concepts>
 #include <list>
 #include <memory>
 #include <typeindex>
 #include <unordered_map>
+
+#include "siplus/config.h"
 
 namespace SIPLUS_NAMESPACE {
 namespace internal {

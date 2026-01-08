@@ -2,11 +2,13 @@
 #define INCLUDE_CONVERTERS_NUMERIC_H_
 
 #include "siplus/config.h"
-#include "siplus/context.h"
-#include <memory>
 
 #ifdef SIPLUS_INCLUDE_STDLIB
 
+#include <memory>
+#include <typeindex>
+
+#include "siplus/context.h"
 #include "siplus/text/converter.h"
 
 namespace SIPLUS_NAMESPACE {

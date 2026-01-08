@@ -1,8 +1,6 @@
 #ifndef INCLUDE_SIPLUS_TEXT_LITERAL_RETRIEVER_H_
 #define INCLUDE_SIPLUS_TEXT_LITERAL_RETRIEVER_H_
 
-#include <any>
-
 #include "siplus/config.h"
 #include "siplus/invocation_context.h"
 #include "siplus/text/data.h"

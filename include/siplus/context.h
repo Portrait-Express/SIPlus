@@ -2,8 +2,11 @@
 #define INCLUDE_SIPLUS_TEXT_CONTEXT_H_
 
 #include <memory>
+#include <string>
 #include <type_traits>
+#include <typeindex>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "siplus/internal/binary_type_cache.h"

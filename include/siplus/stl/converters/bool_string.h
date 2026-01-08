@@ -5,6 +5,8 @@
 
 #ifdef SIPLUS_INCLUDE_STDLIB
 
+#include <typeindex>
+
 #include "siplus/text/converter.h"
 
 namespace SIPLUS_NAMESPACE {
