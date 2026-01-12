@@ -229,11 +229,16 @@ int test_interpolation(
 ) {
     auto retriever = get_test_context().get_interpolation(expression, opts);
 
-    auto invoCtx = get_test_context()
-        .context()
-        .builder()
-        .use_default(SIPlus::text::make_data(data))
-        .build();
+    std::shared_ptr<SIPlus::InvocationContext> invoCtx;
+    if constexpr (std::is_same_v<V, std::shared_ptr<SIPlus::InvocationContext>>) {
+        invoCtx = data;
+    } else {
+        invoCtx = get_test_context()
+            .context()
+            .builder()
+            .use_default(SIPlus::text::make_data(data))
+            .build();
+    }
 
     auto result = retriever.construct_with(invoCtx);
 

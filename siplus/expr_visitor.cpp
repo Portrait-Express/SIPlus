@@ -5,6 +5,7 @@
 
 #include <any>
 #include <memory>
+#include <ostream>
 
 #include "siplus/invocation_context.h"
 #include "siplus/text/data.h"
@@ -154,8 +155,11 @@ public:
 
 class ArgListVisitor : public SIPlusParseTreeVisitor {
 public:
-    ArgListVisitor(std::shared_ptr<SIPlusParserContext> context, const antlr4::BufferedTokenStream& tokens)
-        : context_(context), tokens_(tokens) {}
+    ArgListVisitor(
+        std::shared_ptr<SIPlusParserContext> context, 
+        std::shared_ptr<BuildContext> buildContext,
+        const antlr4::BufferedTokenStream& tokens
+    ) : context_(context), buildContext_(buildContext), tokens_(tokens) {}
 
     bool shouldVisitNextChild(antlr4::tree::ParseTree *node, const std::any& currentResult) override {
         return dynamic_cast<StringInterpolatorParser::ArgumentContext*>(node) == nullptr;
@@ -212,8 +216,8 @@ std::any ExpressionVisitor::visitExpr_block(StringInterpolatorParser::Expr_block
 PipedExpressionVisitor::PipedExpressionVisitor(
     std::shared_ptr<SIPlusParserContext> context, 
     std::shared_ptr<BuildContext> buildContext,
-    const antlr4::BufferedTokenStream& tokens) 
-: context_(context), buildContext_(buildContext), tokens_(tokens) {}
+    const antlr4::BufferedTokenStream& tokens
+) : context_(context), buildContext_(buildContext), tokens_(tokens) {}
 
 bool PipedExpressionVisitor::shouldVisitNextChild(antlr4::tree::ParseTree *node, const std::any& currentResult) {
     return dynamic_cast<StringInterpolatorParser::FuncContext*>(node) == nullptr &&
@@ -227,7 +231,7 @@ std::any PipedExpressionVisitor::visitFunc(StringInterpolatorParser::FuncContext
 
     std::any val;
     if(ctx->arg_list()) {
-        ArgListVisitor visitor{context_, tokens_};
+        ArgListVisitor visitor{context_, buildContext_, tokens_};
         val = ctx->arg_list()->accept(&visitor);
     } else {
         val = std::vector<std::shared_ptr<text::ValueRetriever>>{};
