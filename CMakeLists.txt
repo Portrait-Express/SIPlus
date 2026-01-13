@@ -5,7 +5,7 @@ option(SIPLUS_SANITIZE_ADDRESS "Set -fsanitize=address for memory leak testing" 
 option(SIPLUS_BUILD_EXAMPLES "Build Examples" OFF)
 set(SIPLUS_NAMESPACE SIPlus CACHE STRING "Optionally specify a different root namespace")
 
-project(siplus VERSION 1.1.1)
+project(siplus VERSION 1.1.2)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
