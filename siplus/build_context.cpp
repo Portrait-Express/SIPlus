@@ -1,17 +1,103 @@
-#include "build_context.h"
-#include "siplus/util.h"
+#include "siplus/build_context.h"
+#include "siplus/text/data.h"
+#include <iostream>
+#include <ostream>
 
 namespace SIPLUS_NAMESPACE {
 
-text::UnknownDataTypeContainer VariableRetriever::retrieve(InvocationContext &value) const {
-    return value.variable(name);
+namespace {
+
+struct VariableRetrieverImpl : VariableRetriever {
+    VariableRetrieverImpl(
+        std::string name,
+        bool is_const
+    ) : name_(name), is_const_(is_const) {}
+
+    virtual bool is_persist() const override;
+    virtual bool is_mutable() const override;
+    virtual std::string name() const override;
+
+    text::UnknownDataTypeContainer retrieve(InvocationContext& context) const override;
+
+private:
+    virtual void set(InvocationContext& context, text::UnknownDataTypeContainer value) override;
+
+    std::string name_;
+    bool is_const_:1 = false;
+    bool initialized_:1 = false;
+};
+
+bool VariableRetrieverImpl::is_persist() const { return false; }
+bool VariableRetrieverImpl::is_mutable() const { return !is_const_ || !initialized_; }
+std::string VariableRetrieverImpl::name() const { return name_; }
+
+text::UnknownDataTypeContainer VariableRetrieverImpl::retrieve(
+    InvocationContext& context
+) const {
+    return context.variable(name_);
 }
 
-void VariableRetriever::set_value(
-    InvocationContext& context,
+void VariableRetrieverImpl::set(
+    InvocationContext& context, 
     text::UnknownDataTypeContainer value
-) const {
-    context.set_variable(name, value);
+) {
+    initialized_ = true;
+    context.set_variable(name_, value);
+}
+
+struct PersistentVariableRetrieverImpl : VariableRetriever {
+    PersistentVariableRetrieverImpl(
+        std::string name,
+        bool is_const
+    ) : name_(name), is_const_(is_const) {}
+
+    virtual bool is_persist() const override;
+    virtual bool is_mutable() const override;
+    virtual std::string name() const override;
+
+    text::UnknownDataTypeContainer retrieve(InvocationContext& context) const override;
+
+private:
+    virtual void set(InvocationContext& context, text::UnknownDataTypeContainer value) override;
+
+    std::string name_;
+    text::UnknownDataTypeContainer data_;
+    bool is_const_:1 = false;
+    bool initialized_:1 = false;
+};
+
+bool PersistentVariableRetrieverImpl::is_persist() const { return true; }
+bool PersistentVariableRetrieverImpl::is_mutable() const { 
+    return !is_const_ || !initialized_;
+}
+std::string PersistentVariableRetrieverImpl::name() const { return name_; }
+
+text::UnknownDataTypeContainer 
+PersistentVariableRetrieverImpl::retrieve(InvocationContext& context) const {
+    return data_;
+}
+
+void PersistentVariableRetrieverImpl::set(
+    InvocationContext& context, 
+    text::UnknownDataTypeContainer value
+) {
+    initialized_ = true;
+    data_ = value;
+}
+
+} /* anonymous */
+
+void VariableRetriever::set_value(
+    InvocationContext& context, 
+    text::UnknownDataTypeContainer value
+) {
+    if(!is_mutable()) {
+        throw std::runtime_error{util::to_string(
+            "Attempted to mutate a const variable '$", name(), "'."
+        )};
+    }
+
+    this->set(context, value);
 }
 
 bool BuildContext::has_variable(std::string name) {
@@ -28,20 +114,34 @@ bool BuildContext::has_variable(std::string name) {
     return true;
 }
 
-std::shared_ptr<VariableRetriever> BuildContext::get_variable(std::string name, bool declare) {
+std::shared_ptr<VariableRetriever> BuildContext::declare_variable(
+    std::string name,
+    const VariableOpts& opts
+) {
+    std::shared_ptr<VariableRetriever> variable;
+
+    if(variables_.contains(name)) {
+        throw std::runtime_error{util::to_string("Redefinition of '$", name, "'")};
+    }
+
+    if(opts.is_persist) {
+        variable = std::make_shared<PersistentVariableRetrieverImpl>(name, opts.is_const);
+    } else {
+        variable = std::make_shared<VariableRetrieverImpl>(name, opts.is_const);
+    }
+
+    variables_[name] = variable;
+    return variable;
+}
+
+std::shared_ptr<VariableRetriever> BuildContext::get_variable(std::string name) {
     auto it = variables_.find(name);
 
     if(it == variables_.end()) {
-        if(parent_ && parent_->has_variable(name)) {
+        if(parent_) {
             return parent_->get_variable(name);
         } else {
-            if(declare) {
-                auto var = std::make_shared<VariableRetriever>(name);
-                variables_[name] = var;
-                return var;
-            } else {
-                throw std::runtime_error{util::to_string("Undefined variable '", name, '\'')};
-            }
+            throw std::runtime_error{util::to_string("Undefined variable '", name, '\'')};
         }
     }
 
@@ -76,7 +176,9 @@ std::shared_ptr<BuildContext> make_build_context(const ParseOpts opts) {
     auto res = std::make_shared<BuildContext>();
 
     for(auto global : opts.globals) {
-        res->get_variable(global, true);
+        VariableOpts varOpts;
+        varOpts.is_const = true;
+        res->declare_variable(global, varOpts);
     }
 
     return res;

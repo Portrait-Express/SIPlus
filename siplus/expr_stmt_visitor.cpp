@@ -1,4 +1,3 @@
-#include "block_visitor.h"
 #include "expr_stmt_visitor.h"
 #include "expr_visitor.h"
 #include "generated/StringInterpolatorParser.h"
@@ -42,12 +41,18 @@ struct AssignStmt : Statement {
     ) : variable_(variable), expression_(expression) { }
 
     void invoke(InvocationContext& ctx) override {
+        if(variable_->is_persist()) {
+            if(persistInitialized_) return;
+            persistInitialized_ = true;
+        }
+
         variable_->set_value(ctx, expression_->retrieve(ctx));
     }
 
 private:
     std::shared_ptr<VariableRetriever> variable_;
     std::shared_ptr<text::ValueRetriever> expression_;
+    bool persistInitialized_:1 = false;
 };
 
 struct ExprStmt : Statement {
@@ -203,7 +208,22 @@ std::any ExprStmtVisitor::visitAssign_stmt(StringInterpolatorParser::Assign_stmt
     ExpressionVisitor visitor{context_, buildContext_, tokens_};
     auto expression = visitor.visit(ctx->expr());
 
-    auto variable = buildContext_->get_variable(varName, true);
+    VariableOpts opts;
+    opts.is_const = static_cast<bool>(ctx->CONST());
+    opts.is_persist = static_cast<bool>(ctx->PERSIST());
+
+    std::shared_ptr<VariableRetriever> variable;
+    if(ctx->VAR()) {
+        variable = buildContext_->declare_variable(varName, opts);
+    } else {
+        variable = buildContext_->get_variable(varName);
+
+        if(variable->is_mutable()) {
+            throw std::runtime_error{util::to_string(
+                "Attempted to mutate a const variable '$", varName, "'.")};
+        }
+    }
+
     return std::static_pointer_cast<Statement>(std::make_shared<AssignStmt>(variable, expression));
 }
 

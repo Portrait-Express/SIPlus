@@ -1,6 +1,5 @@
 #include <sstream>
 
-#include "invocation_context_impl.h"
 #include "siplus/context.h"
 #include "siplus/invocation_context.h"
 #include "siplus/text/constructor.h"

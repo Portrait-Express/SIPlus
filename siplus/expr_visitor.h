@@ -4,7 +4,7 @@
 #include "BufferedTokenStream.h"
 
 #include "ParseTree.h"
-#include "build_context.h"
+#include "siplus/build_context.h"
 #include "siplus/config.h"
 #include "siplus/context.h"
 #include "siplus/text/value_retrievers/retriever.h"

@@ -2,7 +2,7 @@
 #define INCLUDE_SIPLUS_INTERPOLATION_VISITOR_H_
 
 #include "BufferedTokenStream.h"
-#include "build_context.h"
+#include "siplus/build_context.h"
 
 #include "siplus/context.h"
 #include "siplus/text/constructor.h"

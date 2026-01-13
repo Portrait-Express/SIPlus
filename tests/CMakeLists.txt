@@ -11,12 +11,7 @@ endif()
 
 add_subdirectory(util)
 
-set(TEST_SOURCES 
-    test_array.cxx
-    test_expression.cxx
-    test_interpolate.cxx
-    test_variable.cxx
-)
+set(TEST_SOURCES test_base.cxx)
 
 if(SIPLUS_INCLUDE_STDLIB)
     set(TEST_SOURCES ${TEST_SOURCES} test_stdlib.cxx)

@@ -1,6 +1,7 @@
 #include "siplus/util.h"
 #include "siplus/context.h"
 #include "siplus/text/text.h"
+
 #include <memory>
 #include <typeindex>
 

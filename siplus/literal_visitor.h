@@ -3,7 +3,7 @@
 
 #include "BufferedTokenStream.h"
 
-#include "build_context.h"
+#include "siplus/build_context.h"
 #include "siplus/context.h"
 #include "visitor.h"
 

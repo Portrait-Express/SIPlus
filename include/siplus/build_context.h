@@ -11,12 +11,20 @@
 
 namespace SIPLUS_NAMESPACE {
 
+struct VariableOpts {
+    bool is_persist:1 = false;
+    bool is_const:1 = false;
+};
+
 struct VariableRetriever : public text::ValueRetriever {
-    VariableRetriever(std::string name) : name(name) {}
-    void set_value(InvocationContext& context, text::UnknownDataTypeContainer value) const;
-    text::UnknownDataTypeContainer retrieve(InvocationContext &value) const override;
+    virtual bool is_persist() const = 0;
+    virtual bool is_mutable() const = 0;
+    virtual std::string name() const = 0;
+
+    void set_value(InvocationContext& context, text::UnknownDataTypeContainer value);
+
 private:
-    std::string name;
+    virtual void set(InvocationContext& context, text::UnknownDataTypeContainer value) = 0;
 };
 
 struct BuildContext : public std::enable_shared_from_this<BuildContext> {
@@ -39,7 +47,19 @@ struct BuildContext : public std::enable_shared_from_this<BuildContext> {
      * @param declare If set to `true` this will declare the variable in the 
      * current scope, if not defined.
      */
-    std::shared_ptr<VariableRetriever> get_variable(std::string name, bool declare = false);
+    std::shared_ptr<VariableRetriever> get_variable(std::string name);
+
+    /**
+     * @brief Declare a variable in the current scope
+     *
+     * @param name The name of the variable.
+     * @param opts The options of the variable.
+     * @return The created variable
+     */
+    std::shared_ptr<VariableRetriever> declare_variable(
+        std::string name, 
+        const VariableOpts& opts
+    );
 
     bool has_function(const std::string& name);
     Function& function(const std::string& name);
@@ -49,6 +69,7 @@ struct BuildContext : public std::enable_shared_from_this<BuildContext> {
         if(has_function(name)) {
             throw std::runtime_error{util::to_string("Function '@", name, "' already defined")};
         }
+
         functions_[name] = std::make_unique<T>(std::forward<Ts>(args)...);
     }
 

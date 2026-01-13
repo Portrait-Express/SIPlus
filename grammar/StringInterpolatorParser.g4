@@ -28,7 +28,7 @@ expr_item: literal | property | func | array | variable_reference ;
 piped_expression: expr_item WS* PIPE WS* ( expr_item | piped_expression ) ;
 expr: expr_item | piped_expression | expr_block ;
 
-assign_stmt: DOLLAR ID WS* EQUAL WS* expr ;
+assign_stmt: ( ( PERSIST WS+ )? ( CONST WS+ )? VAR WS+ )? DOLLAR ID WS* EQUAL WS* expr ;
 function_parameter: ID QUESTION? ;
 function_parameters: OPENP WS* ( function_parameter WS* ( COMMA WS* function_parameter WS* )* COMMA? ) WS* CLOSEP ;
 function_def_stmt: AT ID WS* function_parameters? WS* ARROW WS* expr_block ;
@@ -56,6 +56,7 @@ interpolated_str: ( normal | stmt )* ;
 
 expression_program: WS* expr_block_contents WS* EOF;
 program: interpolated_str EOF;
+
 
 
 

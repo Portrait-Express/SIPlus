@@ -8,6 +8,9 @@ mode TEMPLATE;
 
 TRUE: 'true' ;
 FALSE: 'false' ;
+VAR: 'var' ;
+PERSIST: 'persist' ;
+CONST: 'const' ;
 DOT: '.' ;
 HASH: '#' ;
 SLASH: '/' ;

@@ -1,7 +1,7 @@
 #ifndef INCLUDE_SIPLUS_EXPR_STMT_VISITOR_H_
 #define INCLUDE_SIPLUS_EXPR_STMT_VISITOR_H_
 
-#include "build_context.h"
+#include "siplus/build_context.h"
 #include "siplus/context.h"
 #include "visitor.h"
 

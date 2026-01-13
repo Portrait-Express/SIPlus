@@ -12,12 +12,12 @@
 class  StringInterpolatorParser : public antlr4::Parser {
 public:
   enum {
-    NORMAL_TEXT = 1, NORMAL_ESCAPE = 2, OPEN = 3, TRUE = 4, FALSE = 5, DOT = 6, 
-    HASH = 7, SLASH = 8, CLOSE = 9, OPENP = 10, CLOSEP = 11, OPENB = 12, 
-    CLOSEB = 13, COMMA = 14, PIPE = 15, DOLLAR = 16, SEMICOLON = 17, QUESTION = 18, 
-    AT = 19, EQUAL = 20, ARROW = 21, BACKSLASH = 22, STRING_START = 23, 
-    WS = 24, INT = 25, FLOAT = 26, ID = 27, ANY = 28, STRING_TEXT = 29, 
-    STRING_ESCAPE = 30, STRING_END = 31
+    NORMAL_TEXT = 1, NORMAL_ESCAPE = 2, OPEN = 3, TRUE = 4, FALSE = 5, VAR = 6, 
+    PERSIST = 7, CONST = 8, DOT = 9, HASH = 10, SLASH = 11, CLOSE = 12, 
+    OPENP = 13, CLOSEP = 14, OPENB = 15, CLOSEB = 16, COMMA = 17, PIPE = 18, 
+    DOLLAR = 19, SEMICOLON = 20, QUESTION = 21, AT = 22, EQUAL = 23, ARROW = 24, 
+    BACKSLASH = 25, STRING_START = 26, WS = 27, INT = 28, FLOAT = 29, ID = 30, 
+    ANY = 31, STRING_TEXT = 32, STRING_ESCAPE = 33, STRING_END = 34
   };
 
   enum {
@@ -151,7 +151,6 @@ public:
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *DOLLAR();
     antlr4::tree::TerminalNode *ID();
-    antlr4::tree::TerminalNode *INT();
     std::vector<Property_itemContext *> property_item();
     Property_itemContext* property_item(size_t i);
 
@@ -375,8 +374,11 @@ public:
     antlr4::tree::TerminalNode *ID();
     antlr4::tree::TerminalNode *EQUAL();
     ExprContext *expr();
+    antlr4::tree::TerminalNode *VAR();
     std::vector<antlr4::tree::TerminalNode *> WS();
     antlr4::tree::TerminalNode* WS(size_t i);
+    antlr4::tree::TerminalNode *PERSIST();
+    antlr4::tree::TerminalNode *CONST();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
