@@ -36,6 +36,7 @@ set(SIPLUS_SOURCES
 if(SIPLUS_INCLUDE_STDLIB)
     set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/arithmetic.cpp)
     set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/comparison.cpp)
+    set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/control.cpp)
     set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/converting_operator.cpp)
     set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/converters.cpp)
     set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/iterable.cpp)

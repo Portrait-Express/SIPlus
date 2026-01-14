@@ -27,6 +27,19 @@ private:
     std::weak_ptr<SIPlusParserContext> context_;
 };
 
+struct while_func : Function  {
+    explicit while_func(std::weak_ptr<SIPlusParserContext> context) 
+        : context_(context) { }
+
+    std::shared_ptr<text::ValueRetriever> value(
+        std::shared_ptr<text::ValueRetriever> parent, 
+        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    ) const override;
+
+private:
+    std::weak_ptr<SIPlusParserContext> context_;
+};
+
 } /* stl */
 } /* SIPLUS_NAMESPACE */
 

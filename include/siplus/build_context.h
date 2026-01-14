@@ -18,13 +18,10 @@ struct VariableOpts {
 
 struct VariableRetriever : public text::ValueRetriever {
     virtual bool is_persist() const = 0;
-    virtual bool is_mutable() const = 0;
+    virtual bool is_const() const = 0;
     virtual std::string name() const = 0;
 
-    void set_value(InvocationContext& context, text::UnknownDataTypeContainer value);
-
-private:
-    virtual void set(InvocationContext& context, text::UnknownDataTypeContainer value) = 0;
+    virtual void set_value(InvocationContext& context, text::UnknownDataTypeContainer value) = 0;
 };
 
 struct BuildContext : public std::enable_shared_from_this<BuildContext> {

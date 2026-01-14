@@ -27,6 +27,7 @@ int test_base(int, char**) {
                     return tests(
                         test_expression<int>("var $A = (.x); $A", 2),
                         test_expression<long>("var $A = 123; $A", 123),
+                        test_expression<long>("var $A = 123; $A = 234; $A", 234),
                         test_expression<int>("$extra.x", extraOpts, extra, 2),
                         test("const", [](const SIPLUS_NAMESPACE::Parser& parser) {
                             return tests(

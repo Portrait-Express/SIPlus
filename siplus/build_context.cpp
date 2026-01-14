@@ -1,7 +1,5 @@
 #include "siplus/build_context.h"
 #include "siplus/text/data.h"
-#include <iostream>
-#include <ostream>
 
 namespace SIPLUS_NAMESPACE {
 
@@ -14,21 +12,20 @@ struct VariableRetrieverImpl : VariableRetriever {
     ) : name_(name), is_const_(is_const) {}
 
     virtual bool is_persist() const override;
-    virtual bool is_mutable() const override;
+    virtual bool is_const() const override;
     virtual std::string name() const override;
 
-    text::UnknownDataTypeContainer retrieve(InvocationContext& context) const override;
+    virtual text::UnknownDataTypeContainer retrieve(InvocationContext& value) const override;
+    virtual void set_value(InvocationContext& context, text::UnknownDataTypeContainer value) override;
 
 private:
-    virtual void set(InvocationContext& context, text::UnknownDataTypeContainer value) override;
-
     std::string name_;
     bool is_const_:1 = false;
     bool initialized_:1 = false;
 };
 
 bool VariableRetrieverImpl::is_persist() const { return false; }
-bool VariableRetrieverImpl::is_mutable() const { return !is_const_ || !initialized_; }
+bool VariableRetrieverImpl::is_const() const { return is_const_; }
 std::string VariableRetrieverImpl::name() const { return name_; }
 
 text::UnknownDataTypeContainer VariableRetrieverImpl::retrieve(
@@ -37,10 +34,16 @@ text::UnknownDataTypeContainer VariableRetrieverImpl::retrieve(
     return context.variable(name_);
 }
 
-void VariableRetrieverImpl::set(
+void VariableRetrieverImpl::set_value(
     InvocationContext& context, 
     text::UnknownDataTypeContainer value
 ) {
+    if(is_const() && initialized_) {
+        throw std::runtime_error{util::to_string(
+            "Attempted to mutate a const variable '$", name(), "'."
+        )};
+    }
+
     initialized_ = true;
     context.set_variable(name_, value);
 }
@@ -52,14 +55,13 @@ struct PersistentVariableRetrieverImpl : VariableRetriever {
     ) : name_(name), is_const_(is_const) {}
 
     virtual bool is_persist() const override;
-    virtual bool is_mutable() const override;
+    virtual bool is_const() const override;
     virtual std::string name() const override;
 
     text::UnknownDataTypeContainer retrieve(InvocationContext& context) const override;
+    virtual void set_value(InvocationContext& context, text::UnknownDataTypeContainer value) override;
 
 private:
-    virtual void set(InvocationContext& context, text::UnknownDataTypeContainer value) override;
-
     std::string name_;
     text::UnknownDataTypeContainer data_;
     bool is_const_:1 = false;
@@ -67,9 +69,7 @@ private:
 };
 
 bool PersistentVariableRetrieverImpl::is_persist() const { return true; }
-bool PersistentVariableRetrieverImpl::is_mutable() const { 
-    return !is_const_ || !initialized_;
-}
+bool PersistentVariableRetrieverImpl::is_const() const { return is_const_; }
 std::string PersistentVariableRetrieverImpl::name() const { return name_; }
 
 text::UnknownDataTypeContainer 
@@ -77,28 +77,21 @@ PersistentVariableRetrieverImpl::retrieve(InvocationContext& context) const {
     return data_;
 }
 
-void PersistentVariableRetrieverImpl::set(
+void PersistentVariableRetrieverImpl::set_value(
     InvocationContext& context, 
     text::UnknownDataTypeContainer value
 ) {
-    initialized_ = true;
-    data_ = value;
-}
-
-} /* anonymous */
-
-void VariableRetriever::set_value(
-    InvocationContext& context, 
-    text::UnknownDataTypeContainer value
-) {
-    if(!is_mutable()) {
+    if(is_const() && initialized_) {
         throw std::runtime_error{util::to_string(
             "Attempted to mutate a const variable '$", name(), "'."
         )};
     }
 
-    this->set(context, value);
+    initialized_ = true;
+    data_ = value;
 }
+
+} /* anonymous */
 
 bool BuildContext::has_variable(std::string name) {
     auto it = variables_.find(name);

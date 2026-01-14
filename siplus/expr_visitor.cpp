@@ -164,7 +164,7 @@ public:
     }
 
     std::any visitArgument(StringInterpolatorParser::ArgumentContext *ctx) override {
-        PipedExpressionVisitor visitor{context_, buildContext_, tokens_};
+        ExpressionVisitor visitor{context_, buildContext_, tokens_};
         auto anyval = ctx->accept(&visitor);
         auto expr = std::any_cast<std::shared_ptr<text::ValueRetriever>>(anyval);
         arguments_.push_back(expr);

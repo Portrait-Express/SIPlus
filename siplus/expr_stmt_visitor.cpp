@@ -218,7 +218,7 @@ std::any ExprStmtVisitor::visitAssign_stmt(StringInterpolatorParser::Assign_stmt
     } else {
         variable = buildContext_->get_variable(varName);
 
-        if(variable->is_mutable()) {
+        if(variable->is_const()) {
             throw std::runtime_error{util::to_string(
                 "Attempted to mutate a const variable '$", varName, "'.")};
         }

@@ -1,63 +1,16 @@
-#include "siplus/invocation_context.h"
 #include "siplus/stl/functions/rand.h"
 #include "siplus/stl/functions/arithmetic.h"
 #include "siplus/stl/functions/iterable.h"
 #include "siplus/stl/functions/text.h"
 #include "siplus/stl/functions/typed_operator.h"
 #include "siplus/text/data.h"
-#include "siplus/text/value_retrievers/retriever.h"
 #include "siplus/stl.h"
 
 #include <functional>
 #include <memory>
-#include <vector>
 
 namespace SIPLUS_NAMESPACE {
 namespace stl {
-
-namespace {
-
-struct if_impl : public text::ValueRetriever {
-    if_impl(
-        std::shared_ptr<text::ValueRetriever> condition,
-        std::shared_ptr<text::ValueRetriever> tVal,
-        std::shared_ptr<text::ValueRetriever> fVal,
-        std::weak_ptr<SIPlusParserContext> context
-    ) : condition(condition), tVal(tVal), fVal(fVal), context_(context) {}
-
-    text::UnknownDataTypeContainer 
-    retrieve(InvocationContext& value) const override;
-
-    std::shared_ptr<text::ValueRetriever> condition;
-    std::shared_ptr<text::ValueRetriever> tVal;
-    std::shared_ptr<text::ValueRetriever> fVal;
-
-private:
-    std::weak_ptr<SIPlusParserContext> context_;
-};
-
-}
-
-std::shared_ptr<text::ValueRetriever>
-if_func::value(
-    std::shared_ptr<text::ValueRetriever> parent,
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
-) const {
-    auto [cond, t, f] = util::get_parameters_first_parent<3>(parent, parameters);
-    return std::make_shared<if_impl>(cond, t, f, context_);
-}
-
-text::UnknownDataTypeContainer
-if_impl::retrieve(InvocationContext& value) const {
-    auto ctx = context_.lock();
-    auto cond = condition->retrieve(value);
-
-    if(ctx->convert<bool>(cond).as<bool>()) {
-        return tVal->retrieve(value);
-    } else {
-        return fVal->retrieve(value);
-    }
-}
 
 
 //----------------------------
@@ -76,6 +29,7 @@ void attach_stl(SIPlusParserContext& context) {
     //Misc
     context.emplace_function<str_func>("str", context.shared_from_this());
     context.emplace_function<if_func>("if", context.shared_from_this());
+    context.emplace_function<while_func>("while", context.shared_from_this());
 
     //Iterator-related
     context.emplace_function<map_func>("map", context.shared_from_this());

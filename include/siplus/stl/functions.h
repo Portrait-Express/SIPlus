@@ -8,7 +8,7 @@
 #include "siplus/stl/functions/arithmetic.h"
 #include "siplus/stl/functions/comparison.h"
 #include "siplus/stl/functions/converting_operator.h"
-#include "siplus/stl/functions/if.h"
+#include "siplus/stl/functions/control.h"
 #include "siplus/stl/functions/iterable.h"
 #include "siplus/stl/functions/text.h"
 #include "siplus/stl/functions/typed_operator.h"

@@ -173,6 +173,14 @@ int test_if() {
     });
 }
 
+int test_while() {
+    return test("while", [](const Parser& parser) {
+        return tests(
+            test_expression<long>(R"(var $v = 0; while (lt $v 3) ($v = add $v 1; 0); $v)", 3)
+        );
+    });
+}
+
 int test_replace() { 
     return test("replace", [](const Parser& parser) {
         return tests(
@@ -367,6 +375,7 @@ int test_functions() {
         return tests(
             test_str(),
             test_if(),
+            test_while(),
 
             test_add(),
             test_sub(),
