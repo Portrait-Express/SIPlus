@@ -89,19 +89,49 @@ In the cases that some expressions become too large and unwieldy, or if you want
 can store a value to a variable, and use it later. (Whitespace is ignored, so you may split expressions on to as many 
 lines as you wish)
 ```
-$a = mul (.id | add 2) 10; 
+var $a = mul (.id | add 2) 10; 
 div $a $a
 ```
 
 We use the semicolon `;` to precede our return expression with a variable assignment. You can declare as many variables 
 as you want before your final output expression. The output expression is marked with the omission of the final semicolon.
 ```
-$b = mul (.id | add 4) 6; 
-$a = mul (.id | add 2) 10; 
+var $b = mul (.id | add 4) 6; 
+var $a = mul (.id | add 2) 10; 
 div $a $b
 ```
 
-You may include predefined variables by including them on the data builder by calling `with(name, data)`.
+You may also specify a `const` variable which will not allow that variable to be reassigned later.
+
+```
+const var $a = 2; $a = 3; $a // Error
+const var $a = 2; $a // 2
+```
+
+This does not prevent modification to the value in cases such as `set_add`.
+
+
+```
+const var $set = set_new;
+set_add $set 2;
+set_has $set 2 // true
+```
+
+Variables can also be declared `persist` which causes the value of the variable to be persisted through multiple evaluations
+of the same expression. Variables that are declared with `persist` are initialized on the first evaluation of the expression,
+with that context at that time. The variables are not re-initalized later, but their values will be persisted through several 
+invocations.
+
+```
+persist var $a = 0; $a = add $a 1; $a // 1
+                                      // 2
+                                      // 3
+
+persist const var $a = 0; $a = add $a 1; $a // error
+```
+
+You may include predefined variables by including them on the data builder by calling `with(name, data)`. These are always
+implicitly declared `const`.
 
 ## Expression nesting
 Expressions can also be nested in case some functions have side effects
