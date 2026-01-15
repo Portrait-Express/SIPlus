@@ -302,3 +302,55 @@ specified.
 substr "Hello, World!" 0 5 // "Hello"
 substr "Hello, World!" 5 // ", World!"
 ```
+
+## while (1.1.3)
+Repeatedly evaluate the second parameter while the first parameter returns 
+`true`. `condition` is evaulated, and while `condition` returns true, `expr` 
+is evaluated. Returns the value that was returned from the last evaluation of 
+`expr`.
+
+- `condition` the condition, which shoudl return a truthy or falsy value
+- `expr` the expression to evaulate each iteration
+
+```
+$i = 0; 
+$str = "a";
+while (lt $i 3) (
+    $i = add $i 1;
+    $str = add $str "a";
+    0
+);
+$str // "aaaa"
+```
+
+## set_new (1.1.3)
+Create a new instance of a set. This uses an internal implementation of a hash 
+function to hash numeric and string values. Currently sets are not able to 
+store non-string nor non-numeric values.
+
+No arguments
+
+```
+set_new // a new set instance
+```
+
+## set_add (1.1.3)
+Add an item to the set. Returns an instance to the set.
+
+- `set` the set to modify
+- `value` the value to add
+
+```
+set_new | set_add 123 // the set instance
+```
+
+## set_has (1.1.3)
+Check if the set contains an item.
+
+- `set` the set to modify
+- `value` the value to check for
+
+```
+set_new | set_add 2 | set_has 3 // false
+set_new | set_add 2 | set_has 2 // true
+```

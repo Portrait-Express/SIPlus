@@ -470,7 +470,21 @@ int test_stdlib(int, char**) {
     auto res = group("stdlib", []() {
         return tests(
             test_functions(),
-            test_converters()
+            test_converters(),
+            test("Misc", [](const Parser& parser) {
+                return tests(
+                    test_expression<std::string>(
+                        R"(
+                        var $i = 0; 
+                        var $str = "a"; 
+                        while (lt $i 3) ( 
+                            $i = add $i 1; 
+                            $str = add $str "a"; 
+                            $str
+                        ))", 
+                        "aaaa")
+                );
+            })
         );
     });
     return res;
