@@ -1,6 +1,7 @@
 #include "siplus/stl/functions/rand.h"
 #include "siplus/stl/functions/arithmetic.h"
 #include "siplus/stl/functions/iterable.h"
+#include "siplus/stl/functions/set.h"
 #include "siplus/stl/functions/text.h"
 #include "siplus/stl/functions/typed_operator.h"
 #include "siplus/text/data.h"
@@ -30,6 +31,11 @@ void attach_stl(SIPlusParserContext& context) {
     context.emplace_function<str_func>("str", context.shared_from_this());
     context.emplace_function<if_func>("if", context.shared_from_this());
     context.emplace_function<while_func>("while", context.shared_from_this());
+
+    //Set functions
+    context.emplace_function<set_new_func>("set_new", context.shared_from_this());
+    context.emplace_function<set_add_func>("set_add");
+    context.emplace_function<set_has_func>("set_has");
 
     //Iterator-related
     context.emplace_function<map_func>("map", context.shared_from_this());

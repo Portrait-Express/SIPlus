@@ -2,19 +2,13 @@
 #include <cfloat>
 #include <iostream>
 #include <string>
-#include <tuple>
 
 #include "siplus/context.h"
 #include "siplus/parser.h"
 #include "siplus/siplus.h"
 #include "siplus/text/data.h"
 #include "siplus/text/text.h"
-
-template<typename _OStream, typename T>
-_OStream& operator<<(_OStream& stream, std::function<T> func) {
-    stream << "(function)";
-    return stream;
-}
+#include "siplus/util.h"
 
 struct User {
     int id;
@@ -168,6 +162,29 @@ bool compare(const T& v1, const T& v2) {
     return compare<T, T>(v1, v2);
 }
 
+template<typename _ExpectedVal, typename _ExpectedType = _ExpectedVal>
+bool expect_equal(
+    const SIPLUS_NAMESPACE::text::UnknownDataTypeContainer container, const _ExpectedVal& expected
+) {
+    if(!container.template is<_ExpectedType>()) {
+        throw std::runtime_error{SIPLUS_NAMESPACE::util::to_string(
+            "Expected type ", 
+            SIPLUS_NAMESPACE::text::get_type_name(typeid(_ExpectedType)), 
+            " recieved value of type ",
+            SIPLUS_NAMESPACE::text::get_type_name(container.type), "."
+        )};
+    }
+
+    if(!compare(container.template as<_ExpectedType>(), expected)) {
+        throw std::runtime_error{SIPLUS_NAMESPACE::util::to_string(
+            "Expected ", expected, " recieved value ", 
+            container.template as<_ExpectedType>(), "."
+        )};
+    }
+
+    return true;
+}
+
 template<typename T, typename V, typename _ExpectedType = T>
 int test_expression(
     const std::string& expression, 
@@ -188,22 +205,15 @@ int test_expression(
 
     auto result = retriever->retrieve(*ctx);
 
-    if(!result.template is<_ExpectedType>()) {
-        std::cout << "Expression \"" << expression << "\" failed: Expected type " 
-            << SIPLUS_NAMESPACE::text::get_type_name(typeid(_ExpectedType)) << " recieved value of type " 
-            << SIPLUS_NAMESPACE::text::get_type_name(result.type) << "." << std::endl;
+    try {
+        return expect_equal<T, _ExpectedType>(result, expected) ? 0 : 1;
+    } catch(std::runtime_error& e) {
+        throw std::runtime_error{SIPLUS_NAMESPACE::util::to_string(
+            "Expression '", expression, "' failed: ", e.what()
+        )};
+
         return 1;
     }
-
-    if(!compare(result.template as<_ExpectedType>(), expected)) {
-        std::cout 
-            << "Expression \"" << expression << "\" failed: Expected " 
-             << expected << " recieved value " 
-            << result.template as<_ExpectedType>() << "." << std::endl;
-        return 1;
-    }
-
-    return 0;
 }
 
 template<typename T, typename _ExpectedType = T>

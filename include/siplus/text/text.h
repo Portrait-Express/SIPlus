@@ -1,3 +1,4 @@
+#pragma once
 #ifndef INCLUDE_SIPLUS_TEXT_TEXT_H_
 #define INCLUDE_SIPLUS_TEXT_TEXT_H_
 
@@ -93,6 +94,12 @@ _OStream& operator<<(_OStream& out, const UnknownDataTypeContainer& val) {
 } /* SIPLUS_NAMESPACE */
 
 namespace std {
+
+template<typename _OStream, typename T>
+_OStream& operator<<(_OStream& stream, std::function<T> func) {
+    stream << "(function)";
+    return stream;
+}
 
 template<typename _OStream, typename T>
 _OStream& operator<<(_OStream& out, const std::vector<T>& val) {

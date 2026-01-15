@@ -41,6 +41,17 @@ struct UnknownDataTypeContainer {
     template<typename T>
     const T& as() const { return *(const T*)ptr; }
 
+    /**
+     * @brief Returns a reference to the stored data as a specified type. If 
+     * this is called with the incorrect type, the returned data is undefined.
+     * Always use `is` before calling this.
+     *
+     * @tparam T The type to return
+     * @return Const reference to stored data
+     */
+    template<typename T>
+    T& as() { return *(T*)ptr; }
+
     friend void swap(UnknownDataTypeContainer& self, UnknownDataTypeContainer& other) {
         using std::swap;
 

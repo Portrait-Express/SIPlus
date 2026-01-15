@@ -298,6 +298,44 @@ int test_eq() {
     });
 }
 
+/**
+ * @brief Tests all set-related functions.
+ */
+int test_set() {
+    return test("set", [](const Parser& parser) {
+        auto expr = parser.get_expression(
+            "persist var $set = set_new; set_add $set .; set_has $set 5", 
+            ParseOpts{});
+
+        auto ctx = parser.context().builder().use_default(text::make_data<std::string>("test")).build();
+        auto value = expr->retrieve(*ctx);
+        expect_equal(value, false);
+
+        ctx = parser.context().builder().use_default(text::make_data(5)).build();
+        value = expr->retrieve(*ctx);
+        expect_equal(value, true);
+
+        ctx = parser.context().builder().use_default(text::make_data(7)).build();
+        value = expr->retrieve(*ctx);
+        expect_equal(value, true);
+
+        return tests(
+            test_expression(R"(set_new | set_add 143 | set_has 143)", true),
+            test_expression(R"(set_new | set_add 143 | set_add "test" | set_has 420)", false),
+            test_expression(R"(set_new | set_add "test" | set_add 143 | set_has "test")", true),
+            test_expression(R"(
+                            var $set = set_new;
+                            var $i = 0;
+                            while (lt $i 10) (
+                                set_add $set $i;
+                                $i = add $i 1; 0
+                            );
+                            set_has $set 5
+                            )", true)
+        );
+    });
+}
+
 int test_int_converter() {
     return test("int_converter", [](const Parser& parser) {
         stl::int_converter converter;
@@ -376,6 +414,8 @@ int test_functions() {
             test_str(),
             test_if(),
             test_while(),
+
+            test_set(),
 
             test_add(),
             test_sub(),
