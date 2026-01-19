@@ -1,3 +1,6 @@
+# 1.1.4
+- Fixed errors when using template-defiend function parameters
+
 # 1.1.3
 - Fixed occasional segfault
 - Added `while` function
