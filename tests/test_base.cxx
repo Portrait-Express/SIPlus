@@ -58,7 +58,8 @@ int test_base(int, char**) {
                 }),
                 test("Functions", [](const SIPlus::Parser& parser) {
                     return tests(
-                        test_expression<long>("@test => ( 2 ); @test", 2)
+                        test_expression<long>("@test => ( 2 ); @test", 2),
+                        test_expression<int>("@test(val) => ( $val.x ); @test .", 2)
                     );
                 }),
                 test("Scope", [](const SIPlus::Parser& parser) {

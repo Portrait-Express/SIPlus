@@ -5,8 +5,10 @@
 #include "siplus/invocation_context.h"
 #include "siplus/text/data.h"
 #include "siplus/text/value_retrievers/retriever.h"
+
 #include <iterator>
 #include <memory>
+#include <ostream>
 #include <vector>
 
 namespace SIPLUS_NAMESPACE {
@@ -71,6 +73,7 @@ private:
 struct ParameterInfo {
     std::string name;
     bool required;
+    std::shared_ptr<VariableRetriever> variable;
 };
 
 struct CustomFunction : Function {
@@ -92,7 +95,7 @@ private:
 };
 
 struct CustomFuncImpl : text::ValueRetriever {
-    using parameter_info = std::pair<std::string, std::shared_ptr<text::ValueRetriever>>;
+    using parameter_info = std::pair<std::shared_ptr<VariableRetriever>, std::shared_ptr<text::ValueRetriever>>;
 
     CustomFuncImpl(
         std::string name,
@@ -123,7 +126,7 @@ std::shared_ptr<text::ValueRetriever> CustomFunction::value(
         )};
     }
 
-    std::vector<CustomFuncImpl::parameter_info> params{parameters.size()};
+    std::vector<CustomFuncImpl::parameter_info> params{};
     for(int i = 0; i < parameters_.size(); i++) {
         auto& param = parameters_[i];
 
@@ -142,7 +145,7 @@ std::shared_ptr<text::ValueRetriever> CustomFunction::value(
             }
         }
 
-        params.emplace_back(param.name, parameters[i]);
+        params.emplace_back(param.variable, parameters[i]);
     }
 
     return make_shared<CustomFuncImpl>(name_, params, expr_);
@@ -150,13 +153,12 @@ std::shared_ptr<text::ValueRetriever> CustomFunction::value(
 
 text::UnknownDataTypeContainer CustomFuncImpl::retrieve(InvocationContext& context) const {
     auto function_scope = get_function_context(name_, context);
-    auto builder = wrap_scope(function_scope);
+    auto scope = wrap_scope(function_scope).build();
 
     for(auto [k, v] : parameters_) {
-        builder.with(k, v->retrieve(context));
+        k->set_value(*scope, v->retrieve(context));
     }
 
-    auto scope = builder.build(); 
     return expr_->retrieve(*scope);
 }
 
@@ -179,22 +181,29 @@ std::any ExprStmtVisitor::visitFunction_def_stmt(StringInterpolatorParser::Funct
 
     auto paramContext = ctx->function_parameters();
     std::vector<ParameterInfo> params;
+
+    auto buildCtx = std::make_shared<BuildContext>(buildContext_);
+    VariableOpts paramDeclareOpts;
+
     if(paramContext) {
         bool optionalFound = false;
         for(auto param : paramContext->function_parameter()) {
             ParameterInfo& info = params.emplace_back();
             info.name = param->ID()->getText();
             info.required = !static_cast<bool>(param->QUESTION());
+            info.variable = 
+                buildCtx->declare_variable(info.name, paramDeclareOpts);
 
             if(optionalFound && info.required) {
                 throw std::runtime_error{"Non-optional parameters cannot appear after an optional parameter."};
             }
 
             optionalFound = optionalFound || !info.required;
+
         }
     }
 
-    ExpressionVisitor visitor{context_, buildContext_, tokens_};
+    ExpressionVisitor visitor{context_, buildCtx, tokens_};
     auto expr = std::any_cast<std::shared_ptr<text::ValueRetriever>>(ctx->expr_block()->accept(&visitor));
 
     buildContext_->emplace_function<CustomFunction>(name, name, params, expr);
