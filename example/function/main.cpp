@@ -3,7 +3,7 @@
 
 #include "../common.hxx"
 
-using namespace SIPlus;
+using namespace SIPLUS_NAMESPACE;
 
 struct access_func : Function {
     access_func(std::shared_ptr<SIPlusParserContext> context) : context_(context) {}

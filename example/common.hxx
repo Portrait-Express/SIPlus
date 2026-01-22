@@ -10,12 +10,12 @@ struct Person {
     std::string first_name;
 };
 
-struct PersonAccessor : SIPlus::text::Accessor {
-    virtual SIPlus::text::UnknownDataTypeContainer access(
-        const SIPlus::text::UnknownDataTypeContainer& value, 
+struct PersonAccessor : SIPLUS_NAMESPACE::text::Accessor {
+    virtual SIPLUS_NAMESPACE::text::UnknownDataTypeContainer access(
+        const SIPLUS_NAMESPACE::text::UnknownDataTypeContainer& value, 
         const std::string& name
     );
 
-    virtual bool can_access(const SIPlus::text::UnknownDataTypeContainer& value);
+    virtual bool can_access(const SIPLUS_NAMESPACE::text::UnknownDataTypeContainer& value);
 };
 

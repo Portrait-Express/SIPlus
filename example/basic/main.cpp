@@ -4,7 +4,10 @@
 
 #include "../common.hxx"
 
-using namespace SIPlus;
+//After the library is built, you likely can just use 
+//using namespace SIPlus;
+//unless you set -DSIPLUS_NAMESPACE=<something else> at library build time
+using namespace SIPLUS_NAMESPACE;
 
 int main(int, char**) {
     Person person;

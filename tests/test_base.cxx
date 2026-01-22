@@ -8,17 +8,17 @@ using namespace SIPLUS_NAMESPACE;
 
 int test_base(int, char**) {
     return tests(
-        group("Expression", [](const SIPLUS_NAMESPACE::Parser& parser) {
+        group("Expression", [](const Parser& parser) {
             return tests(
-                test("Accessor", [](const SIPlus::Parser& parser) {
+                test("Accessor", [](const Parser& parser) {
                     return tests(
                         test_expression<int>(".x", 2)
                     );
                 }),
-                group("Variables", [](const SIPlus::Parser& parser) {
+                group("Variables", [](const Parser& parser) {
                     auto extra = parser.context().builder()
-                        .with("extra", SIPlus::text::make_data(test_data{}))
-                        .use_default(SIPlus::text::make_data(test_data{}))
+                        .with("extra", text::make_data(test_data{}))
+                        .use_default(text::make_data(test_data{}))
                         .build();
 
                     ParseOpts extraOpts;
@@ -29,7 +29,7 @@ int test_base(int, char**) {
                         test_expression<long>("var $A = 123; $A", 123),
                         test_expression<long>("var $A = 123; $A = 234; $A", 234),
                         test_expression<int>("$extra.x", extraOpts, extra, 2),
-                        test("const", [](const SIPLUS_NAMESPACE::Parser& parser) {
+                        test("const", [](const Parser& parser) {
                             return tests(
                                 test_expression<int>("const var $A = (.x); $A", 2),
                                 expect_throw([&]() {
@@ -37,7 +37,7 @@ int test_base(int, char**) {
                                 })
                             );
                         }),
-                        test("persist", [](const SIPLUS_NAMESPACE::Parser& parser) {
+                        test("persist", [](const Parser& parser) {
                             auto retriever = parser.get_expression("persist const var $A = rand; $A", ParseOpts{});
                             auto ctx = parser.context().builder().use_default(text::UnknownDataTypeContainer{}).build();
                             auto v1 = retriever->retrieve(*ctx);
@@ -56,13 +56,13 @@ int test_base(int, char**) {
                         })
                     );
                 }),
-                test("Functions", [](const SIPlus::Parser& parser) {
+                test("Functions", [](const Parser& parser) {
                     return tests(
                         test_expression<long>("@test => ( 2 ); @test", 2),
                         test_expression<int>("@test(val) => ( $val.x ); @test .", 2)
                     );
                 }),
-                test("Scope", [](const SIPlus::Parser& parser) {
+                test("Scope", [](const Parser& parser) {
                     return tests(
                         expect_throw([](){
                             test_expression<long>("@test => ( @a => (2); @a ); @a", 2);
@@ -72,7 +72,7 @@ int test_base(int, char**) {
                         })
                     );
                 }),
-                test("Arrays", [](const SIPlus::Parser& parser) {
+                test("Arrays", [](const Parser& parser) {
                     return tests(
                         test_expression<std::vector<long>, std::vector<text::UnknownDataTypeContainer>>(
                             R"([1,2,3])", std::vector<long>{1,2,3}),
@@ -83,24 +83,24 @@ int test_base(int, char**) {
                 })
             );
         }),
-        group("Interpolation", [](const SIPLUS_NAMESPACE::Parser& parser) {
+        group("Interpolation", [](const Parser& parser) {
             return tests(
-                test("Accessor", [](const SIPlus::Parser& parser) {
+                test("Accessor", [](const Parser& parser) {
                     return tests(
                         test_interpolation("TEST { .x } HELLO", "TEST 2 HELLO")
                     );
                 }),
-                test("Variables", [](const SIPlus::Parser& parser) {
+                test("Variables", [](const Parser& parser) {
                     return tests(
                         test_interpolation("{ var $A = 123; \"\" }{ $A }", "123")
                     );
                 }),
-                test("Functions", [](const SIPlus::Parser& parser) {
+                test("Functions", [](const Parser& parser) {
                     return tests(
                         test_interpolation("{ @test => ( 2 ); \"\" }{ @test }", "2")
                     );
                 }),
-                test("Scope", [](const SIPlus::Parser& parser) {
+                test("Scope", [](const Parser& parser) {
                     return tests(
                         expect_throw([](){
                             test_interpolation("{ @test => ( @a => (2); @a ); \"\" }{ @a }", "2");
@@ -110,7 +110,7 @@ int test_base(int, char**) {
                         })
                     );
                 }),
-                test("Looping statement", [](const SIPlus::Parser& parser) {
+                test("Looping statement", [](const Parser& parser) {
                     return tests(
                         test_interpolation(
                             "{# .users } Id { .id } is { .username } - { .email } {//}",
@@ -123,13 +123,13 @@ int test_base(int, char**) {
         }),
 
         //Variables not defined in parameters / segfaulting
-        test("Issue 2", [](const SIPLUS_NAMESPACE::Parser& parser) {
+        test("Issue 2", [](const Parser& parser) {
             auto ctx = parser.context().builder()
-                .with("job", SIPlus::text::make_data(2))
-                .use_default(SIPlus::text::make_data(test_data{}))
+                .with("job", text::make_data(2))
+                .use_default(text::make_data(test_data{}))
                 .build();
 
-            SIPLUS_NAMESPACE::ParseOpts opts;
+            ParseOpts opts;
             opts.globals.push_back("job");
 
             return tests(

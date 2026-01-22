@@ -27,7 +27,7 @@ InvocationContextWrapperBuilder wrap_scope(std::shared_ptr<InvocationContext> co
     return InvocationContextWrapperBuilder{context};
 }
 
-SIPlus::text::UnknownDataTypeContainer InvocationContext::default_data() const {
+text::UnknownDataTypeContainer InvocationContext::default_data() const {
     return variable("0");
 }
 

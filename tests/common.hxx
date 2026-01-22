@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 
+#include "siplus/config.h"
 #include "siplus/context.h"
 #include "siplus/parser.h"
 #include "siplus/siplus.h"
@@ -30,9 +31,9 @@ struct test_data {
     } y;
 };
 
-SIPlus::Parser& get_test_context();
-int test(std::string name, std::function<int(const SIPlus::Parser&)> test_impl);
-int group(std::string name, std::function<int(const SIPlus::Parser&)> test_impl);
+SIPLUS_NAMESPACE::Parser& get_test_context();
+int test(std::string name, std::function<int(const SIPLUS_NAMESPACE::Parser&)> test_impl);
+int group(std::string name, std::function<int(const SIPLUS_NAMESPACE::Parser&)> test_impl);
 int group(std::string name, std::function<int()> test_impl);
 
 template<typename... TestResults>
@@ -52,12 +53,12 @@ bool conversion_equal(T first, T second) {
 template<>
 bool conversion_equal<double>(double first, double second);
 
-template<typename T, typename V, typename To> requires std::is_base_of_v<SIPlus::text::Converter, T>
+template<typename T, typename V, typename To> requires std::is_base_of_v<SIPLUS_NAMESPACE::text::Converter, T>
 int test_conversion(const T& converter, const V& val, const To& result) {
-    SIPlus::text::UnknownDataTypeContainer container;
+    SIPLUS_NAMESPACE::text::UnknownDataTypeContainer container;
 
     if(converter.can_convert(typeid(V), typeid(To))) {
-        container = converter.convert(SIPlus::text::make_data(val), typeid(To));
+        container = converter.convert(SIPLUS_NAMESPACE::text::make_data(val), typeid(To));
     } else {
         std::cout 
             << SIPLUS_NAMESPACE::text::get_type_name(typeid(T)) << " cannot convert from " 
@@ -81,7 +82,7 @@ int test_conversion(const T& converter, const V& val, const To& result) {
     }
 }
 
-template<typename T, typename V, typename To> requires std::is_base_of_v<SIPlus::text::Converter, T>
+template<typename T, typename V, typename To> requires std::is_base_of_v<SIPLUS_NAMESPACE::text::Converter, T>
 int test_conversion(const V& val, const To& result) {
     T converter;
     return test_conversion<T, V, To>(converter, val, result);
@@ -116,9 +117,9 @@ struct test_expression_compare<T, std::function<bool (const T&)>> {
 };
 
 template<>
-struct test_expression_compare<std::vector<SIPlus::text::UnknownDataTypeContainer>, std::vector<std::string>> {
+struct test_expression_compare<std::vector<SIPLUS_NAMESPACE::text::UnknownDataTypeContainer>, std::vector<std::string>> {
     static bool compare(
-        const std::vector<SIPlus::text::UnknownDataTypeContainer>& val, 
+        const std::vector<SIPLUS_NAMESPACE::text::UnknownDataTypeContainer>& val, 
         const std::vector<std::string>& other
     ) {
         std::vector<std::string> strVal{};
@@ -134,9 +135,9 @@ struct test_expression_compare<std::vector<SIPlus::text::UnknownDataTypeContaine
 };
 
 template<typename T>
-struct test_expression_compare<std::vector<SIPlus::text::UnknownDataTypeContainer>, std::vector<T>> {
+struct test_expression_compare<std::vector<SIPLUS_NAMESPACE::text::UnknownDataTypeContainer>, std::vector<T>> {
     static bool compare(
-        const std::vector<SIPlus::text::UnknownDataTypeContainer>& val, 
+        const std::vector<SIPLUS_NAMESPACE::text::UnknownDataTypeContainer>& val, 
         const std::vector<T>& other
     ) {
         if(val.size() != other.size()) return false;
@@ -199,7 +200,7 @@ int test_expression(
         ctx = data;
     } else {
         ctx = get_test_context().context().builder()
-            .use_default(SIPlus::text::make_data(data))
+            .use_default(SIPLUS_NAMESPACE::text::make_data(data))
             .build();
     }
 
@@ -239,14 +240,14 @@ int test_interpolation(
 ) {
     auto retriever = get_test_context().get_interpolation(expression, opts);
 
-    std::shared_ptr<SIPlus::InvocationContext> invoCtx;
-    if constexpr (std::is_same_v<V, std::shared_ptr<SIPlus::InvocationContext>>) {
+    std::shared_ptr<SIPLUS_NAMESPACE::InvocationContext> invoCtx;
+    if constexpr (std::is_same_v<V, std::shared_ptr<SIPLUS_NAMESPACE::InvocationContext>>) {
         invoCtx = data;
     } else {
         invoCtx = get_test_context()
             .context()
             .builder()
-            .use_default(SIPlus::text::make_data(data))
+            .use_default(SIPLUS_NAMESPACE::text::make_data(data))
             .build();
     }
 

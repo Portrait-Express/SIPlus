@@ -44,7 +44,7 @@ struct int_string_converter : text::Converter {
 
 #endif
 
-struct user_accessor : public SIPlus::text::Accessor {
+struct user_accessor : public text::Accessor {
     text::UnknownDataTypeContainer access(
         const text::UnknownDataTypeContainer &value, 
         const std::string &name
@@ -70,7 +70,7 @@ struct user_accessor : public SIPlus::text::Accessor {
     }
 };
 
-struct data_accessor : public SIPlus::text::Accessor {
+struct data_accessor : public text::Accessor {
     text::UnknownDataTypeContainer access(
         const text::UnknownDataTypeContainer &value, 
         const std::string &name
@@ -166,7 +166,7 @@ int test(std::string name, std::function<int(const Parser&)> test_impl) {
     return result;
 }
 
-int group(std::string name, std::function<int(const SIPlus::Parser&)> test_impl) {
+int group(std::string name, std::function<int(const Parser&)> test_impl) {
     //Remove any slashes from name
     name.erase(std::remove(name.begin(), name.end(), '/'), name.end());
     group_prefix += name + "/";

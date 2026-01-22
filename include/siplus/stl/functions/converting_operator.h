@@ -15,7 +15,7 @@ namespace SIPLUS_NAMESPACE {
 namespace stl {
 
 struct operator_impl {
-    virtual SIPlus::text::UnknownDataTypeContainer invoke(
+    virtual text::UnknownDataTypeContainer invoke(
         std::shared_ptr<SIPlusParserContext>   context,
         text::UnknownDataTypeContainer         lhs, 
         text::UnknownDataTypeContainer         rhs

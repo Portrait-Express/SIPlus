@@ -15,7 +15,7 @@ namespace stl {
 
 namespace {
 
-struct map_impl : public SIPlus::text::ValueRetriever {
+struct map_impl : public text::ValueRetriever {
     map_impl(
         std::weak_ptr<SIPlusParserContext> context,
         std::shared_ptr<text::ValueRetriever> input,
@@ -31,7 +31,7 @@ private:
     std::shared_ptr<text::ValueRetriever> map_expr_;
 };
 
-struct length_impl : public SIPlus::text::ValueRetriever {
+struct length_impl : public text::ValueRetriever {
     length_impl(
         std::weak_ptr<SIPlusParserContext> context,
         std::shared_ptr<text::ValueRetriever> input
@@ -45,7 +45,7 @@ private:
     std::shared_ptr<text::ValueRetriever> input_;
 };
 
-struct join_impl : public SIPlus::text::ValueRetriever {
+struct join_impl : public text::ValueRetriever {
     join_impl(
         std::weak_ptr<SIPlusParserContext> context,
         std::shared_ptr<text::ValueRetriever> input,
@@ -61,7 +61,7 @@ private:
     std::shared_ptr<text::ValueRetriever> delimiter_;
 };
 
-struct contains_impl : public SIPlus::text::ValueRetriever {
+struct contains_impl : public text::ValueRetriever {
     contains_impl (
         std::weak_ptr<SIPlusParserContext> context,
         std::shared_ptr<text::ValueRetriever> input,
