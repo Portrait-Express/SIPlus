@@ -1,10 +1,13 @@
+#pragma once
 #ifndef INCLUDE_SIPLUS_TEXT_ITERATOR_H_
 #define INCLUDE_SIPLUS_TEXT_ITERATOR_H_
 
-#include <memory>
+namespace SIPLUS_NAMESPACE::text {
+class Iterator;
+} /* SIPLUS_NAMESPACE::text */
 
 #include "siplus/config.h"
-#include "siplus/text/data.h"
+#include "siplus/data.h"
 
 namespace SIPLUS_NAMESPACE {
 namespace text {
@@ -17,13 +20,6 @@ public:
 
     virtual ~Iterator() = default;
 };
-
-class IteratorProvider {
-public:
-    virtual std::unique_ptr<Iterator> iterator(const UnknownDataTypeContainer& value) = 0;
-    virtual bool can_iterate(const UnknownDataTypeContainer& value) = 0;
-};
-
 
 } /* text */
 }

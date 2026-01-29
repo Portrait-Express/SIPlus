@@ -3,9 +3,12 @@
 #include <vector>
 
 #include "siplus/parser.h"
-#include "siplus/text/data.h"
 
 #include "common.hxx"
+#include "siplus/types/array.h"
+#include "siplus/types/float.h"
+#include "siplus/types/integer.h"
+#include "siplus/types/string.h"
 
 using namespace SIPLUS_NAMESPACE;
 
@@ -14,9 +17,9 @@ int test_add() {
         return tests(
             test_expression("add .x .y.b", 3L),
             test_expression("add .x 2.3", 4.3),
-            test_expression<std::string>(R"(add .x "ab")", "2ab"),
-            test_expression<std::string>(R"(add "a" "b")", "ab"),
-            test_expression<std::string>(R"("a" | add "b")", "ab")
+            test_expression(R"(add .x "ab")", "2ab"),
+            test_expression(R"(add "a" "b")", "ab"),
+            test_expression(R"("a" | add "b")", "ab")
         );
     });
 }
@@ -34,7 +37,7 @@ int test_mul() {
     return test("mul", [](const Parser& parser) {
         return tests(
             test_expression("mul 2 3", 6L),
-            test_expression<double>("mul 2.2 5", 11)
+            test_expression("mul 2.2 5", 11.0)
         );
     });
 }
@@ -42,7 +45,7 @@ int test_mul() {
 int test_div() {
     return test("div", [](const Parser& parser) {
         return tests(
-            test_expression<double>("div 6 2", 3),
+            test_expression("div 6 2", 3.0),
             test_expression("div 10 4", 2.5)
         );
     });
@@ -51,7 +54,7 @@ int test_div() {
 int test_str() {
     return test("str", [](const Parser& parser) {
         return tests(
-            test_expression<std::string>(".x | str", "2")
+            test_expression(".x | str", "2")
         );
     });
 }
@@ -59,8 +62,7 @@ int test_str() {
 int test_map() {
     return test("map", [](const Parser& parser) {
         return tests(
-            test_expression<std::vector<int>, std::vector<text::UnknownDataTypeContainer>>(
-                R"(.users | map .id)", std::vector<int>{1,2})
+            test_expression<types::ArrayType, std::vector<int>>(R"(.users | map .id)", {1,2})
         );
     });
 }
@@ -68,10 +70,10 @@ int test_map() {
 int test_length() {
     return test("length", [](const Parser& parser) {
         return tests(
-            test_expression(". | length", std::vector{1,2,3}, 3L),
-            test_expression(". | length", std::vector<int>{}, 0L),
-            test_expression(". | length", std::vector<std::string>{"1"}, 1L),
-            test_expression<long, std::string>(". | length", "Hello", 5L)
+            test_expression<types::IntegerType>(". | length", std::vector{1,2,3}, 3L),
+            test_expression<types::IntegerType>(". | length", std::vector<int>{}, 0L),
+            test_expression<types::IntegerType>(". | length", std::vector<std::string>{"1"}, 1L),
+            test_expression<types::IntegerType>(". | length", "Hello", 5L)
         );
     });
 }
@@ -138,11 +140,11 @@ int test_not() {
 int test_rand() {
     return test("rand", [](const Parser& parser) {
         return tests(
-            test_expression<std::function<bool (const double&)>, double>(
+            test_expression<types::FloatType>(
                 "rand", 
                 [](const double& v) { return v > 0 && v < 1; }
             ),
-            test_expression<std::function<bool (const long&)>, long>(
+            test_expression<types::IntegerType>(
                 "rand 1 3", 
                 [](const long& v) { return v >= 1 && v <= 3; }
             )
@@ -153,11 +155,11 @@ int test_rand() {
 int test_rand_str() {
     return test("randstr", [](const Parser &parser) {
         return tests(
-            test_expression<std::function<bool (const std::string &)>, std::string>(
+            test_expression<types::StringType, std::function<bool (const std::string&)>>(
                 R"(randstr "0123456789abcdef" 3)", 
                 [](const std::string &v) { return v.length() == 3; }
             ),
-            test_expression<std::function<bool (const std::string &)>, std::string>(
+            test_expression<types::StringType, std::function<bool (const std::string&)>>(
                 R"(randstr "abcdefghijklmnopqrstuvwxyz" 12)", 
                 [](const std::string &v) { return v.length() == 12; }
             )
@@ -241,12 +243,11 @@ int test_lower() {
 
 int test_split() { 
     return test("split", [](const Parser& parser) {
-        using expected = std::vector<text::UnknownDataTypeContainer>;
         return tests(
-            test_expression<std::vector<std::string>, expected>(R"("2.2.1" | split ".")", {"2", "2", "1"}),
-            test_expression<std::vector<std::string>, expected>(R"("test" | split "")", {"t","e","s","t"}),
-            test_expression<std::vector<std::string>, expected>(R"("banana and orange" | split " and ")", {"banana", "orange"}),
-            test_expression<std::vector<std::string>, expected>(R"("" | split "value")", {""})
+            test_expression<types::ArrayType, std::vector<std::string>>(R"("2.2.1" | split ".")", {"2", "2", "1"}),
+            test_expression<types::ArrayType, std::vector<std::string>>(R"("test" | split "")", {"t","e","s","t"}),
+            test_expression<types::ArrayType, std::vector<std::string>>(R"("banana and orange" | split " and ")", {"banana", "orange"}),
+            test_expression<types::ArrayType, std::vector<std::string>>(R"("" | split "value")", {""})
         );
     });
 }
@@ -307,17 +308,17 @@ int test_set() {
             "persist var $set = set_new; set_add $set .; set_has $set 5", 
             ParseOpts{});
 
-        auto ctx = parser.context().builder().use_default(text::make_data<std::string>("test")).build();
+        auto ctx = parser.context().builder().use_default(make_data<std::string>("test")).build();
         auto value = expr->retrieve(*ctx);
-        expect_equal(value, false);
+        expect_equal<types::BoolType>(value, false);
 
-        ctx = parser.context().builder().use_default(text::make_data(5)).build();
+        ctx = parser.context().builder().use_default(make_data(5)).build();
         value = expr->retrieve(*ctx);
-        expect_equal(value, true);
+        expect_equal<types::BoolType>(value, true);
 
-        ctx = parser.context().builder().use_default(text::make_data(7)).build();
+        ctx = parser.context().builder().use_default(make_data(7)).build();
         value = expr->retrieve(*ctx);
-        expect_equal(value, true);
+        expect_equal<types::BoolType>(value, true);
 
         return tests(
             test_expression(R"(set_new | set_add 143 | set_has 143)", true),
@@ -336,55 +337,24 @@ int test_set() {
     });
 }
 
-int test_int_converter() {
-    return test("int_converter", [](const Parser& parser) {
-        stl::int_converter converter;
-
-        return tests(
-            test_conversion<stl::int_converter, short, long>(12, 12),
-            test_conversion<stl::int_converter, int, long>(42, 42),
-            test_conversion<stl::int_converter, long, long>(1337, 1337)
-        );
-    });
-}
-
-int test_float_converter() {
-    return test("float_converter", [](const Parser& parser) {
-        text::UnknownDataTypeContainer data = text::make_data<double>(2);
-        stl::float_converter con;
-
-        return tests(
-            test_conversion<stl::float_converter, float, double>(1.124f, 1.124),
-            test_conversion<stl::float_converter, double, double>(3.141f, 3.141)
-        );
-    });
-}
-
 int test_numeric_string_converter() {
     return test("numeric_string_converter", [](const Parser& parser) {
-        stl::numeric_string_converter converter{parser.context().shared_from_this()};
-
         return tests(
-            test_conversion<stl::numeric_string_converter, short, std::string>(converter, 1, "1"),
-            test_conversion<stl::numeric_string_converter, int, std::string>(converter, 1, "1"),
-            test_conversion<stl::numeric_string_converter, long, std::string>(converter, 1, "1"),
-            test_conversion<stl::numeric_string_converter, float, std::string>(converter, 1, "1"),
-            test_conversion<stl::numeric_string_converter, double, std::string>(converter, 1, "1")
+            test_conversion<stl::numeric_string_converter>(1, std::string{"1"}),
+            test_conversion<stl::numeric_string_converter>(1.4, std::string{"1.4"})
         );
     });
 }
 
 int test_numeric_bool_converter() {
     return test("numeric_bool_converter", [](const Parser& parser) {
-        stl::numeric_bool_converter converter{parser.context().shared_from_this()};
-
         return tests(
-            test_conversion<stl::numeric_bool_converter, short, bool>(converter, 1, true),
-            test_conversion<stl::numeric_bool_converter, int, bool>(converter, 0, false),
-            test_conversion<stl::numeric_bool_converter, long, bool>(converter, 11212521L, true),
-            test_conversion<stl::numeric_bool_converter, long, bool>(converter, 0, false),
-            test_conversion<stl::numeric_bool_converter, float, bool>(converter, 1.3, true),
-            test_conversion<stl::numeric_bool_converter, double, bool>(converter, 0, false)
+            test_conversion<stl::numeric_bool_converter>(1, true),
+            test_conversion<stl::numeric_bool_converter>(0, false),
+            test_conversion<stl::numeric_bool_converter>(11212521L, true),
+            test_conversion<stl::numeric_bool_converter>(0, false),
+            test_conversion<stl::numeric_bool_converter>(1.3, true),
+            test_conversion<stl::numeric_bool_converter>(0, false)
         );
     });
 }
@@ -392,9 +362,9 @@ int test_numeric_bool_converter() {
 int test_string_bool_converter() {
     return test("string_bool_converter", [](const Parser& parser) {
         return tests(
-            test_conversion<stl::string_bool_converter, std::string, bool>(" ", true),
-            test_conversion<stl::string_bool_converter, std::string, bool>("Hello, World", true),
-            test_conversion<stl::string_bool_converter, std::string, bool>("", false)
+            test_conversion<stl::string_bool_converter, std::string>(" ", true),
+            test_conversion<stl::string_bool_converter, std::string>("Hello, World", true),
+            test_conversion<stl::string_bool_converter, std::string>("", false)
         );
     });
 }
@@ -455,8 +425,6 @@ int test_functions() {
 int test_converters() {
     return group("converters", []() {
         return tests(
-            test_int_converter(),
-            test_float_converter(),
             test_numeric_string_converter(),
             test_numeric_bool_converter(),
             test_string_bool_converter(),

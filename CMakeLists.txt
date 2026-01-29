@@ -37,7 +37,7 @@ set(SIPLUS_SOURCES
     siplus/parser_impl.cpp
     siplus/statement_visitor.cpp
     siplus/text.cpp
-    siplus/util.cpp
+    siplus/types.cpp
     siplus/visitor.cpp
 )
 

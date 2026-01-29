@@ -1,124 +1,88 @@
 #include "siplus/stl/converters.h"
-#include "siplus/text/data.h"
-#include "siplus/text/text.h"
+#include "siplus/data.h"
+#include "siplus/types/bool.h"
+#include "siplus/types/float.h"
+#include "siplus/types/integer.h"
+#include "siplus/types/string.h"
 #include "siplus/util.h"
+#include <iomanip>
 
 namespace SIPLUS_NAMESPACE {
 namespace stl {
 
+
+bool int_float_converter::can_convert(const TypeInfo& from, const TypeInfo& to) const {
+    return from.is<types::IntegerType>() && to.is<types::FloatType>();
+}
+
+UnknownDataTypeContainer
+int_float_converter::convert(const UnknownDataTypeContainer& from, const TypeInfo& to) const {
+    return make_data<types::FloatType>(from.as<types::IntegerType>());
+}
+
 bool
-int_converter::can_convert(std::type_index from, std::type_index to) const {
+numeric_string_converter::can_convert(const TypeInfo& from, const TypeInfo& to) const {
     return (
-            from == typeid(short) ||
-            from == typeid(int) || 
-            from == typeid(long)
-        ) &&
-        to == typeid(long);
+        from.is<types::IntegerType>() || 
+        from.is<types::FloatType>()
+    ) && to.is<types::StringType>();
 }
 
-text::UnknownDataTypeContainer 
-int_converter::convert(const text::UnknownDataTypeContainer& from, std::type_index to) const {
-    if(from.is<long>()) return from; 
-
-    long val;
-
-    if(from.is<int>()) {
-        val = from.as<int>();
-    } else if(from.is<short>()) {
-        val = from.as<short>();
+UnknownDataTypeContainer
+numeric_string_converter::convert(const UnknownDataTypeContainer& from, const TypeInfo& to) const {
+    if(from.is<types::IntegerType>()) {
+        return make_data<types::StringType>(std::to_string(from.as<types::IntegerType>()));
+    } else if(from.is<types::FloatType>()) {
+        return make_data<types::StringType>(util::to_string(
+            std::setprecision(8), from.as<types::FloatType>()
+        ));
     } else {
-        throw std::runtime_error{"Int converter cannot handle source type " + 
-            text::get_type_name(from.type)};
+        throw std::runtime_error{"Cannot convert from " + from.type->name() + " to " + to.name()}; 
     }
-
-    return text::make_data(val);
 }
 
-bool float_converter::can_convert(std::type_index from, std::type_index to) const {
+bool
+numeric_bool_converter::can_convert(const TypeInfo& from, const TypeInfo& to) const {
     return (
-        from == typeid(float) ||
-        from == typeid(double)
-    ) && to == typeid(double);
+        from.is<types::IntegerType>() || 
+        from.is<types::FloatType>()
+    ) && to.is<types::BoolType>();
 }
 
-text::UnknownDataTypeContainer
-float_converter::convert(const text::UnknownDataTypeContainer& from, std::type_index to) const {
-    if(from.is<double>()) return from;
-
-    double d;
-
-    if(from.is<float>()) {
-        d = from.as<float>();
-    }
-
-    return text::make_data(d);
-}
-
-bool
-numeric_string_converter::can_convert(std::type_index from, std::type_index to) const {
-    return text::is_numeric(from) && to == typeid(std::string);
-}
-
-text::UnknownDataTypeContainer
-numeric_string_converter::convert(const text::UnknownDataTypeContainer& from, std::type_index to) const {
-    auto ctx = ctx_.lock();
-    auto base = text::as_base(ctx, from);
-    if(base.is<double>()) {
-        long val = base.as<double>();
-        return text::make_data(util::to_string(val));
-    } else if(base.is<long>()) {
-        double val = base.as<long>();
-        return text::make_data(util::to_string(val));
+UnknownDataTypeContainer
+numeric_bool_converter::convert(const UnknownDataTypeContainer& from, const TypeInfo& to) const {
+    if(from.is<types::IntegerType>()) {
+        return make_data<types::BoolType>(from.as<types::IntegerType>());
+    } else if(from.is<types::FloatType>()) {
+        return make_data<types::BoolType>(from.as<types::FloatType>());
     } else {
-        throw std::runtime_error{"Cannot convert from " + text::get_type_name(from.type) 
-            + " to " + text::get_type_name(to)};
+        throw std::runtime_error{"Cannot convert from " + from.type->name() + " to " + to.name()}; 
     }
 }
 
-bool
-numeric_bool_converter::can_convert(std::type_index from, std::type_index to) const {
-    return text::is_numeric(from) && to == typeid(bool);
+bool bool_string_converter::can_convert(const TypeInfo& from, const TypeInfo& to) const {
+    return from.is<types::BoolType>() && to.is<types::StringType>();
 }
 
-text::UnknownDataTypeContainer
-numeric_bool_converter::convert(const text::UnknownDataTypeContainer& from, std::type_index to) const {
-    auto ctx = ctx_.lock();
-    auto base = text::as_base(ctx, from);
-
-    if(base.is<double>()) {
-        return text::make_data(static_cast<bool>(base.as<double>()));
-    } else if(base.is<long>()) {
-        return text::make_data(static_cast<bool>(base.as<long>()));
-    } else {
-        throw std::runtime_error{"Cannot convert from " + text::get_type_name(from.type) + " to bool."};
-    }
-}
-
-bool bool_string_converter::can_convert(std::type_index from, std::type_index to) const {
-    return from == typeid(bool) && to == typeid(std::string);
-}
-
-text::UnknownDataTypeContainer bool_string_converter::convert(
-    const text::UnknownDataTypeContainer& from,
-    std::type_index to
+UnknownDataTypeContainer bool_string_converter::convert(
+    const UnknownDataTypeContainer& from,
+    const TypeInfo& to
 ) const {
-    if(from.as<bool>()) {
-        return text::make_data<std::string>("true");
-    } else {
-        return text::make_data<std::string>("false");
-    }
+    return make_data<types::StringType>(
+        from.as<types::BoolType>() ? "true" : "false"
+    );
 }
 
-bool string_bool_converter::can_convert(std::type_index from, std::type_index to) const {
-    return from == typeid(std::string) && to == typeid(bool);
+bool string_bool_converter::can_convert(const TypeInfo& from, const TypeInfo& to) const {
+    return from.is<types::StringType>() && to.is<types::BoolType>();
 }
 
-text::UnknownDataTypeContainer string_bool_converter::convert(
-    const text::UnknownDataTypeContainer& from,
-    std::type_index to
+UnknownDataTypeContainer string_bool_converter::convert(
+    const UnknownDataTypeContainer& from,
+    const TypeInfo& to
 ) const {
-    bool value = !from.as<std::string>().empty();
-    return text::make_data(value);
+    bool value = !from.as<types::StringType>().empty();
+    return make_data<types::BoolType>(value);
 }
 
 } /* stl */

@@ -9,7 +9,7 @@
 #include "siplus/invocation_context.h"
 #include "siplus/parser.h"
 #include "siplus/text/constructor.h"
-#include "siplus/text/data.h"
+#include "siplus/data.h"
 
 #include "block_visitor.h"
 #include "generated/StringInterpolatorLexer.h"
@@ -109,7 +109,7 @@ void ErrorListener::reportContextSensitivity(
 struct NewScopeValueRetriever : text::ValueRetriever {
     NewScopeValueRetriever(std::shared_ptr<text::ValueRetriever> expr) : expr_(expr) {}
 
-    text::UnknownDataTypeContainer retrieve(InvocationContext &value) const override {
+    UnknownDataTypeContainer retrieve(InvocationContext &value) const override {
         auto wrapped = wrap_scope(value.shared_from_this()).build();
         return expr_->retrieve(*wrapped);
     }

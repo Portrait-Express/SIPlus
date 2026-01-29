@@ -1,3 +1,4 @@
+#pragma once
 #ifndef INCLUDE_SIPLUS_STL_H_
 #define INCLUDE_SIPLUS_STL_H_
 
@@ -7,7 +8,6 @@
 
 #include "siplus/stl/converters.h"
 #include "siplus/stl/functions.h"
-#include "siplus/stl/iterators.h"
 
 namespace SIPLUS_NAMESPACE {
 namespace stl {

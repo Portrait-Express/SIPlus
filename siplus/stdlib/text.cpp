@@ -1,4 +1,7 @@
 #include "siplus/invocation_context.h"
+#include "siplus/types/array.h"
+#include "siplus/types/integer.h"
+#include "siplus/types/string.h"
 #include "siplus/util.h"
 
 #include <algorithm>
@@ -6,7 +9,7 @@
 #include <cstring>
 
 #include "siplus/config.h"
-#include "siplus/text/data.h"
+#include "siplus/data.h"
 #include "siplus/text/value_retrievers/retriever.h"
 #include "siplus/stl/functions/text.h"
 
@@ -21,7 +24,7 @@ struct str_impl : public text::ValueRetriever {
         std::weak_ptr<SIPlusParserContext> context
     ) : param_(param), context_(context) {}
 
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
@@ -37,7 +40,7 @@ struct replace_function_impl : text::ValueRetriever {
         std::shared_ptr<text::ValueRetriever> value
     ) : ctx_(ctx), input_(input), target_(target), value_(value) { }
 
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
@@ -55,7 +58,7 @@ struct pad_end_impl : text::ValueRetriever {
         std::shared_ptr<text::ValueRetriever> padding
     ) : ctx_(ctx), input_(input), length_(length), padding_(padding) { }
 
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
@@ -73,7 +76,7 @@ struct pad_start_impl : text::ValueRetriever {
         std::shared_ptr<text::ValueRetriever> padding
     ) : ctx_(ctx), input_(input), length_(length), padding_(padding) { }
 
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
@@ -89,7 +92,7 @@ struct trim_impl : text::ValueRetriever {
         std::shared_ptr<text::ValueRetriever> input
     ) : ctx_(ctx), input_(input) { }
 
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
@@ -103,7 +106,7 @@ struct upper_impl : text::ValueRetriever {
         std::shared_ptr<text::ValueRetriever> input
     ) : ctx_(ctx), input_(input) { }
 
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
@@ -117,7 +120,7 @@ struct lower_impl : text::ValueRetriever {
         std::shared_ptr<text::ValueRetriever> input
     ) : ctx_(ctx), input_(input) { }
 
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
@@ -132,7 +135,7 @@ struct split_impl : text::ValueRetriever {
         std::shared_ptr<text::ValueRetriever> delim
     ) : ctx_(ctx), input_(input), delimiter_(delim) { }
 
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
@@ -149,7 +152,7 @@ struct substr_impl : text::ValueRetriever {
         std::shared_ptr<text::ValueRetriever> end
     ) : ctx_(ctx), input_(input), begin_(begin), end_(end) { }
 
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
@@ -170,11 +173,11 @@ str_func::value(
     return std::make_shared<str_impl>(input, context_);
 }
 
-text::UnknownDataTypeContainer 
+UnknownDataTypeContainer 
 str_impl::retrieve(InvocationContext& value) const {
     auto ctx = context_.lock();
     auto val = param_->retrieve(value);
-    return ctx->convert<std::string>(val);
+    return ctx->convert<types::StringType>(val);
 }
 
 std::shared_ptr<text::ValueRetriever> replace_function::value(
@@ -185,14 +188,14 @@ std::shared_ptr<text::ValueRetriever> replace_function::value(
     return std::make_shared<replace_function_impl>(ctx_, input, target, value);
 }
 
-text::UnknownDataTypeContainer
+UnknownDataTypeContainer
 replace_function_impl::retrieve(InvocationContext& value) const {
     std::shared_ptr<SIPlusParserContext> ctx = ctx_.lock();
-    auto input = ctx->convert<std::string>(input_->retrieve(value)).as<std::string>();
-    auto target = ctx->convert<std::string>(target_->retrieve(value)).as<std::string>();
-    auto with = ctx->convert<std::string>(value_->retrieve(value)).as<std::string>();
+    auto input = ctx->convert<types::StringType>(input_->retrieve(value)).as<types::StringType>();
+    auto target = ctx->convert<types::StringType>(target_->retrieve(value)).as<types::StringType>();
+    auto with = ctx->convert<types::StringType>(value_->retrieve(value)).as<types::StringType>();
 
-    if(input.empty() || target.empty()) return text::make_data(input);
+    if(input.empty() || target.empty()) return make_data<types::StringType>(input);
 
     size_t start_pos = 0;
     while((start_pos = input.find(target, start_pos)) != std::string::npos) {
@@ -200,7 +203,7 @@ replace_function_impl::retrieve(InvocationContext& value) const {
         start_pos += with.length();
     }
 
-    return text::make_data(input);
+    return make_data<types::StringType>(input);
 }
 
 std::shared_ptr<text::ValueRetriever> pad_end_function::value(
@@ -211,24 +214,24 @@ std::shared_ptr<text::ValueRetriever> pad_end_function::value(
     return std::make_shared<pad_end_impl>(ctx_, input, length, padding);
 }
 
-text::UnknownDataTypeContainer 
+UnknownDataTypeContainer 
 pad_end_impl::retrieve(InvocationContext& value) const {
     std::shared_ptr<SIPlusParserContext> ctx = ctx_.lock();
-    auto val = ctx->convert<std::string>(input_->retrieve(value)).as<std::string>();
-    auto length = ctx->convert<long>(length_->retrieve(value)).as<long>();
-    auto padding = ctx->convert<std::string>(padding_->retrieve(value)).as<std::string>();
+    auto val = ctx->convert<types::StringType>(input_->retrieve(value)).as<types::StringType>();
+    auto length = ctx->convert<types::IntegerType>(length_->retrieve(value)).as<types::IntegerType>();
+    auto padding = ctx->convert<types::StringType>(padding_->retrieve(value)).as<types::StringType>();
 
     if(padding.size() != 1) {
         throw std::runtime_error{"Expected padding size to be one character."};
     }
 
     if(val.size() > length) {
-        return text::make_data(val);
+        return make_data<types::StringType>(val);
     } else {
         val.resize(length, padding[0]);
     }
 
-    return text::make_data(val);
+    return make_data<types::StringType>(val);
 }
 
 std::shared_ptr<text::ValueRetriever> pad_start_function::value(
@@ -239,19 +242,19 @@ std::shared_ptr<text::ValueRetriever> pad_start_function::value(
     return std::make_shared<pad_start_impl>(ctx_, input, length, padding);
 }
 
-text::UnknownDataTypeContainer 
+UnknownDataTypeContainer 
 pad_start_impl::retrieve(InvocationContext& value) const {
     std::shared_ptr<SIPlusParserContext> ctx = ctx_.lock();
-    auto val = ctx->convert<std::string>(input_->retrieve(value)).as<std::string>();
-    auto length = ctx->convert<long>(length_->retrieve(value)).as<long>();
-    auto padding = ctx->convert<std::string>(padding_->retrieve(value)).as<std::string>();
+    auto val = ctx->convert<types::StringType>(input_->retrieve(value)).as<types::StringType>();
+    auto length = ctx->convert<types::IntegerType>(length_->retrieve(value)).as<types::IntegerType>();
+    auto padding = ctx->convert<types::StringType>(padding_->retrieve(value)).as<types::StringType>();
 
     if(padding.size() != 1) {
         throw std::runtime_error{"Expected padding size to be one character."};
     }
 
     if(val.size() > length) {
-        return text::make_data(val);
+        return make_data<types::StringType>(val);
     }
 
     std::string out;
@@ -260,7 +263,7 @@ pad_start_impl::retrieve(InvocationContext& value) const {
     size_t offset = length - val.size();
     std::memcpy(out.data() + offset, val.c_str(), val.size());
 
-    return text::make_data(out);
+    return make_data<types::StringType>(out);
 }
 
 std::shared_ptr<text::ValueRetriever> trim_function::value(
@@ -271,10 +274,10 @@ std::shared_ptr<text::ValueRetriever> trim_function::value(
     return std::make_shared<trim_impl>(ctx_, input);
 }
 
-text::UnknownDataTypeContainer
+UnknownDataTypeContainer
 trim_impl::retrieve(InvocationContext& value) const {
     auto ctx = ctx_.lock();
-    auto str = ctx->convert<std::string>(input_->retrieve(value)).as<std::string>();
+    auto str = ctx->convert<types::StringType>(input_->retrieve(value)).as<types::StringType>();
     
     str.erase(str.begin(), std::find_if(str.begin(), str.end(), [](unsigned char c) {
         return !std::isspace(c);
@@ -284,7 +287,7 @@ trim_impl::retrieve(InvocationContext& value) const {
         return !std::isspace(c);
     }).base(), str.end());
 
-    return text::make_data(str);
+    return make_data<types::StringType>(str);
 }
 
 std::shared_ptr<text::ValueRetriever> upper_function::value(
@@ -295,16 +298,16 @@ std::shared_ptr<text::ValueRetriever> upper_function::value(
     return std::make_shared<upper_impl>(ctx_, input);
 }
 
-text::UnknownDataTypeContainer
+UnknownDataTypeContainer
 upper_impl::retrieve(InvocationContext& value) const {
     auto ctx = ctx_.lock();
-    auto str = ctx->convert<std::string>(input_->retrieve(value)).as<std::string>();
+    auto str = ctx->convert<types::StringType>(input_->retrieve(value)).as<types::StringType>();
     
     std::transform(str.begin(), str.end(), str.begin(), [](char c) {
         return std::toupper(c);
     });
 
-    return text::make_data(str);
+    return make_data<types::StringType>(str);
 }
 
 std::shared_ptr<text::ValueRetriever> lower_function::value(
@@ -315,16 +318,16 @@ std::shared_ptr<text::ValueRetriever> lower_function::value(
     return std::make_shared<lower_impl>(ctx_, input);
 }
 
-text::UnknownDataTypeContainer
+UnknownDataTypeContainer
 lower_impl::retrieve(InvocationContext& value) const {
     auto ctx = ctx_.lock();
-    auto str = ctx->convert<std::string>(input_->retrieve(value)).as<std::string>();
+    auto str = ctx->convert<types::StringType>(input_->retrieve(value)).as<types::StringType>();
     
     std::transform(str.begin(), str.end(), str.begin(), [](char c) {
         return std::tolower(c);
     });
 
-    return text::make_data(str);
+    return make_data<types::StringType>(str);
 }
 
 std::shared_ptr<text::ValueRetriever>
@@ -336,21 +339,21 @@ split_function::value(
     return std::make_shared<split_impl>(ctx_, input, delim);
 }
 
-text::UnknownDataTypeContainer
+UnknownDataTypeContainer
 split_impl::retrieve(InvocationContext& value) const {
     auto ctx = ctx_.lock();
     auto input_val = input_->retrieve(value);
     auto delimiter_val = delimiter_->retrieve(value);
-    auto delimiter = ctx->convert<std::string>(delimiter_val).as<std::string>();
-    auto text = ctx->convert<std::string>(input_val).as<std::string>();
+    auto delimiter = ctx->convert<types::StringType>(delimiter_val).as<types::StringType>();
+    auto text = ctx->convert<types::StringType>(input_val).as<types::StringType>();
 
-    std::vector<text::UnknownDataTypeContainer> ret;
+    std::vector<UnknownDataTypeContainer> ret;
     auto last = 0;
     auto idx = text.find(delimiter);
     while(idx != std::string::npos) {
         if(idx != last)  {
             std::string substr = text.substr(last, idx-last);
-            ret.push_back(text::make_data(substr));
+            ret.push_back(make_data<types::StringType>(substr));
         }
 
         last = idx + delimiter.size();
@@ -359,10 +362,10 @@ split_impl::retrieve(InvocationContext& value) const {
 
     if(text.empty() || (idx != last && text.size() - last != 0)) {
         std::string substr = text.substr(last, text.size() - last);
-        ret.push_back(text::make_data(substr));
+        ret.push_back(make_data<types::StringType>(substr));
     }
 
-    return text::make_data(ret);
+    return make_data<types::ArrayType>(ret);
 }
 
 std::shared_ptr<text::ValueRetriever>
@@ -374,58 +377,58 @@ substr_function::value(
     return std::make_shared<substr_impl>(ctx_, input, begin, end);
 }
 
-text::UnknownDataTypeContainer
+UnknownDataTypeContainer
 substr_impl::retrieve(InvocationContext& value) const {
     auto ctx = ctx_.lock();
-    text::UnknownDataTypeContainer input_val = input_->retrieve(value);
-    text::UnknownDataTypeContainer begin_val = begin_->retrieve(value);
-    std::string input = ctx->convert<std::string>(input_val).as<std::string>();
-    long begin = ctx->convert<long>(begin_val).as<long>();
+    UnknownDataTypeContainer input_val = input_->retrieve(value);
+    UnknownDataTypeContainer begin_val = begin_->retrieve(value);
+    std::string input = ctx->convert<types::StringType>(input_val).as<types::StringType>();
+    long begin = ctx->convert<types::IntegerType>(begin_val).as<types::IntegerType>();
     long end = input.size();
 
     if(end_) {
-        text::UnknownDataTypeContainer end_val = end_->retrieve(value);
-        end = ctx->convert<long>(end_val).as<long>();
+        UnknownDataTypeContainer end_val = end_->retrieve(value);
+        end = ctx->convert<types::IntegerType>(end_val).as<types::IntegerType>();
     }
 
-    return text::make_data(input.substr(begin, end));
+    return make_data<types::StringType>(input.substr(begin, end));
 }
 
-text::UnknownDataTypeContainer string_concatenator::invoke(
+UnknownDataTypeContainer string_concatenator::invoke(
     std::shared_ptr<SIPlusParserContext> ctx,
-    text::UnknownDataTypeContainer       lhs,
-    text::UnknownDataTypeContainer       rhs
+    UnknownDataTypeContainer       lhs,
+    UnknownDataTypeContainer       rhs
 ) {
-    if(!lhs.is<std::string>() || !rhs.is<std::string>()) {
+    if(!lhs.is<types::StringType>() || !rhs.is<types::StringType>()) {
         throw std::runtime_error{"String concatenator can only handle std::string"};
     }
-    return text::make_data(lhs.as<std::string>() + rhs.as<std::string>());
+    return make_data<types::StringType>(lhs.as<types::StringType>() + rhs.as<types::StringType>());
 }
 
-bool string_concatenator::can_handle(std::type_index lhs, std::type_index rhs) const {
-    return lhs == typeid(std::string) && rhs == typeid(std::string);
+bool string_concatenator::can_handle(const TypeInfo& lhs, const TypeInfo& rhs) const {
+    return lhs.is<types::StringType>() && rhs.is<types::StringType>();
 }
 
-text::UnknownDataTypeContainer 
+UnknownDataTypeContainer 
 string_comparator::invoke(
     std::shared_ptr<SIPlusParserContext> context,
-    text::UnknownDataTypeContainer lhs, 
-    text::UnknownDataTypeContainer rhs
+    UnknownDataTypeContainer lhs, 
+    UnknownDataTypeContainer rhs
 ) {
-    auto strl = lhs.as<std::string>();
-    auto strr = rhs.as<std::string>();
+    auto strl = lhs.as<types::StringType>();
+    auto strr = rhs.as<types::StringType>();
 
     if(strl < strr) {
-        return text::make_data(-1L);
+        return make_data<types::IntegerType>(-1L);
     } else if(strl > strr) {
-        return text::make_data(1L);
+        return make_data<types::IntegerType>(1L);
     } else {
-        return text::make_data(0L);
+        return make_data<types::IntegerType>(0L);
     }
 }
 
-bool string_comparator::can_handle(std::type_index lhs, std::type_index rhs) const {
-    return lhs == typeid(std::string) && rhs == typeid(std::string);
+bool string_comparator::can_handle(const TypeInfo& lhs, const TypeInfo& rhs) const {
+    return lhs.is<types::StringType>() && rhs.is<types::StringType>();
 }
 
 } /* stl */

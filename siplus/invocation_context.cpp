@@ -3,12 +3,12 @@
 
 namespace SIPLUS_NAMESPACE {
 
-InvocationContextWrapperBuilder& InvocationContextWrapperBuilder::use_default(text::UnknownDataTypeContainer val) {
+InvocationContextWrapperBuilder& InvocationContextWrapperBuilder::use_default(UnknownDataTypeContainer val) {
     with("0", val);
     return *this;
 }
 
-InvocationContextWrapperBuilder& InvocationContextWrapperBuilder::with(std::string name, text::UnknownDataTypeContainer val) {
+InvocationContextWrapperBuilder& InvocationContextWrapperBuilder::with(std::string name, UnknownDataTypeContainer val) {
     variables_[name] = val;
     return *this;
 }
@@ -27,7 +27,7 @@ InvocationContextWrapperBuilder wrap_scope(std::shared_ptr<InvocationContext> co
     return InvocationContextWrapperBuilder{context};
 }
 
-text::UnknownDataTypeContainer InvocationContext::default_data() const {
+UnknownDataTypeContainer InvocationContext::default_data() const {
     return variable("0");
 }
 
@@ -35,7 +35,7 @@ bool ContextInvocationContext::variable_defined(std::string key) const {
     return variables_.find(key) != variables_.end();
 }
 
-const text::UnknownDataTypeContainer ContextInvocationContext::variable(std::string key) const {
+const UnknownDataTypeContainer ContextInvocationContext::variable(std::string key) const {
     auto it = variables_.find(key);
 
     if(it == variables_.end()) {
@@ -45,7 +45,7 @@ const text::UnknownDataTypeContainer ContextInvocationContext::variable(std::str
     return it->second;
 }
 
-void ContextInvocationContext::set_variable(std::string key, const text::UnknownDataTypeContainer& value) {
+void ContextInvocationContext::set_variable(std::string key, const UnknownDataTypeContainer& value) {
     variables_[key] = value;
 }
 
@@ -53,7 +53,7 @@ bool InvocationContextWrapper::variable_defined(std::string key) const {
     return variables_.find(key) != variables_.end() || (parent_ && parent_->variable_defined(key));
 }
 
-const text::UnknownDataTypeContainer InvocationContextWrapper::variable(std::string key) const {
+const UnknownDataTypeContainer InvocationContextWrapper::variable(std::string key) const {
     auto it = variables_.find(key);
 
     if(it == variables_.end()) {
@@ -66,7 +66,7 @@ const text::UnknownDataTypeContainer InvocationContextWrapper::variable(std::str
     return it->second;
 }
 
-void InvocationContextWrapper::set_variable(std::string key, const text::UnknownDataTypeContainer& value) {
+void InvocationContextWrapper::set_variable(std::string key, const UnknownDataTypeContainer& value) {
     auto it = variables_.find(key);
 
     if(it == variables_.end()) {

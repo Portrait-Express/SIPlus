@@ -2,6 +2,7 @@
 #include <ostream>
 
 #include "../common.hxx"
+#include "siplus/types/string.h"
 
 using namespace SIPLUS_NAMESPACE;
 
@@ -32,11 +33,15 @@ private:
             std::shared_ptr<text::ValueRetriever> fieldName
         ) : context_(context), input_(input), fieldName_(fieldName) {}
 
-        text::UnknownDataTypeContainer retrieve(InvocationContext& value) const override {
+        UnknownDataTypeContainer retrieve(InvocationContext& value) const override {
+            //Get input value
             auto input = input_->retrieve(value);
-            auto fieldName = context_->convert<std::string>(fieldName_->retrieve(value));
 
-            return context_->accessor(input)->access(input, fieldName.as<std::string>());
+            //Get the field name parameter
+            auto fieldName = context_->convert<types::StringType>(fieldName_->retrieve(value));
+
+            //Access the field on the object.
+            return input.access(fieldName.as<types::StringType>());
         }
 
     private:
@@ -47,8 +52,8 @@ private:
 };
 
 int main(int, char**) {
-    Person person;
-    person.first_name = "John";
+    std::string templateText = "Hello, { . | access \"first_name\" }";
+    User person{2, "John"};
 
     //Create parser
     Parser p;
@@ -56,17 +61,21 @@ int main(int, char**) {
 
     //Set up parser.
     p.context().use_stl();
-    p.context().emplace_accessor<PersonAccessor>(); 
+    
     //Emplace our custom function
     p.context().emplace_function<access_func>("access", p.context().shared_from_this());
 
-    auto constructor = p.get_interpolation("Hello, { . | access \"first_name\" }", opts);
+    auto constructor = p.get_interpolation(templateText);
 
     auto data = p.context()
         .builder()
-        .use_default(text::make_data(person))
+        .use_default(make_data(person))
         .build();
 
     auto constructed = constructor.construct_with(data);
-    std::cout << constructed << std::endl;
+    std::cout 
+        << "Template: " << templateText << '\n'
+        << "Result:   " << constructed << std::endl;
+
+    return 0;
 }

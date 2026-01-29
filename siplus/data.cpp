@@ -1,19 +1,27 @@
-#include "siplus/text/data.h"
+#include "siplus/data.h"
+#include "siplus/text/iterator.h"
+#include "siplus/util.h"
 
 namespace SIPLUS_NAMESPACE {
 
-namespace text {
+UnknownDataTypeContainer TypeInfo::access(const UnknownDataTypeContainer&, const std::string&) const {
+    throw std::runtime_error{util::to_string(name(), " has no accessible properties")};
+}
+
+std::unique_ptr<text::Iterator> TypeInfo::iterate(const UnknownDataTypeContainer&) const {
+    throw std::runtime_error{util::to_string(name(), " is not iterable")};
+}
 
 UnknownDataTypeContainer::UnknownDataTypeContainer() {
     _ref = new size_t(1);
 }
 
-UnknownDataTypeContainer::UnknownDataTypeContainer(std::type_index type, const void *ptr) : UnknownDataTypeContainer() {
+UnknownDataTypeContainer::UnknownDataTypeContainer(std::shared_ptr<TypeInfo> type, void *ptr) : UnknownDataTypeContainer() {
     this->type = type;
     this->ptr = ptr;
 }
 
-UnknownDataTypeContainer::UnknownDataTypeContainer(std::type_index type, const void *ptr, deleter deleter) : UnknownDataTypeContainer(type, ptr) {
+UnknownDataTypeContainer::UnknownDataTypeContainer(std::shared_ptr<TypeInfo> type, void *ptr, deleter deleter) : UnknownDataTypeContainer(type, ptr) {
     deleter_ = deleter;
 }
 
@@ -34,6 +42,18 @@ UnknownDataTypeContainer& UnknownDataTypeContainer::operator=(UnknownDataTypeCon
     return *this;
 }
 
+UnknownDataTypeContainer UnknownDataTypeContainer::access(const std::string& name) {
+    return type->access(*this, name);
+}
+
+std::unique_ptr<text::Iterator> UnknownDataTypeContainer::iterate() {
+    return type->iterate(*this);
+}
+
+bool UnknownDataTypeContainer::is_iterable() {
+    return type->is_iterable();
+}
+
 UnknownDataTypeContainer::~UnknownDataTypeContainer() {
     //_ref can be nullptr if this object is moved from
     if(_ref != nullptr) {
@@ -50,5 +70,4 @@ UnknownDataTypeContainer::~UnknownDataTypeContainer() {
 }
 
 
-}
 }

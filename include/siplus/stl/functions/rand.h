@@ -1,3 +1,4 @@
+#pragma once
 #ifndef INCLUDE_FUNCTIONS_RAND_H_
 #define INCLUDE_FUNCTIONS_RAND_H_
 

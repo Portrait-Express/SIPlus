@@ -1,3 +1,7 @@
+#pragma once
+#include "siplus/types/float.h"
+#include "siplus/types/integer.h"
+#include "siplus/types/string.h"
 #ifndef INCLUDE_FUNCTIONS_SET_H_
 #define INCLUDE_FUNCTIONS_SET_H_
 
@@ -7,39 +11,35 @@
 
 #include "siplus/function.h"
 #include "siplus/context.h"
-#include "siplus/text/data.h"
+#include "siplus/data.h"
 #include "siplus/text/iterator.h"
-#include "siplus/text/value_retrievers/settable_value_retriever.h"
 
 #include <unordered_set>
 
 namespace std {
 
 template<>
-struct hash<SIPLUS_NAMESPACE::text::UnknownDataTypeContainer> {
-    hash(shared_ptr<SIPLUS_NAMESPACE::SIPlusParserContext> context);
-
+struct hash<SIPLUS_NAMESPACE::UnknownDataTypeContainer> {
     std::uint64_t operator()(
-        const SIPLUS_NAMESPACE::text::UnknownDataTypeContainer& container
+        const SIPLUS_NAMESPACE::UnknownDataTypeContainer& container
     ) const;
 
 private:
-    shared_ptr<SIPLUS_NAMESPACE::SIPlusParserContext> context_;
-    hash<std::string> string_;
-    hash<double> double_;
-    hash<long> long_;
+    hash<SIPLUS_NAMESPACE::types::StringType::data_type> string_;
+    hash<SIPLUS_NAMESPACE::types::FloatType::data_type> double_;
+    hash<SIPLUS_NAMESPACE::types::IntegerType::data_type> long_;
 };
 
 template<>
-struct equal_to<SIPLUS_NAMESPACE::text::UnknownDataTypeContainer> {
+struct equal_to<SIPLUS_NAMESPACE::UnknownDataTypeContainer> {
     equal_to(
         shared_ptr<SIPLUS_NAMESPACE::SIPlusParserContext> context,
         shared_ptr<SIPLUS_NAMESPACE::text::ValueRetriever> comparator
     );
 
     bool operator()(
-        const SIPLUS_NAMESPACE::text::UnknownDataTypeContainer& lhs,
-        const SIPLUS_NAMESPACE::text::UnknownDataTypeContainer& rhs
+        const SIPLUS_NAMESPACE::UnknownDataTypeContainer& lhs,
+        const SIPLUS_NAMESPACE::UnknownDataTypeContainer& rhs
     ) const;
 
 private:
@@ -52,7 +52,13 @@ private:
 namespace SIPLUS_NAMESPACE {
 namespace stl {
 
-using set_t = std::unordered_set<text::UnknownDataTypeContainer>;
+struct SetType : public TypeInfo {
+    using data_type = std::unordered_set<UnknownDataTypeContainer>;
+    virtual std::string name() const override;
+    virtual bool is_iterable() const override;
+
+    virtual std::unique_ptr<text::Iterator> iterate(const UnknownDataTypeContainer& data) const override;
+};
 
 /**
  * struct set_new_func - Function to create a new instance of a set
@@ -94,27 +100,17 @@ struct set_add_func : Function {
  * struct set_iterator - Iterator implementation for a set
  */
 struct set_iterator : text::Iterator {
-    set_iterator(set_t::const_iterator begin, set_t::const_iterator end) 
+    set_iterator(SetType::data_type::const_iterator begin, SetType::data_type::const_iterator end) 
         : begin_(begin), end_(end) { }
 
     bool more() override;
     void next() override;
-    text::UnknownDataTypeContainer current() override;
+    UnknownDataTypeContainer current() override;
 
 private:
-    set_t::const_iterator begin_;
-    set_t::const_iterator end_;
+    SetType::data_type::const_iterator begin_;
+    SetType::data_type::const_iterator end_;
     bool next_called_;
-};
-
-/**
- * struct set_iterator_provider - IteratorProvider implementation for a set
- */
-struct set_iterator_provider : text::IteratorProvider {
-    std::unique_ptr<text::Iterator> iterator(
-        const text::UnknownDataTypeContainer& value
-    ) override;
-    bool can_iterate(const text::UnknownDataTypeContainer& value) override;
 };
 
 } /* stl */

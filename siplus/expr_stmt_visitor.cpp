@@ -3,25 +3,31 @@
 #include "generated/StringInterpolatorParser.h"
 #include "siplus/context.h"
 #include "siplus/invocation_context.h"
-#include "siplus/text/data.h"
+#include "siplus/data.h"
 #include "siplus/text/value_retrievers/retriever.h"
 
 #include <iterator>
 #include <memory>
-#include <ostream>
 #include <vector>
 
 namespace SIPLUS_NAMESPACE {
 
 namespace {
 
+struct DummyScopeType : public TypeInfo { 
+    using data_type = std::weak_ptr<InvocationContext>;
+
+    virtual std::string name() const { return "<internal-scope>"; }
+    virtual bool is_iterable() const { return false; }
+};
+
 //I hate this solution for storing the scope, but its the best I can come up with
 void store_function_context(const std::string function, std::shared_ptr<InvocationContext> ctx) {
-    ctx->set_variable("*@" + function, text::make_data(std::weak_ptr{ctx}));
+    ctx->set_variable("*@" + function, make_data<DummyScopeType>(std::weak_ptr{ctx}));
 }
 
 std::shared_ptr<InvocationContext> get_function_context(const std::string function, InvocationContext& ctx) {
-    return ctx.variable("*@" + function).as<std::weak_ptr<InvocationContext>>().lock();
+    return ctx.variable("*@" + function).as<DummyScopeType>().lock();
 }
 
 struct FuncDefStmt : Statement {
@@ -103,7 +109,7 @@ struct CustomFuncImpl : text::ValueRetriever {
         std::shared_ptr<text::ValueRetriever> expr
     ) : name_(name), parameters_(parameters), expr_(expr) {}
 
-    text::UnknownDataTypeContainer retrieve(InvocationContext &value) const override;
+    UnknownDataTypeContainer retrieve(InvocationContext &value) const override;
 
 private:
     std::string name_;
@@ -151,7 +157,7 @@ std::shared_ptr<text::ValueRetriever> CustomFunction::value(
     return make_shared<CustomFuncImpl>(name_, params, expr_);
 }
 
-text::UnknownDataTypeContainer CustomFuncImpl::retrieve(InvocationContext& context) const {
+UnknownDataTypeContainer CustomFuncImpl::retrieve(InvocationContext& context) const {
     auto function_scope = get_function_context(name_, context);
     auto scope = wrap_scope(function_scope).build();
 

@@ -1,4 +1,7 @@
-#include "siplus/text/data.h"
+#include "siplus/data.h"
+#include "siplus/types/float.h"
+#include "siplus/types/integer.h"
+#include "siplus/types/string.h"
 #include "siplus/util.h"
 #include "siplus/stl/functions/rand.h"
 #include <random>
@@ -32,7 +35,7 @@ struct rand_impl : text::ValueRetriever {
         std::shared_ptr<text::ValueRetriever> seed
     ) : context_(context), begin_(begin), end_(end), seed_(seed) {}
 
-    virtual text::UnknownDataTypeContainer retrieve(InvocationContext& value) const override;
+    virtual UnknownDataTypeContainer retrieve(InvocationContext& value) const override;
 
 private:
     std::weak_ptr<SIPlusParserContext> context_;
@@ -48,7 +51,7 @@ struct rand_str_impl : text::ValueRetriever {
         std::shared_ptr<text::ValueRetriever> length
     ) : context_(context), characters_(characters), length_(length) {}
 
-    virtual text::UnknownDataTypeContainer retrieve(InvocationContext& value) const override;
+    virtual UnknownDataTypeContainer retrieve(InvocationContext& value) const override;
 
 private:
     std::weak_ptr<SIPlusParserContext> context_;
@@ -66,13 +69,13 @@ std::shared_ptr<text::ValueRetriever> rand_func::value(
     return std::make_shared<rand_impl>(context_, begin, end, seed);
 }
 
-text::UnknownDataTypeContainer 
+UnknownDataTypeContainer 
 rand_impl::retrieve(InvocationContext& container) const {
     auto ctx = context_.lock();
 
     unsigned long seed;
     if(seed_) {
-        seed = ctx->convert<long>(seed_->retrieve(container)).as<long>();
+        seed = ctx->convert<types::IntegerType>(seed_->retrieve(container)).as<types::IntegerType>();
     } else {
         seed = std::random_device{}();
     }
@@ -80,16 +83,16 @@ rand_impl::retrieve(InvocationContext& container) const {
     if(!begin_) {
         std::mt19937 engine{seed};
         std::uniform_real_distribution<double> dist{0, 1};
-        return text::make_data(dist(engine));
+        return make_data<types::FloatType>(dist(engine));
     } else {
-        auto begin = ctx->convert<long>(begin_->retrieve(container)).as<long>();
-        auto end = ctx->convert<long>(end_->retrieve(container)).as<long>();
+        auto begin = ctx->convert<types::IntegerType>(begin_->retrieve(container)).as<types::IntegerType>();
+        auto end = ctx->convert<types::IntegerType>(end_->retrieve(container)).as<types::IntegerType>();
 
         std::mt19937 engine{seed};
         std::uniform_int_distribution<long> dist{begin, end};
         auto ret = dist(engine);
 
-        return text::make_data(ret);
+        return make_data<types::IntegerType>(ret);
     }
 }
 
@@ -101,11 +104,11 @@ std::shared_ptr<text::ValueRetriever> rand_str_func::value(
     return std::make_shared<rand_str_impl>(context_, characters, length);
 }
 
-text::UnknownDataTypeContainer 
+UnknownDataTypeContainer 
 rand_str_impl::retrieve(InvocationContext& value) const {
     auto ctx = context_.lock();
-    auto characters = ctx->convert<std::string>(characters_->retrieve(value)).as<std::string>();
-    auto length = ctx->convert<long>(length_->retrieve(value)).as<long>();
+    auto characters = ctx->convert<types::StringType>(characters_->retrieve(value)).as<types::StringType>();
+    auto length = ctx->convert<types::IntegerType>(length_->retrieve(value)).as<types::IntegerType>();
 
     std::string str{};
     str.resize(length, ' ');
@@ -118,7 +121,7 @@ rand_str_impl::retrieve(InvocationContext& value) const {
         str[i] = characters[idx];
     }
 
-    return text::make_data(str);
+    return make_data<types::StringType>(str);
 }
 
 } /* stl */

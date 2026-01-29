@@ -3,7 +3,7 @@
 
 #include "siplus/context.h"
 #include "siplus/invocation_context.h"
-#include "siplus/text/data.h"
+#include "siplus/data.h"
 #include <memory>
 #include <unordered_map>
 
@@ -17,11 +17,11 @@ struct ContextInvocationContext : InvocationContext {
 
     ContextInvocationContext(std::shared_ptr<const SIPlusParserContext> context) : context_(context) {}
     virtual bool variable_defined(std::string key) const override;
-    virtual const text::UnknownDataTypeContainer variable(std::string key) const override;
-    virtual void set_variable(std::string key, const text::UnknownDataTypeContainer& value) override;
+    virtual const UnknownDataTypeContainer variable(std::string key) const override;
+    virtual void set_variable(std::string key, const UnknownDataTypeContainer& value) override;
 private:
     std::shared_ptr<const SIPlusParserContext> context_;
-    std::unordered_map<std::string, text::UnknownDataTypeContainer> variables_;
+    std::unordered_map<std::string, UnknownDataTypeContainer> variables_;
 };
 
 } /* SIPLUS_NAMESPACE */

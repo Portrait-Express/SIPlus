@@ -1,3 +1,4 @@
+#pragma once
 #ifndef INCLUDE_SIPLUS_PARSER_H
 #define INCLUDE_SIPLUS_PARSER_H
 

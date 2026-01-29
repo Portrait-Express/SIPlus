@@ -1,3 +1,4 @@
+#pragma once
 #ifndef INCLUDE_FUNCTIONS_CONVERTING_OPERATOR_H_
 #define INCLUDE_FUNCTIONS_CONVERTING_OPERATOR_H_
 
@@ -9,19 +10,19 @@
 #include <vector>
 
 #include "siplus/context.h"
-#include "siplus/text/data.h"
+#include "siplus/data.h"
 
 namespace SIPLUS_NAMESPACE {
 namespace stl {
 
 struct operator_impl {
-    virtual text::UnknownDataTypeContainer invoke(
+    virtual UnknownDataTypeContainer invoke(
         std::shared_ptr<SIPlusParserContext>   context,
-        text::UnknownDataTypeContainer         lhs, 
-        text::UnknownDataTypeContainer         rhs
+        UnknownDataTypeContainer         lhs, 
+        UnknownDataTypeContainer         rhs
     ) = 0;
 
-    virtual bool can_handle(std::type_index lhs, std::type_index rhs) const = 0;
+    virtual bool can_handle(const TypeInfo& lhs, const TypeInfo& rhs) const = 0;
 
     virtual ~operator_impl() = default;
 };
@@ -42,8 +43,8 @@ struct converting_operator_function : Function {
         return *this;
     }
 
-    bool has_impl(std::type_index lhs, std::type_index rhs) const;
-    std::shared_ptr<operator_impl> find_impl(std::type_index lhs, std::type_index rhs) const;
+    bool has_impl(const TypeInfo& from, const TypeInfo& to) const;
+    std::shared_ptr<operator_impl> find_impl(const TypeInfo& from, const TypeInfo& to) const;
 
 private:
     std::weak_ptr<SIPlusParserContext> context_;

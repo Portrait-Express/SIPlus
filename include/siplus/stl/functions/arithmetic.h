@@ -1,3 +1,4 @@
+#pragma once
 #ifndef INCLUDE_FUNCTIONS_ARITHMETIC_H_
 #define INCLUDE_FUNCTIONS_ARITHMETIC_H_
 
@@ -9,7 +10,7 @@
 
 #include "siplus/context.h"
 #include "siplus/stl/functions/converting_operator.h"
-#include "siplus/text/data.h"
+#include "siplus/data.h"
 #include "siplus/text/text.h"
 
 namespace SIPLUS_NAMESPACE {
@@ -22,53 +23,54 @@ namespace stl {
  * implementations. Implements `can_handle`.
  */
 struct base_numeric_operator_impl : operator_impl {
-    bool can_handle(std::type_index lhs, std::type_index rhs) const override {
-        return text::is_numeric(lhs) && text::is_numeric(rhs);
+    bool can_handle(const TypeInfo& lhs, const TypeInfo& rhs) const override {
+        return (lhs.is<types::IntegerType>() || lhs.is<types::FloatType>()) &&
+            (rhs.is<types::IntegerType>() || rhs.is<types::FloatType>());
     }
 };
 
 struct numeric_adder : base_numeric_operator_impl {
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     invoke(
         std::shared_ptr<SIPlusParserContext> context,
-        text::UnknownDataTypeContainer lhs, 
-        text::UnknownDataTypeContainer rhs
+        UnknownDataTypeContainer lhs, 
+        UnknownDataTypeContainer rhs
     ) override;
 };
 
 struct numeric_subtractor : base_numeric_operator_impl {
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     invoke(
         std::shared_ptr<SIPlusParserContext> context,
-        text::UnknownDataTypeContainer lhs, 
-        text::UnknownDataTypeContainer rhs
+        UnknownDataTypeContainer lhs, 
+        UnknownDataTypeContainer rhs
     ) override;
 };
 
 struct numeric_multiplier : base_numeric_operator_impl {
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     invoke(
         std::shared_ptr<SIPlusParserContext> context,
-        text::UnknownDataTypeContainer lhs, 
-        text::UnknownDataTypeContainer rhs
+        UnknownDataTypeContainer lhs, 
+        UnknownDataTypeContainer rhs
     ) override;
 };
 
 struct numeric_divider : base_numeric_operator_impl {
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     invoke(
         std::shared_ptr<SIPlusParserContext> context,
-        text::UnknownDataTypeContainer lhs, 
-        text::UnknownDataTypeContainer rhs
+        UnknownDataTypeContainer lhs, 
+        UnknownDataTypeContainer rhs
     ) override;
 };
 
 struct numeric_comparator : base_numeric_operator_impl {
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     invoke(
         std::shared_ptr<SIPlusParserContext> context,
-        text::UnknownDataTypeContainer lhs, 
-        text::UnknownDataTypeContainer rhs
+        UnknownDataTypeContainer lhs, 
+        UnknownDataTypeContainer rhs
     ) override;
 
 };

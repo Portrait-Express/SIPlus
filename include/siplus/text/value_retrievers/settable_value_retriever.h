@@ -1,3 +1,4 @@
+#pragma once
 #ifndef INCLUDE_VALUE_RETRIEVERS_SETTABLE_VALUE_RETRIEVER_H_
 #define INCLUDE_VALUE_RETRIEVERS_SETTABLE_VALUE_RETRIEVER_H_
 
@@ -21,7 +22,7 @@ struct SettableValueRetriever : text::ValueRetriever {
 
     SettableValueRetriever() {}
 
-    text::UnknownDataTypeContainer retrieve(InvocationContext& value) const override {
+    UnknownDataTypeContainer retrieve(InvocationContext& value) const override {
         if(!is_set_) {
             throw std::runtime_error{"value not set"};
         }
@@ -29,7 +30,7 @@ struct SettableValueRetriever : text::ValueRetriever {
         return value_;
     }
 
-    clear_binding set_value(const text::UnknownDataTypeContainer& container) {
+    clear_binding set_value(const UnknownDataTypeContainer& container) {
         is_set_ = true;
         value_ = container;
 
@@ -37,12 +38,12 @@ struct SettableValueRetriever : text::ValueRetriever {
     }
 
     void clear() {
-        value_ = text::UnknownDataTypeContainer{};
+        value_ = UnknownDataTypeContainer{};
         is_set_ = false;
     }
 
 private:
-    text::UnknownDataTypeContainer value_;
+    UnknownDataTypeContainer value_;
     bool is_set_ = false;
 };
 

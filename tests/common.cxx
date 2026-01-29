@@ -18,8 +18,7 @@
 
 #include "siplus/context.h"
 #include "siplus/parser.h"
-#include "siplus/text/data.h"
-#include "siplus/stl/iterators/vector_iterator_provider.h"
+#include "siplus/data.h"
 
 #include "common.hxx"
 
@@ -44,64 +43,45 @@ struct int_string_converter : text::Converter {
 
 #endif
 
-struct user_accessor : public text::Accessor {
-    text::UnknownDataTypeContainer access(
-        const text::UnknownDataTypeContainer &value, 
-        const std::string &name
-    ) override {
+UnknownDataTypeContainer test_data_y_type::access(const UnknownDataTypeContainer& ptr, const std::string& name) const  {
+    struct test_data::y& data = ptr.as<test_data_y_type>();
 
-        const User& data = value.as<User>();
-
-        if(name == "id") {
-            return text::make_data(data.id);
-        } else if(name == "email") {
-            return text::make_data(data.email);
-        } else if(name == "username") {
-            return text::make_data(data.username);
-        } else if(name == "can_login") {
-            return text::make_data(data.can_login);
-        }
-
+    if(name == "b") {
+        return make_data(data.b);
+    } else {
         throw std::runtime_error(std::format("No viable property for '{}'", name));
     }
+}
 
-    bool can_access(const text::UnknownDataTypeContainer& value) override {
-        return value.type == typeid(User);
-    }
-};
+UnknownDataTypeContainer test_data_type::access(const UnknownDataTypeContainer& ptr, const std::string& name) const  {
+    test_data& data = ptr.as<test_data_type>();
 
-struct data_accessor : public text::Accessor {
-    text::UnknownDataTypeContainer access(
-        const text::UnknownDataTypeContainer &value, 
-        const std::string &name
-    ) override {
-        if(value.is<struct test_data::y>()) {
-            return text::make_data(value.as<struct test_data::y>().b);
-        }
-
-        const test_data& data = value.as<test_data>();
-
-        if(name == "x") {
-            return text::make_data(data.x);
-        }
-
-        if(name == "y") {
-            return text::make_data(data.y);
-        }
-
-        if(name == "users") {
-            return text::make_data(data.users);
-        }
-
-
+    if(name == "x") {
+        return make_data(data.x);
+    } else if(name == "y") {
+        return make_data(data.y);
+    } else if(name == "users") {
+        return make_data(data.users);
+    } else {
         throw std::runtime_error(std::format("No viable property for '{}'", name));
     }
+}
 
-    bool can_access(const text::UnknownDataTypeContainer& value) override {
-        return value.type == typeid(test_data) || 
-            value.type == typeid(struct test_data::y);
+UnknownDataTypeContainer user_type::access(const UnknownDataTypeContainer& ptr, const std::string& name) const {
+    User& user = ptr.as<user_type>();
+
+    if(name == "id") {
+        return make_data(user.id);
+    } else if(name == "email") {
+        return make_data(user.email);
+    } else if(name == "username") {
+        return make_data(user.username);
+    } else if(name == "can_login") {
+        return make_data(user.can_login);
     }
-};
+
+    throw std::runtime_error(std::format("No viable property for '{}'", name));
+}
 
 bool g_parser_init = false;
 Parser& get_test_context() {
@@ -113,16 +93,6 @@ Parser& get_test_context() {
 #else
         parser.context().emplace_converter<int_string_converter>();
 #endif
-
-        parser.context().emplace_accessor<data_accessor>();
-        parser.context().emplace_accessor<user_accessor>();
-        parser.context().emplace_iterator<stl::vector_iterator<User>>();
-        parser.context().emplace_iterator<stl::vector_iterator<long>>();
-        parser.context().emplace_iterator<stl::vector_iterator<int>>();
-        parser.context().emplace_iterator<stl::vector_iterator<short>>();
-        parser.context().emplace_iterator<stl::vector_iterator<double>>();
-        parser.context().emplace_iterator<stl::vector_iterator<float>>();
-        parser.context().emplace_iterator<stl::vector_iterator<std::string>>();
 
         g_parser_init = true;
     }
@@ -186,11 +156,6 @@ int group(std::string name, std::function<int()> test_impl) {
     return group(name, [&](const Parser&) {
         return test_impl();
     });
-}
-
-template<>
-bool conversion_equal<double>(double first, double second) {
-    return nearly_equal(first, second, (double)FLT_EPSILON, (double)FLT_MIN);
 }
 
 bool nearly_equal(float a, float b, float epsilon, float abs_th) {

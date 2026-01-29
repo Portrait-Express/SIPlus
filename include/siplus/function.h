@@ -1,3 +1,4 @@
+#pragma once
 #ifndef INCLUDE_INCLUDE_FUNCTION_H_
 #define INCLUDE_INCLUDE_FUNCTION_H_
 

@@ -1,7 +1,12 @@
 #include "literal_visitor.h"
 #include "Token.h"
 #include "generated/StringInterpolatorLexer.h"
-#include "siplus/text/data.h"
+#include "interpolation_visitor.h"
+#include "siplus/data.h"
+#include "siplus/types/bool.h"
+#include "siplus/types/float.h"
+#include "siplus/types/integer.h"
+#include "siplus/types/string.h"
 #include <cstdlib>
 #include <string>
 
@@ -84,19 +89,19 @@ std::any LiteralVisitor::visitString(StringInterpolatorParser::StringContext *no
         }
     }
 
-    return text::make_data(ss.str());
+    return make_data<types::StringType>(ss.str());
 }
 
 std::any LiteralVisitor::visitInteger(StringInterpolatorParser::IntegerContext *node) {
-    return text::make_data(parse_int(node->getText()));
+    return make_data<types::IntegerType>(parse_int(node->getText()));
 }
 
 std::any LiteralVisitor::visitFloat(StringInterpolatorParser::FloatContext *node) {
-    return text::make_data(parse_float(node->getText()));
+    return make_data<types::FloatType>(parse_float(node->getText()));
 }
 
 std::any LiteralVisitor::visitBoolean(StringInterpolatorParser::BooleanContext *node) {
-    return text::make_data(parse_bool(node->getText()));
+    return make_data<types::BoolType>(parse_bool(node->getText()));
 }
 
 }

@@ -2,19 +2,18 @@
 
 using namespace SIPLUS_NAMESPACE;
 
-text::UnknownDataTypeContainer PersonAccessor::access(
-    const text::UnknownDataTypeContainer& value, 
-    const std::string& name
-) {
-    const Person& person = value.as<Person>();
+std::string UserType::name() const { return "User"; }
+bool UserType::is_iterable() const { return false; }
 
-    if(name == "first_name") {
-        return text::make_data(person.first_name);
+SIPLUS_NAMESPACE::UnknownDataTypeContainer 
+UserType::access(const SIPLUS_NAMESPACE::UnknownDataTypeContainer& data, const std::string& name) const {
+    User& user = data.as<UserType>();
+
+    if(name == "id") {
+        return make_data(user.id);
+    } else if(name == "first_name") {
+        return make_data(user.id);
     }
 
-    throw std::runtime_error{"Unrecognized property name " + name + " for type Person."};
-}
-
-bool PersonAccessor::can_access(const text::UnknownDataTypeContainer& value) {
-    return value.is<Person>();
+    throw std::runtime_error{"Unknown user property " + name};
 }

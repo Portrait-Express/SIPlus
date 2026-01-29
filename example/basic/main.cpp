@@ -1,45 +1,67 @@
-#include "siplus/text/data.h"
+#include <siplus/siplus.h>
 #include <iostream>
-#include <ostream>
 
-#include "../common.hxx"
-
-//After the library is built, you likely can just use 
-//using namespace SIPlus;
-//unless you set -DSIPLUS_NAMESPACE=<something else> at library build time
 using namespace SIPLUS_NAMESPACE;
 
-int main(int, char**) {
-    Person person;
-    person.first_name = "John";
+struct Person { std::string name = "Dave"; } person;
 
-    //Create parser
-    Parser p;
-    ParseOpts opts;
-
-    //Set up parser.
-    p.context().use_stl(); // This call is necessary to include the STL functions and converters
-                           // use_stl() will not be present if SIPLUS_INCLUDE_STDLIB is not defined
-    p.context().emplace_accessor<PersonAccessor>(/* constructor arguments */); 
-
-    auto constructor = p.get_interpolation("Hello, { .first_name }", opts);
-    auto retriever = p.get_expression(".first_name", opts);
-
-    //Build the data to invoke templates with
-    auto data = p.context()
-        .builder()
-        .use_default(text::make_data(person))
-        .build();
-
-    //get_interpolation
-    auto constructed = constructor.construct_with(data);
-    std::cout << "TextConstructor: " << constructed << std::endl;
-
-    //get_expression
-    auto retrieved = retriever->retrieve(*data);
-    if(retrieved.is<std::string>()) {
-        std::cout << "ValueRetriever: " << retrieved.as<std::string>() << std::endl;
-    } else {
-        std::cerr << "This shouldnt happen for this example, but outputs can be anything." << std::endl;
+struct PersonType : public TypeInfo {
+    // This is optional, but HIGHLY recommended as it makes most operations 
+    //much easier.
+    using data_type = Person; 
+                              
+    virtual std::string name() const { 
+        //This NEEDS to be unique among all registered types. There are a 
+        //handful of builtin types, so ensure that your tyoe name does not 
+        //overlap. If two TypeInfo objects have the same name(), they are 
+        //considered equivalent. This is not ideal, but a better solution is 
+        //not known.
+        return "Person"; 
     }
+
+    virtual bool is_iterable() const {
+        //This is not an iterable type, it has no sub elements you can iterate 
+        //over. If your type *is* iterable, implement text::Iterator, and 
+        //iterate() on it's TypeInfo implementation.
+        return false;
+    }
+
+    virtual UnknownDataTypeContainer access(const UnknownDataTypeContainer& data, const std::string& name) const {
+        //The as() method is only available if you specify YourType::data_type.
+        //Otherwise use the void* in data directly.
+        Person &person = data.as<PersonType>();
+                                                        
+
+        if(name == "name") {
+            return make_data(person.name);
+        }
+
+        throw std::runtime_error{"Unrecognized Person property " + name};
+    }
+};
+
+//This makes PersonType info able to be looked up in 
+//SIPlus::type_info_for_t<Person>, and therefore we do not have to specify
+//PersonType when calling make_data on a Person. This is optional, but also 
+//highly recommended, similar to TypeInfo::data_type.
+namespace SIPLUS_NAMESPACE {
+SIPLUS_DEFINE_TYPE_INFO(Person, PersonType);
+}
+
+int main() {
+    std::string templateText = "Im sorry { .name }.";
+
+    Parser c;
+    c.context().use_stl();
+
+    auto data = c.context().builder().use_default(make_data(person)).build();
+
+    text::TextConstructor constructor = c.get_interpolation(templateText);
+    std::string text = constructor.construct_with(data);
+
+    std::cout 
+        << "Template: " << templateText << '\n'
+        << "Result:   " << text << std::endl;
+
+    return 0;
 }

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef INCLUDE_SIPLUS_UTIL_H_
 #define INCLUDE_SIPLUS_UTIL_H_
 

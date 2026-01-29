@@ -1,3 +1,4 @@
+#pragma once
 #ifndef INCLUDE_FUNCTIONS_ITERABLE_H_
 #define INCLUDE_FUNCTIONS_ITERABLE_H_
 
@@ -21,7 +22,7 @@ namespace stl {
  * IMPORTANT:
  * If you include this, and arent using `attach_stl()`, or 
  * `attach_stl_functions()` be sure to add an `IteratorProvider` instance of 
- * `vector_iterator<text::UnknownDataTypeContainer>`, otherwise the value
+ * `vector_iterator<UnknownDataTypeContainer>`, otherwise the value
  * returned from this function will not be iterable.
  *
  * @code

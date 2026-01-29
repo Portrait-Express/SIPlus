@@ -4,8 +4,9 @@
 #include "siplus/stl/functions/set.h"
 #include "siplus/stl/functions/text.h"
 #include "siplus/stl/functions/typed_operator.h"
-#include "siplus/text/data.h"
+#include "siplus/data.h"
 #include "siplus/stl.h"
+#include "siplus/types/bool.h"
 
 #include <functional>
 #include <memory>
@@ -20,12 +21,10 @@ namespace stl {
 
 void attach_stl(SIPlusParserContext& context) {
     //Base converters
-    context.emplace_converter<int_converter>();
-    context.emplace_converter<float_converter>();
     context.emplace_converter<string_bool_converter>();
     context.emplace_converter<bool_string_converter>();
-    context.emplace_converter<numeric_string_converter>(context.shared_from_this());
-    context.emplace_converter<numeric_bool_converter>(context.shared_from_this());
+    context.emplace_converter<numeric_string_converter>();
+    context.emplace_converter<numeric_bool_converter>();
 
     //Misc
     context.emplace_function<str_func>("str", context.shared_from_this());
@@ -42,21 +41,24 @@ void attach_stl(SIPlusParserContext& context) {
     context.emplace_function<length_func>("length", context.shared_from_this());
     context.emplace_function<join_func>("join", context.shared_from_this());
     context.emplace_function<contains_func>("contains", context.shared_from_this());
-    context.emplace_iterator<vector_iterator<text::UnknownDataTypeContainer>>();
-    context.emplace_iterator<string_iterator>();
 
     //Boolean logic
-    context.emplace_function<typed_binary_operator_function<bool, bool>>("and", context.shared_from_this(), std::logical_and<bool>());
-    context.emplace_function<typed_binary_operator_function<bool, bool>>("or", context.shared_from_this(), std::logical_or<bool>());
-    context.emplace_function<typed_binary_operator_function<bool, bool>>("xor", context.shared_from_this(), std::not_equal_to<bool>());
-    context.emplace_function<typed_unary_operator_function<bool, bool>>("not", context.shared_from_this(), std::logical_not<bool>());
+    context.emplace_function<typed_binary_operator_function<types::BoolType, types::BoolType>>(
+        "and", context.shared_from_this(), std::logical_and<bool>());
+    context.emplace_function<typed_binary_operator_function<types::BoolType, types::BoolType>>(
+        "or", context.shared_from_this(), std::logical_or<bool>());
+    context.emplace_function<typed_binary_operator_function<types::BoolType, types::BoolType>>(
+        "xor", context.shared_from_this(), std::not_equal_to<bool>());
+    context.emplace_function<typed_unary_operator_function<types::BoolType, types::BoolType>>(
+        "not", context.shared_from_this(), std::logical_not<bool>());
 
     context.emplace_function<rand_func>("rand", context.shared_from_this());
     context.emplace_function<rand_str_func>("randstr", context.shared_from_this());
 
     //Arithmetic
     auto add_func = converting_operator_function{context.shared_from_this()};
-    add_func.emplace_impl<string_concatenator>().emplace_impl<numeric_adder>();
+    add_func.emplace_impl<string_concatenator>()
+        .emplace_impl<numeric_adder>();
 
     auto sub_func = converting_operator_function{context.shared_from_this()};
     sub_func.emplace_impl<numeric_subtractor>();
