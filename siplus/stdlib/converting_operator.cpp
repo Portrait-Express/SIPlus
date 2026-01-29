@@ -1,7 +1,6 @@
 #include "siplus/stl/functions/converting_operator.h"
 #include "siplus/invocation_context.h"
-#include "siplus/text/data.h"
-#include "siplus/text/text.h"
+#include "siplus/data.h"
 #include "siplus/text/value_retrievers/retriever.h"
 #include <memory>
 #include <stdexcept>
@@ -20,7 +19,7 @@ struct converting_operator_impl : text::ValueRetriever {
         std::shared_ptr<text::ValueRetriever> rhs
     ) : parent_(parent), ctx_(ctx), lhs_(lhs), rhs_(rhs) { }
 
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
@@ -33,12 +32,12 @@ private:
 } /* anonymous */
 
 bool 
-converting_operator_function::has_impl(std::type_index lhs, std::type_index rhs) const {
+converting_operator_function::has_impl(const TypeInfo& lhs, const TypeInfo& rhs) const {
     return cache_.find(lhs, rhs) != cache_.end();;
 }
 
 std::shared_ptr<operator_impl> 
-converting_operator_function::find_impl(std::type_index lhs, std::type_index rhs) const {
+converting_operator_function::find_impl(const TypeInfo& lhs, const TypeInfo& rhs) const {
     return *cache_.find(lhs, rhs);
 }
 
@@ -70,27 +69,26 @@ converting_operator_function::value(
     return std::make_shared<converting_operator_impl>(*this, context_, lhs, rhs);
 }
 
-text::UnknownDataTypeContainer
+UnknownDataTypeContainer
 converting_operator_impl::retrieve(InvocationContext& value) const {
     std::shared_ptr<SIPlusParserContext> ctx = ctx_.lock();
-    text::UnknownDataTypeContainer lhs = lhs_->retrieve(value);
-    text::UnknownDataTypeContainer rhs = rhs_->retrieve(value);
+    UnknownDataTypeContainer lhs = lhs_->retrieve(value);
+    UnknownDataTypeContainer rhs = rhs_->retrieve(value);
 
-    if(parent_.has_impl(lhs.type, rhs.type)) {
-        auto adder = parent_.find_impl(lhs.type, rhs.type);
+    if(parent_.has_impl(*lhs.type, *rhs.type)) {
+        auto adder = parent_.find_impl(*lhs.type, *rhs.type);
         return adder->invoke(ctx, lhs, rhs);
 
-    } else if(ctx->try_converter(rhs.type, lhs.type) && parent_.has_impl(lhs.type, lhs.type)) { // Can convert rhs to lhs type
-        auto adder = parent_.find_impl(lhs.type, lhs.type);
-        return adder->invoke(ctx, lhs, ctx->convert(rhs, lhs.type));
+    } else if(ctx->try_converter(*rhs.type, *lhs.type) && parent_.has_impl(*lhs.type, *lhs.type)) { // Can convert rhs to lhs type
+        auto adder = parent_.find_impl(*lhs.type, *lhs.type);
+        return adder->invoke(ctx, lhs, ctx->convert(rhs, *lhs.type));
 
-    } else if(ctx->try_converter(lhs.type, rhs.type) && parent_.has_impl(rhs.type, rhs.type)) { // Can convert lhs to rhs type
-        auto adder = parent_.find_impl(rhs.type, rhs.type);
-        return adder->invoke(ctx, ctx->convert(lhs, rhs.type), rhs);
+    } else if(ctx->try_converter(*lhs.type, *rhs.type) && parent_.has_impl(*rhs.type, *rhs.type)) { // Can convert lhs to rhs type
+        auto adder = parent_.find_impl(*rhs.type, *rhs.type);
+        return adder->invoke(ctx, ctx->convert(lhs, *rhs.type), rhs);
 
     } else {
-        throw std::runtime_error{"Unsure how to operate on " + 
-            text::get_type_name(lhs.type) + " and " + text::get_type_name(rhs.type)};
+        throw std::runtime_error{"Unsure how to operate on " + lhs.type->name() + " and " + rhs.type->name()};
     }
 }
 

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef INCLUDE_FUNCTIONS_BOOLEAN_H_
 #define INCLUDE_FUNCTIONS_BOOLEAN_H_
 
@@ -8,7 +9,7 @@
 #include <memory>
 #include <vector>
 
-#include "siplus/text/data.h"
+#include "siplus/data.h"
 #include "siplus/invocation_context.h"
 #include "siplus/util.h"
 #include "siplus/context.h"
@@ -17,9 +18,9 @@
 namespace SIPLUS_NAMESPACE {
 namespace stl {
 
-template<typename T, typename V>
+template<simple_value_retrievable_type T, simple_value_retrievable_type V>
 struct typed_binary_operator_function : Function {
-    using operator_function = std::function<V (T,T)>;
+    using operator_function = std::function<typename V::data_type (typename T::data_type, typename T::data_type)>;
 
     typed_binary_operator_function(
         std::weak_ptr<SIPlusParserContext> context,
@@ -43,14 +44,14 @@ struct typed_binary_operator_function : Function {
             std::shared_ptr<text::ValueRetriever> b
         ) : context_(context), operator_(operate), a_(a), b_(b) {}
 
-        text::UnknownDataTypeContainer
+        UnknownDataTypeContainer
         retrieve(InvocationContext& value) const override {
             auto ctx = context_.lock();
 
-            T a = ctx->convert<T>(a_->retrieve(value)).template as<T>();
-            T b = ctx->convert<T>(b_->retrieve(value)).template as<T>();
+            typename T::data_type a = ctx->convert<T>(a_->retrieve(value)).template as<T>();
+            typename T::data_type b = ctx->convert<T>(b_->retrieve(value)).template as<T>();
 
-            return text::make_data(operator_(a, b));
+            return make_data<V>(operator_(a, b));
         }
 
     private:
@@ -65,9 +66,9 @@ private:
     operator_function operator_;
 };
 
-template<typename T, typename V>
+template<simple_value_retrievable_type T, simple_value_retrievable_type V>
 struct typed_unary_operator_function : Function {
-    using operator_function = std::function<V (T)>;
+    using operator_function = std::function<typename V::data_type (typename T::data_type)>;
 
     typed_unary_operator_function(
         std::weak_ptr<SIPlusParserContext> context,
@@ -90,11 +91,11 @@ struct typed_unary_operator_function : Function {
             std::shared_ptr<text::ValueRetriever> a
         ) : context_(context), operator_(operate), a_(a) {}
 
-        text::UnknownDataTypeContainer
+        UnknownDataTypeContainer
         retrieve(InvocationContext& value) const override {
             auto ctx = context_.lock();
-            text::UnknownDataTypeContainer a = ctx->convert<T>(a_->retrieve(value));
-            return text::make_data(operator_(a.as<T>()));
+            UnknownDataTypeContainer a = ctx->convert<T>(a_->retrieve(value));
+            return make_data<V>(operator_(a.as<T>()));
         }
 
     private:

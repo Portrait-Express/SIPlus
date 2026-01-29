@@ -1,17 +1,18 @@
+#pragma once
 #ifndef INCLUDE_INTERNAL_BINARY_TYPE_CACHE_H_
 #define INCLUDE_INTERNAL_BINARY_TYPE_CACHE_H_
 
 #include <list>
 #include <memory>
-#include <typeindex>
 #include <unordered_map>
 
 #include "siplus/config.h"
+#include "siplus/data.h"
 
 namespace SIPLUS_NAMESPACE {
 namespace internal {
 
-template<typename T, bool (T::*Handle)(std::type_index, std::type_index) const = T::can_handle>
+template<typename T, bool (T::*Handle)(const TypeInfo&, const TypeInfo&) const = T::can_handle>
 struct BinaryTypeCache {
     using iterator = std::list<std::shared_ptr<T>>::iterator;
     using const_iterator = std::list<std::shared_ptr<T>>::const_iterator;
@@ -30,11 +31,11 @@ struct BinaryTypeCache {
         return value;
     }
 
-    iterator find(std::type_index first, std::type_index second) {
-        auto firstIt = cache_.find(first);
+    iterator find(const TypeInfo& first, const TypeInfo& second) {
+        auto firstIt = cache_.find(first.name());
 
         if(firstIt != cache_.end()) {
-            auto secondIt = firstIt->second.find(second);
+            auto secondIt = firstIt->second.find(second.name());
 
             if(secondIt != firstIt->second.end()) {
                 return convert_constness(secondIt->second);
@@ -46,9 +47,9 @@ struct BinaryTypeCache {
 
             if(((*item).*Handle)(first, second)) {
                 if(firstIt != cache_.end()) {
-                    (firstIt->second)[second] = it;
+                    (firstIt->second)[second.name()] = it;
                 } else {
-                    cache_[first][second] = it;
+                    cache_[first.name()][second.name()] = it;
                 }
 
                 return it;
@@ -58,11 +59,11 @@ struct BinaryTypeCache {
         return items_.end();
     }
 
-    const_iterator find(std::type_index first, std::type_index second) const {
-        auto firstIt = cache_.find(first);
+    const_iterator find(const TypeInfo& first, const TypeInfo& second) const {
+        auto firstIt = cache_.find(first.name());
 
         if(firstIt != cache_.end()) {
-            auto secondIt = firstIt->second.find(second);
+            auto secondIt = firstIt->second.find(second.name());
 
             if(secondIt != firstIt->second.end()) {
                 return secondIt->second;
@@ -74,9 +75,9 @@ struct BinaryTypeCache {
 
             if(((*item).*Handle)(first, second)) {
                 if(firstIt != cache_.end()) {
-                    (firstIt->second)[second] = it;
+                    (firstIt->second)[second.name()] = it;
                 } else {
-                    cache_[first][second] = it;
+                    cache_[first.name()][second.name()] = it;
                 }
 
                 return it;
@@ -88,8 +89,7 @@ struct BinaryTypeCache {
 
 private:
     std::list<std::shared_ptr<T>> items_;
-    mutable std::unordered_map<std::type_index, 
-        std::unordered_map<std::type_index, const_iterator>> cache_;
+    mutable std::unordered_map<std::string, std::unordered_map<std::string, const_iterator>> cache_;
 
     iterator convert_constness(const_iterator it) {
         //dont think about it too much... It cant hurt you any more

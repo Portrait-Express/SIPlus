@@ -1,3 +1,4 @@
+#pragma once
 #ifndef INCLUDE_SIPLUS_PCH_H_
 #define INCLUDE_SIPLUS_PCH_H_
 

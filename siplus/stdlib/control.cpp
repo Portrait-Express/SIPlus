@@ -1,7 +1,7 @@
 #include "siplus/stl/functions/control.h"
-#include "siplus/text/data.h"
+#include "siplus/data.h"
+#include "siplus/types/bool.h"
 #include "siplus/util.h"
-#include <iostream>
 
 namespace SIPLUS_NAMESPACE {
 namespace stl {
@@ -16,7 +16,7 @@ struct if_impl : public text::ValueRetriever {
         std::weak_ptr<SIPlusParserContext> context
     ) : condition(condition), tVal(tVal), fVal(fVal), context_(context) {}
 
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
     std::shared_ptr<text::ValueRetriever> condition;
@@ -27,12 +27,12 @@ private:
     std::weak_ptr<SIPlusParserContext> context_;
 };
 
-text::UnknownDataTypeContainer
+UnknownDataTypeContainer
 if_impl::retrieve(InvocationContext& value) const {
     auto ctx = context_.lock();
     auto cond = condition->retrieve(value);
 
-    if(ctx->convert<bool>(cond).as<bool>()) {
+    if(ctx->convert<types::BoolType>(cond).as<types::BoolType>()) {
         return tVal->retrieve(value);
     } else {
         return fVal->retrieve(value);
@@ -47,7 +47,7 @@ struct while_impl : public text::ValueRetriever {
         std::weak_ptr<SIPlusParserContext> context
     ) : condition_(condition), body_(body), context_(context) {}
 
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
@@ -56,13 +56,13 @@ private:
     std::weak_ptr<SIPlusParserContext> context_;
 };
 
-text::UnknownDataTypeContainer
+UnknownDataTypeContainer
 while_impl::retrieve(InvocationContext& value) const {
     auto ctx = context_.lock();
     auto cond = condition_->retrieve(value);
-    text::UnknownDataTypeContainer last;
+    UnknownDataTypeContainer last;
 
-    while(ctx->convert<bool>(cond).as<bool>()) {
+    while(ctx->convert<types::BoolType>(cond).as<types::BoolType>()) {
         last = body_->retrieve(value);
         cond = condition_->retrieve(value);
     }

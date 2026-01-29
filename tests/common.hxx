@@ -1,15 +1,11 @@
+#include <algorithm>
 #include <cassert>
 #include <cfloat>
 #include <iostream>
 #include <string>
+#include <vector>
 
-#include "siplus/config.h"
-#include "siplus/context.h"
-#include "siplus/parser.h"
 #include "siplus/siplus.h"
-#include "siplus/text/data.h"
-#include "siplus/text/text.h"
-#include "siplus/util.h"
 
 struct User {
     int id;
@@ -31,6 +27,39 @@ struct test_data {
     } y;
 };
 
+struct test_data_type : SIPLUS_NAMESPACE::TypeInfo {
+    using data_type = test_data;
+    std::string name() const override { return "test_data"; }
+    bool is_iterable() const override { return false; }
+
+    SIPLUS_NAMESPACE::UnknownDataTypeContainer 
+    access(void* ptr, const std::string& name) const override;
+};
+
+struct test_data_y_type : SIPLUS_NAMESPACE::TypeInfo {
+    using data_type = struct test_data::y;
+    std::string name() const override { return "test_data::y"; }
+    bool is_iterable() const override { return false; }
+
+    SIPLUS_NAMESPACE::UnknownDataTypeContainer 
+    access(void* ptr, const std::string& name) const override;
+};
+
+struct user_type : SIPLUS_NAMESPACE::TypeInfo {
+    using data_type = User;
+    std::string name() const override { return "user"; }
+    bool is_iterable() const override { return false; }
+
+    SIPLUS_NAMESPACE::UnknownDataTypeContainer 
+    access(void* ptr, const std::string& name) const override;
+};
+
+namespace SIPLUS_NAMESPACE {
+SIPLUS_DEFINE_TYPE_INFO(test_data, test_data_type);
+SIPLUS_DEFINE_TYPE_INFO(struct test_data::y, test_data_y_type);
+SIPLUS_DEFINE_TYPE_INFO(User, user_type);
+}
+
 SIPLUS_NAMESPACE::Parser& get_test_context();
 int test(std::string name, std::function<int(const SIPLUS_NAMESPACE::Parser&)> test_impl);
 int group(std::string name, std::function<int(const SIPLUS_NAMESPACE::Parser&)> test_impl);
@@ -44,49 +73,6 @@ int tests(TestResults... results) {
 //https://stackoverflow.com/a/32334103/10844545
 bool nearly_equal(float a, float b, float epsilon = 128 * FLT_EPSILON, float abs_th = FLT_MIN);
 bool nearly_equal(double a, double b, double epsilon = 128 * DBL_EPSILON, double abs_th = DBL_MIN);
-
-template<typename T>
-bool conversion_equal(T first, T second) {
-    return first == second;
-}
-
-template<>
-bool conversion_equal<double>(double first, double second);
-
-template<typename T, typename V, typename To> requires std::is_base_of_v<SIPLUS_NAMESPACE::text::Converter, T>
-int test_conversion(const T& converter, const V& val, const To& result) {
-    SIPLUS_NAMESPACE::text::UnknownDataTypeContainer container;
-
-    if(converter.can_convert(typeid(V), typeid(To))) {
-        container = converter.convert(SIPLUS_NAMESPACE::text::make_data(val), typeid(To));
-    } else {
-        std::cout 
-            << SIPLUS_NAMESPACE::text::get_type_name(typeid(T)) << " cannot convert from " 
-            << SIPLUS_NAMESPACE::text::get_type_name(typeid(To)) << " to " 
-            << SIPLUS_NAMESPACE::text::get_type_name(container.type) << std::endl;
-        return 1;
-    }
-
-    if(container.is<To>()) {
-        if(conversion_equal<To>(container.as<To>(), result)) {
-            return 0;
-        } else {
-            std::cout << "Expected value " << result
-                << ". Recieved value " << container.as<To>() << std::endl;
-            return 1;
-        }
-    } else {
-        std::cout << "Expected type " << SIPLUS_NAMESPACE::text::get_type_name(typeid(To)) 
-            << ". Recieved " << SIPLUS_NAMESPACE::text::get_type_name(container.type) << std::endl;
-        return 1;
-    }
-}
-
-template<typename T, typename V, typename To> requires std::is_base_of_v<SIPLUS_NAMESPACE::text::Converter, T>
-int test_conversion(const V& val, const To& result) {
-    T converter;
-    return test_conversion<T, V, To>(converter, val, result);
-}
 
 template<typename T1, typename T2>
 struct test_expression_compare {
@@ -109,25 +95,30 @@ struct test_expression_compare<double, double> {
     }
 };
 
-template<typename T>
-struct test_expression_compare<T, std::function<bool (const T&)>> {
-    static bool compare(const T& val, const std::function<bool (const T&)> test) {
+template<typename T, typename Inner>
+concept callable_1 = requires(T f, const Inner& v) {
+    { f(v) } -> std::same_as<bool>;
+};
+
+template<typename T, callable_1<T> F>
+struct test_expression_compare<T, F> {
+    static bool compare(const T& val, const F& test) {
         return test(val);
     }
 };
 
 template<>
-struct test_expression_compare<std::vector<SIPLUS_NAMESPACE::text::UnknownDataTypeContainer>, std::vector<std::string>> {
+struct test_expression_compare<std::vector<SIPLUS_NAMESPACE::UnknownDataTypeContainer>, std::vector<std::string>> {
     static bool compare(
-        const std::vector<SIPLUS_NAMESPACE::text::UnknownDataTypeContainer>& val, 
+        const std::vector<SIPLUS_NAMESPACE::UnknownDataTypeContainer>& val, 
         const std::vector<std::string>& other
     ) {
         std::vector<std::string> strVal{};
         strVal.reserve(val.size());
 
         for(auto& v : val) {
-            if(!v.is<std::string>()) return false;
-            strVal.push_back(v.as<std::string>());
+            if(!v.is<SIPlus::types::StringType>()) return false;
+            strVal.push_back(v.as<SIPlus::types::StringType>());
         }
 
         return strVal == other;
@@ -135,16 +126,18 @@ struct test_expression_compare<std::vector<SIPLUS_NAMESPACE::text::UnknownDataTy
 };
 
 template<typename T>
-struct test_expression_compare<std::vector<SIPLUS_NAMESPACE::text::UnknownDataTypeContainer>, std::vector<T>> {
+struct test_expression_compare<std::vector<SIPLUS_NAMESPACE::UnknownDataTypeContainer>, std::vector<T>> {
     static bool compare(
-        const std::vector<SIPLUS_NAMESPACE::text::UnknownDataTypeContainer>& val, 
+        const std::vector<SIPLUS_NAMESPACE::UnknownDataTypeContainer>& val, 
         const std::vector<T>& other
     ) {
         if(val.size() != other.size()) return false;
 
+        using type_info = SIPLUS_NAMESPACE::type_info_for_t<T>;
+
         for(int i = 0; i < val.size(); i++) {
-            if(!val[i].is<T>()) return false;
-            if(val[i].as<T>() != other[i]) {
+            if(!val[i].is<type_info>()) return false;
+            if(val[i].as<type_info>() != other[i]) {
                 return false;
             }
         }
@@ -163,16 +156,19 @@ bool compare(const T& v1, const T& v2) {
     return compare<T, T>(v1, v2);
 }
 
-template<typename _ExpectedVal, typename _ExpectedType = _ExpectedVal>
+template<
+    SIPLUS_NAMESPACE::simple_value_retrievable_type _ExpectedType, 
+    typename _ExpectedVal = _ExpectedType::data_type
+>
 bool expect_equal(
-    const SIPLUS_NAMESPACE::text::UnknownDataTypeContainer container, const _ExpectedVal& expected
+    const SIPLUS_NAMESPACE::UnknownDataTypeContainer container, const _ExpectedVal& expected
 ) {
     if(!container.template is<_ExpectedType>()) {
         throw std::runtime_error{SIPLUS_NAMESPACE::util::to_string(
             "Expected type ", 
-            SIPLUS_NAMESPACE::text::get_type_name(typeid(_ExpectedType)), 
+            _ExpectedType{}.name(),
             " recieved value of type ",
-            SIPLUS_NAMESPACE::text::get_type_name(container.type), "."
+            container.type->name(), "."
         )};
     }
 
@@ -186,28 +182,34 @@ bool expect_equal(
     return true;
 }
 
-template<typename T, typename V, typename _ExpectedType = T>
+template<
+    SIPLUS_NAMESPACE::simple_value_retrievable_type _ExpectedType,
+    typename T = _ExpectedType::data_type
+>
 int test_expression(
     const std::string& expression, 
-    const SIPLUS_NAMESPACE::ParseOpts& opts,
-    const V& data, 
-    const T& expected
+    SIPLUS_NAMESPACE::ParseOpts opts,
+    const SIPlus::UnknownDataTypeContainer& data, 
+    const T& expected,
+    const std::vector<std::pair<std::string, SIPLUS_NAMESPACE::UnknownDataTypeContainer>>& extra
 ) {
-    auto retriever = get_test_context().get_expression(expression, opts);
+    auto builder = get_test_context().context().builder().use_default(data);
 
-    std::shared_ptr<SIPLUS_NAMESPACE::InvocationContext> ctx;
-    if constexpr (std::is_same_v<V, std::shared_ptr<SIPLUS_NAMESPACE::InvocationContext>>) {
-        ctx = data;
-    } else {
-        ctx = get_test_context().context().builder()
-            .use_default(SIPLUS_NAMESPACE::text::make_data(data))
-            .build();
+    for(auto [k, v] : extra) {
+        auto it = std::find(opts.globals.begin(), opts.globals.end(), k);
+        if(it == opts.globals.end()) {
+            opts.globals.emplace_back(k);
+        }
+
+        builder.with(k, v);
     }
 
-    auto result = retriever->retrieve(*ctx);
+    auto retriever = get_test_context().get_expression(expression, opts);
 
+    auto result = retriever->retrieve(*builder.build());
+                                      
     try {
-        return expect_equal<T, _ExpectedType>(result, expected) ? 0 : 1;
+        return expect_equal<_ExpectedType, T>(result, expected) ? 0 : 1;
     } catch(std::runtime_error& e) {
         throw std::runtime_error{SIPLUS_NAMESPACE::util::to_string(
             "Expression '", expression, "' failed: ", e.what()
@@ -217,41 +219,85 @@ int test_expression(
     }
 }
 
-template<typename T, typename _ExpectedType = T>
-int test_expression(const std::string& expression, const T& expected) {
-    return test_expression<T, test_data, _ExpectedType>(expression, SIPLUS_NAMESPACE::ParseOpts{}, test_data{}, expected);
-}
-
-template<typename T, typename V, typename _ExpectedType = T>
+template<SIPLUS_NAMESPACE::simple_value_retrievable_type Expected, typename T = Expected::data_type> 
 int test_expression(
-    const std::string& expression, 
-    const V& data, 
+    const std::string& expr,
+    const T& expected,
+    const std::vector<std::pair<std::string, SIPLUS_NAMESPACE::UnknownDataTypeContainer>>& extra
+) {
+    auto container = SIPLUS_NAMESPACE::make_data(test_data{});
+    return test_expression<Expected, T>(
+        expr, SIPLUS_NAMESPACE::ParseOpts{}, container, expected, extra
+    );
+}
+template<SIPLUS_NAMESPACE::simple_value_retrievable_type Expected, typename Data, typename T = Expected::data_type> 
+int test_expression(
+    const std::string& expr,
+    const Data& data,
     const T& expected
 ) {
-    return test_expression<T, V, _ExpectedType>(expression, SIPLUS_NAMESPACE::ParseOpts{}, data, expected);
+    auto container = SIPLUS_NAMESPACE::make_data(data);
+    return test_expression<Expected, T>(
+        expr, SIPLUS_NAMESPACE::ParseOpts{}, container, expected, {}
+    );
 }
 
-template<typename V>
+template<SIPLUS_NAMESPACE::simple_value_retrievable_type Expected, typename T = Expected::data_type> 
+int test_expression(
+    const std::string& expr,
+    const T& expected
+) {
+    auto container = SIPLUS_NAMESPACE::make_data(test_data{});
+    return test_expression<Expected, T>(
+        expr, SIPLUS_NAMESPACE::ParseOpts{}, container, expected, {}
+    );
+}
+
+template<typename Expected, typename Data> 
+int test_expression(
+    const std::string& expr,
+    const Data& data,
+    const Expected& expected
+) {
+    auto container = SIPLUS_NAMESPACE::make_data(data);
+    return test_expression<SIPLUS_NAMESPACE::type_info_for_t<Expected>>(
+        expr, SIPLUS_NAMESPACE::ParseOpts{}, container, expected, {}
+    );
+}
+
+template<typename Expected> 
+int test_expression(
+    const std::string& expr,
+    const Expected& expected
+) {
+    return test_expression(expr, test_data{}, expected);
+}
+
+
+
+template<SIPlus::simple_value_retrievable_type V >
 int test_interpolation(
     const std::string& expression, 
-    const SIPLUS_NAMESPACE::ParseOpts& opts,
-    const V& data, 
-    const std::string& expected
+    SIPLUS_NAMESPACE::ParseOpts opts,
+    const typename V::data_type& data, 
+    const std::string& expected,
+    const std::vector<std::pair<std::string, SIPLUS_NAMESPACE::UnknownDataTypeContainer>>& extra
 ) {
-    auto retriever = get_test_context().get_interpolation(expression, opts);
+    auto builder = get_test_context().context().builder()
+        .use_default(SIPLUS_NAMESPACE::make_data(data));
 
-    std::shared_ptr<SIPLUS_NAMESPACE::InvocationContext> invoCtx;
-    if constexpr (std::is_same_v<V, std::shared_ptr<SIPLUS_NAMESPACE::InvocationContext>>) {
-        invoCtx = data;
-    } else {
-        invoCtx = get_test_context()
-            .context()
-            .builder()
-            .use_default(SIPLUS_NAMESPACE::text::make_data(data))
-            .build();
+    for(auto [k, v] : extra) {
+        auto it = std::find(opts.globals.begin(), opts.globals.end(), k);
+        if(it == opts.globals.end()) {
+            opts.globals.emplace_back(k);
+        }
+
+        builder.with(k, v);
     }
 
-    auto result = retriever.construct_with(invoCtx);
+    auto retriever = get_test_context().get_interpolation(expression, opts);
+
+    auto result = retriever.construct_with(builder.build());
 
     if(result != expected) {
         std::cout 
@@ -263,8 +309,16 @@ int test_interpolation(
     return 0;
 }
 
+inline int test_interpolation(
+    const std::string& expression, 
+    const std::string& expected,
+    const std::vector<std::pair<std::string, SIPLUS_NAMESPACE::UnknownDataTypeContainer>>& extra
+) {
+    return test_interpolation<test_data_type>(expression, SIPLUS_NAMESPACE::ParseOpts{}, test_data{}, expected, extra);
+}
+
 inline int test_interpolation(const std::string& expression, const std::string& expected) {
-    return test_interpolation<test_data>(expression, SIPLUS_NAMESPACE::ParseOpts{}, test_data{}, expected);
+    return test_interpolation<test_data_type>(expression, SIPLUS_NAMESPACE::ParseOpts{}, test_data{}, expected, {});
 }
 
 inline int expect_throw(std::function<void ()> func) {
@@ -275,4 +329,53 @@ inline int expect_throw(std::function<void ()> func) {
     } catch(std::runtime_error e) {
         return 0;
     }
+}
+
+template<
+    typename T, 
+    SIPLUS_NAMESPACE::simple_value_retrievable_type To
+> requires std::is_base_of_v<SIPLUS_NAMESPACE::text::Converter, T>
+int test_conversion(
+    const T& converter, 
+    const SIPLUS_NAMESPACE::UnknownDataTypeContainer& from,
+    const typename To::data_type& result
+) {
+    auto to_type = To{};
+
+    if(!converter.can_convert(*from.type, to_type)) {
+        std::cout 
+            << typeid(T).name() << " cannot convert from " 
+            << from.type->name() << " to " << to_type.name() << std::endl;
+        return 1;
+    }
+
+    auto container = converter.convert(from, to_type);
+
+    if(!container.template is<To>()) {
+        std::cout << "Expected type " << to_type.name()
+            << ". Recieved " << container.type->name() << std::endl;
+        return 1;
+    }
+
+    try {
+        return expect_equal<To>(container, result) ? 0 : 1;
+    } catch(std::runtime_error& e) {
+        throw std::runtime_error{SIPLUS_NAMESPACE::util::to_string(
+            "Conversion failed: ", e.what()
+        )};
+
+        return 1;
+    }
+}
+
+template<typename T, typename V, typename To> requires std::is_base_of_v<SIPLUS_NAMESPACE::text::Converter, T>
+int test_conversion(const T& converter, const V& val, const To& result) {
+    auto container = SIPLUS_NAMESPACE::make_data(val);
+    return test_conversion<T, SIPLUS_NAMESPACE::type_info_for_t<To>>(converter, container, result);
+}
+
+template<typename T, typename V, typename To> requires std::is_base_of_v<SIPLUS_NAMESPACE::text::Converter, T>
+int test_conversion(const V& val, const To& result) {
+    T converter;
+    return test_conversion<T, V, To>(converter, val, result);
 }

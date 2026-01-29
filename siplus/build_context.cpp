@@ -1,5 +1,5 @@
 #include "siplus/build_context.h"
-#include "siplus/text/data.h"
+#include "siplus/data.h"
 
 namespace SIPLUS_NAMESPACE {
 
@@ -15,8 +15,8 @@ struct VariableRetrieverImpl : VariableRetriever {
     virtual bool is_const() const override;
     virtual std::string name() const override;
 
-    virtual text::UnknownDataTypeContainer retrieve(InvocationContext& value) const override;
-    virtual void set_value(InvocationContext& context, text::UnknownDataTypeContainer value) override;
+    virtual UnknownDataTypeContainer retrieve(InvocationContext& value) const override;
+    virtual void set_value(InvocationContext& context, UnknownDataTypeContainer value) override;
 
 private:
     std::string name_;
@@ -28,7 +28,7 @@ bool VariableRetrieverImpl::is_persist() const { return false; }
 bool VariableRetrieverImpl::is_const() const { return is_const_; }
 std::string VariableRetrieverImpl::name() const { return name_; }
 
-text::UnknownDataTypeContainer VariableRetrieverImpl::retrieve(
+UnknownDataTypeContainer VariableRetrieverImpl::retrieve(
     InvocationContext& context
 ) const {
     return context.variable(name_);
@@ -36,7 +36,7 @@ text::UnknownDataTypeContainer VariableRetrieverImpl::retrieve(
 
 void VariableRetrieverImpl::set_value(
     InvocationContext& context, 
-    text::UnknownDataTypeContainer value
+    UnknownDataTypeContainer value
 ) {
     if(is_const() && initialized_) {
         throw std::runtime_error{util::to_string(
@@ -58,12 +58,12 @@ struct PersistentVariableRetrieverImpl : VariableRetriever {
     virtual bool is_const() const override;
     virtual std::string name() const override;
 
-    text::UnknownDataTypeContainer retrieve(InvocationContext& context) const override;
-    virtual void set_value(InvocationContext& context, text::UnknownDataTypeContainer value) override;
+    UnknownDataTypeContainer retrieve(InvocationContext& context) const override;
+    virtual void set_value(InvocationContext& context, UnknownDataTypeContainer value) override;
 
 private:
     std::string name_;
-    text::UnknownDataTypeContainer data_;
+    UnknownDataTypeContainer data_;
     bool is_const_:1 = false;
     bool initialized_:1 = false;
 };
@@ -72,14 +72,14 @@ bool PersistentVariableRetrieverImpl::is_persist() const { return true; }
 bool PersistentVariableRetrieverImpl::is_const() const { return is_const_; }
 std::string PersistentVariableRetrieverImpl::name() const { return name_; }
 
-text::UnknownDataTypeContainer 
+UnknownDataTypeContainer 
 PersistentVariableRetrieverImpl::retrieve(InvocationContext& context) const {
     return data_;
 }
 
 void PersistentVariableRetrieverImpl::set_value(
     InvocationContext& context, 
-    text::UnknownDataTypeContainer value
+    UnknownDataTypeContainer value
 ) {
     if(is_const() && initialized_) {
         throw std::runtime_error{util::to_string(

@@ -2,7 +2,10 @@
 
 #include "common.hxx"
 #include "siplus/parser.h"
-#include "siplus/text/data.h"
+#include "siplus/types/array.h"
+#include "siplus/types/float.h"
+#include "siplus/types/integer.h"
+#include "siplus/types/string.h"
 
 using namespace SIPLUS_NAMESPACE;
 
@@ -12,26 +15,20 @@ int test_base(int, char**) {
             return tests(
                 test("Accessor", [](const Parser& parser) {
                     return tests(
-                        test_expression<int>(".x", 2)
+                        test_expression<types::IntegerType>(".x", 2)
                     );
                 }),
                 group("Variables", [](const Parser& parser) {
-                    auto extra = parser.context().builder()
-                        .with("extra", text::make_data(test_data{}))
-                        .use_default(text::make_data(test_data{}))
-                        .build();
-
-                    ParseOpts extraOpts;
-                    extraOpts.globals.push_back("extra");
+                    auto extra = make_data<test_data_type>(test_data{});
 
                     return tests(
-                        test_expression<int>("var $A = (.x); $A", 2),
-                        test_expression<long>("var $A = 123; $A", 123),
-                        test_expression<long>("var $A = 123; $A = 234; $A", 234),
-                        test_expression<int>("$extra.x", extraOpts, extra, 2),
+                        test_expression<types::IntegerType>("var $A = (.x); $A", 2),
+                        test_expression<types::IntegerType>("var $A = 123; $A", 123),
+                        test_expression<types::IntegerType>("var $A = 123; $A = 234; $A", 234),
+                        test_expression<types::IntegerType>("$extra.x", 2, {{"extra", extra}}),
                         test("const", [](const Parser& parser) {
                             return tests(
-                                test_expression<int>("const var $A = (.x); $A", 2),
+                                test_expression<types::IntegerType>("const var $A = (.x); $A", 2),
                                 expect_throw([&]() {
                                     parser.get_expression("const var $a = 2; $a = 5; $a", ParseOpts{});
                                 })
@@ -39,16 +36,17 @@ int test_base(int, char**) {
                         }),
                         test("persist", [](const Parser& parser) {
                             auto retriever = parser.get_expression("persist const var $A = rand; $A", ParseOpts{});
-                            auto ctx = parser.context().builder().use_default(text::UnknownDataTypeContainer{}).build();
+                            auto ctx = parser.context().builder().use_default(UnknownDataTypeContainer{}).build();
                             auto v1 = retriever->retrieve(*ctx);
-                            ctx = parser.context().builder().use_default(text::UnknownDataTypeContainer{}).build();
+                            ctx = parser.context().builder().use_default(UnknownDataTypeContainer{}).build();
                             auto v2 = retriever->retrieve(*ctx);
 
-                            bool persisted = v1.is<double>() && v2.is<double>() && v1.as<double>() == v2.as<double>();
+                            bool persisted = v1.is<types::FloatType>() && v2.is<types::FloatType>() 
+                                && v1.as<types::FloatType>() == v2.as<types::FloatType>();
 
                             return tests(
                                 persisted ? 0 : 1,
-                                test_expression<int>("persist const var $A = (.x); $A", 2),
+                                test_expression<types::IntegerType>("persist const var $A = (.x); $A", 2),
                                 expect_throw([&]() {
                                     parser.get_expression("const var $a = 2; $a = 5; $a", ParseOpts{});
                                 })
@@ -58,27 +56,27 @@ int test_base(int, char**) {
                 }),
                 test("Functions", [](const Parser& parser) {
                     return tests(
-                        test_expression<long>("@test => ( 2 ); @test", 2),
-                        test_expression<int>("@test(val) => ( $val.x ); @test .", 2)
+                        test_expression<types::IntegerType>("@test => ( 2 ); @test", 2),
+                        test_expression<types::IntegerType>("@test(val) => ( $val.x ); @test .", 2)
                     );
                 }),
                 test("Scope", [](const Parser& parser) {
                     return tests(
                         expect_throw([](){
-                            test_expression<long>("@test => ( @a => (2); @a ); @a", 2);
+                            test_expression<types::IntegerType>("@test => ( @a => (2); @a ); @a", 2);
                         }),
                         expect_throw([](){
-                            test_expression<long>("@test => ( $a = 2; $a ); $a", 2);
+                            test_expression<types::IntegerType>("@test => ( $a = 2; $a ); $a", 2);
                         })
                     );
                 }),
                 test("Arrays", [](const Parser& parser) {
+                    auto a = make_data<std::string>("test");
+
                     return tests(
-                        test_expression<std::vector<long>, std::vector<text::UnknownDataTypeContainer>>(
-                            R"([1,2,3])", std::vector<long>{1,2,3}),
-                        test_expression<std::vector<std::string>, std::vector<text::UnknownDataTypeContainer>>(
-                            R"(["hello", "test"])", std::vector<std::string>{"hello", "test"}),
-                        test_expression<std::string>(R"(["hello", "test"] | .[1])", "test")
+                        test_expression<types::ArrayType, std::vector<long>>(R"([1,2,3])", {1,2,3}),
+                        test_expression<types::ArrayType, std::vector<std::string>>(R"(["hello", "test"])", {"hello", "test"}),
+                        test_expression<types::StringType>(R"(["hello", "test"] | .[1])", "test")
                     );
                 })
             );
@@ -124,16 +122,8 @@ int test_base(int, char**) {
 
         //Variables not defined in parameters / segfaulting
         test("Issue 2", [](const Parser& parser) {
-            auto ctx = parser.context().builder()
-                .with("job", text::make_data(2))
-                .use_default(text::make_data(test_data{}))
-                .build();
-
-            ParseOpts opts;
-            opts.globals.push_back("job");
-
             return tests(
-                test_interpolation("{ add $job 3 }", opts, ctx,  "5")
+                test_interpolation("{ add $job 3 }", "5", {{"job", make_data<types::IntegerType>(2)}})
             );
         })
     );

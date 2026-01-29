@@ -1,9 +1,10 @@
+#pragma once
 #ifndef INCLUDE_SIPLUS_TEXT_LITERAL_RETRIEVER_H_
 #define INCLUDE_SIPLUS_TEXT_LITERAL_RETRIEVER_H_
 
 #include "siplus/config.h"
 #include "siplus/invocation_context.h"
-#include "siplus/text/data.h"
+#include "siplus/data.h"
 #include "siplus/text/value_retrievers/retriever.h"
 
 namespace SIPLUS_NAMESPACE {

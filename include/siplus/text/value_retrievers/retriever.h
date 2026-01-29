@@ -1,9 +1,10 @@
+#pragma once
 #ifndef INCLUDE_SIPLUS_TEXT_RETRIEVER_H_
 #define INCLUDE_SIPLUS_TEXT_RETRIEVER_H_
 
 #include "siplus/config.h"
 #include "siplus/invocation_context.h"
-#include "siplus/text/data.h"
+#include "siplus/data.h"
 
 namespace SIPLUS_NAMESPACE {
 namespace text {

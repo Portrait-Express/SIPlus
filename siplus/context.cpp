@@ -2,6 +2,7 @@
 
 #include "siplus/context.h"
 #include "invocation_context_impl.h"
+#include "siplus/data.h"
 #include "siplus/function.h"
 #include "siplus/text/text.h"
 
@@ -11,12 +12,12 @@
 
 namespace SIPLUS_NAMESPACE {
 
-ContextInvocationContextBuilder& ContextInvocationContextBuilder::use_default(text::UnknownDataTypeContainer data) {
+ContextInvocationContextBuilder& ContextInvocationContextBuilder::use_default(UnknownDataTypeContainer data) {
     with("0", data);
     return *this;
 }
 
-ContextInvocationContextBuilder& ContextInvocationContextBuilder::with(std::string name, text::UnknownDataTypeContainer data) {
+ContextInvocationContextBuilder& ContextInvocationContextBuilder::with(std::string name, UnknownDataTypeContainer data) {
     variables_[name] = data;
     return *this;
 }
@@ -43,57 +44,21 @@ Function& SIPlusParserContext::function(const std::string& name) const {
     return *it->second;
 }
 
-std::shared_ptr<text::Accessor> 
-SIPlusParserContext::accessor(const text::UnknownDataTypeContainer& value) const {
-    auto it = accessors_cache_.find(value.type);
-    if(it != accessors_cache_.end()) {
-        return it->second;
-    }
-
-    for(auto& accessor : accessors_) {
-        if(accessor->can_access(value)) {
-            accessors_cache_[value.type] = accessor;
-            return accessor;
-        }
-    }
-
-    throw std::runtime_error{"No accessor available able to handle " + text::get_type_name(value.type)};
-}
-
-
-std::shared_ptr<text::IteratorProvider> 
-SIPlusParserContext::iterator(const text::UnknownDataTypeContainer& value) const {
-    auto it = iterators_cache_.find(value.type);
-    if(it != iterators_cache_.end()) {
-        return it->second;
-    }
-
-    for(auto& iterator : iterators_) {
-        if(iterator->can_iterate(value)) {
-            iterators_cache_[value.type] = iterator;
-            return iterator;
-        }
-    }
-
-    throw std::runtime_error{"No iterator provider available able to iterate " 
-        + text::get_type_name(value.type)};
-}
-
-
 std::shared_ptr<text::Converter> 
-SIPlusParserContext::converter(std::type_index from, std::type_index to) const {
+SIPlusParserContext::converter(const TypeInfo& from, const TypeInfo& to) const {
     auto ret = try_converter(from, to);
 
     if(!ret) {
-        throw std::runtime_error{"No converter available to convert from " 
-            + text::get_type_name(from) + " to " + text::get_type_name(to)};
+        throw std::runtime_error{
+            "No converter available to convert from " + from.name() + " to " + to.name()
+        };
     }
 
     return ret;
 }
 
 std::shared_ptr<text::Converter> 
-SIPlusParserContext::try_converter(std::type_index from, std::type_index to) const {
+SIPlusParserContext::try_converter(const TypeInfo& from, const TypeInfo& to) const {
     auto it = converters_.find(from, to);
 
     if(it == converters_.end()) {
@@ -101,6 +66,13 @@ SIPlusParserContext::try_converter(std::type_index from, std::type_index to) con
     }
 
     return *it;
+}
+
+UnknownDataTypeContainer SIPlusParserContext::convert(const UnknownDataTypeContainer& data, const TypeInfo& to) {
+    if(*data.type == to) return data;
+
+    auto converter = this->converter(*data.type, to);
+    return converter->convert(data, to);
 }
 
 ContextInvocationContextBuilder SIPlusParserContext::builder() const {

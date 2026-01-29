@@ -1,6 +1,7 @@
 #include "siplus/stl/functions/arithmetic.h"
-#include "siplus/text/data.h"
-#include "siplus/text/text.h"
+#include "siplus/data.h"
+#include "siplus/types/float.h"
+#include "siplus/types/integer.h"
 
 namespace SIPLUS_NAMESPACE {
 namespace stl {
@@ -16,38 +17,37 @@ namespace stl {
  * @param[in] rhs Right-hand argument
  */
 template<template<typename _T1, typename _T2> typename operate>
-text::UnknownDataTypeContainer 
+UnknownDataTypeContainer 
 numerically_operate(
     std::shared_ptr<SIPlusParserContext> context,
-    text::UnknownDataTypeContainer       lhs, 
-    text::UnknownDataTypeContainer       rhs
+    UnknownDataTypeContainer       lhs, 
+    UnknownDataTypeContainer       rhs
 ) {
-    lhs = text::as_base(context, lhs);
-    rhs = text::as_base(context, rhs);
+    using int_t = types::IntegerType::data_type;
+    using float_t = types::FloatType::data_type;
 
-    if(lhs.is<long>()) {
-        long val = lhs.as<long>();
+    if(lhs.is<types::IntegerType>()) {
+        int_t val = lhs.as<types::IntegerType>();
 
-        if(rhs.is<long>()) { 
-            return text::make_data(operate<long, long>::invoke(val, rhs.as<long>()));
-        } else if(rhs.is<double>()) {
-            return text::make_data(operate<long, double>::invoke(val, rhs.as<double>()));
+        if(rhs.is<types::IntegerType>()) { 
+            return make_data(operate<int_t, int_t>::invoke(val, rhs.as<types::IntegerType>()));
+        } else if(rhs.is<types::FloatType>()) {
+            return make_data(operate<int_t, float_t>::invoke(val, rhs.as<types::FloatType>()));
         } else {
-            throw std::runtime_error{"Cannot add types long and " + text::get_type_name(rhs.type)};
+            throw std::runtime_error{"Cannot add types long and " + rhs.type->name()};
         }
-    } else if(lhs.is<double>()) {
-        double val = lhs.as<double>();
+    } else if(lhs.is<types::FloatType>()) {
+        float_t val = lhs.as<types::FloatType>();
 
-        if(rhs.is<long>()) { 
-            return text::make_data(operate<double, long>::invoke(val, rhs.as<long>()));
-        } else if(rhs.is<double>()) {
-            return text::make_data(operate<double, double>::invoke(val, rhs.as<double>()));
+        if(rhs.is<types::IntegerType>()) { 
+            return make_data(operate<float_t, int_t>::invoke(val, rhs.as<types::IntegerType>()));
+        } else if(rhs.is<types::FloatType>()) {
+            return make_data(operate<float_t, float_t>::invoke(val, rhs.as<types::FloatType>()));
         } else {
-            throw std::runtime_error{"Cannot add types double and " + text::get_type_name(rhs.type)};
+            throw std::runtime_error{"Cannot add types double and " + rhs.type->name()};
         }
     } else {
-        throw std::runtime_error{"Cannot add types " + text::get_type_name(lhs.type) 
-            + " and " + text::get_type_name(rhs.type)};
+        throw std::runtime_error{"Cannot add types " + lhs.type->name() + " and " + rhs.type->name()};
     }
 }
 
@@ -58,11 +58,11 @@ struct add_operator {
     }
 };
 
-text::UnknownDataTypeContainer 
+UnknownDataTypeContainer 
 SIPLUS_NAMESPACE::stl::numeric_adder::invoke(
     std::shared_ptr<SIPlusParserContext> context,
-    text::UnknownDataTypeContainer       lhs, 
-    text::UnknownDataTypeContainer       rhs
+    UnknownDataTypeContainer       lhs, 
+    UnknownDataTypeContainer       rhs
 ) {
     return numerically_operate<add_operator>(context, lhs, rhs);
 }
@@ -74,11 +74,11 @@ struct subtract_operator {
     }
 };
 
-text::UnknownDataTypeContainer 
+UnknownDataTypeContainer 
 SIPLUS_NAMESPACE::stl::numeric_subtractor::invoke(
     std::shared_ptr<SIPlusParserContext> context,
-    text::UnknownDataTypeContainer       lhs, 
-    text::UnknownDataTypeContainer       rhs
+    UnknownDataTypeContainer       lhs, 
+    UnknownDataTypeContainer       rhs
 ) {
     return numerically_operate<subtract_operator>(context, lhs, rhs);
 }
@@ -90,11 +90,11 @@ struct multiply_operator {
     }
 };
 
-text::UnknownDataTypeContainer 
+UnknownDataTypeContainer 
 SIPLUS_NAMESPACE::stl::numeric_multiplier::invoke(
     std::shared_ptr<SIPlusParserContext> context,
-    text::UnknownDataTypeContainer       lhs, 
-    text::UnknownDataTypeContainer       rhs
+    UnknownDataTypeContainer       lhs, 
+    UnknownDataTypeContainer       rhs
 ) {
     return numerically_operate<multiply_operator>(context, lhs, rhs);
 }
@@ -102,22 +102,22 @@ SIPLUS_NAMESPACE::stl::numeric_multiplier::invoke(
 template<typename _T1, typename _T2>
 struct divide_operator {
     static inline auto invoke(const _T1& a, const _T2& b) {
-        return static_cast<double>(a) / b;
+        return static_cast<types::FloatType::data_type>(a) / b;
     }
 };
 
-text::UnknownDataTypeContainer 
+UnknownDataTypeContainer 
 SIPLUS_NAMESPACE::stl::numeric_divider::invoke(
     std::shared_ptr<SIPlusParserContext> context,
-    text::UnknownDataTypeContainer       lhs, 
-    text::UnknownDataTypeContainer       rhs
+    UnknownDataTypeContainer       lhs, 
+    UnknownDataTypeContainer       rhs
 ) {
     return numerically_operate<divide_operator>(context, lhs, rhs);
 }
 
 template<typename T1, typename T2>
 struct compare_operator {
-    static inline long invoke(T1 a, T2 b) {
+    static inline types::IntegerType::data_type invoke(T1 a, T2 b) {
         if(a < b) {
             return -1;
         } else if(a > b) {
@@ -128,11 +128,11 @@ struct compare_operator {
     }
 };
 
-text::UnknownDataTypeContainer 
+UnknownDataTypeContainer 
 numeric_comparator::invoke(
     std::shared_ptr<SIPlusParserContext> context,
-    text::UnknownDataTypeContainer lhs, 
-    text::UnknownDataTypeContainer rhs
+    UnknownDataTypeContainer lhs, 
+    UnknownDataTypeContainer rhs
 ) {
     return numerically_operate<compare_operator>(context, lhs, rhs);
 }

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef INCLUDE_STL_CONVERTERS_H_
 #define INCLUDE_STL_CONVERTERS_H_
 

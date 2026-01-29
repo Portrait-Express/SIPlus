@@ -2,7 +2,7 @@
 #include "expr_stmt_visitor.h"
 #include "expr_visitor.h"
 #include "generated/StringInterpolatorParser.h"
-#include "siplus/text/data.h"
+#include "siplus/data.h"
 #include "siplus/text/value_retrievers/retriever.h"
 #include <any>
 
@@ -16,7 +16,7 @@ struct StatementExecutingValueRetriever : public text::ValueRetriever {
         std::shared_ptr<text::ValueRetriever> expr
     ) : statements_(stmts), expr_(expr) {}
 
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override {
         for(auto stmt : statements_) {
             stmt->invoke(value);

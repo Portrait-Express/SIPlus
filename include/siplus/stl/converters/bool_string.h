@@ -1,3 +1,4 @@
+#pragma once
 #ifndef INCLUDE_CONVERTERS_BOOL_STRING_H_
 #define INCLUDE_CONVERTERS_BOOL_STRING_H_
 
@@ -14,11 +15,11 @@ namespace stl {
     
 struct bool_string_converter : text::Converter {
 public:
-    bool can_convert(std::type_index from, std::type_index to) const override;
+    bool can_convert(const TypeInfo& from, const TypeInfo& to) const override;
 
-    text::UnknownDataTypeContainer convert(
-        const text::UnknownDataTypeContainer& from,
-        std::type_index to
+    UnknownDataTypeContainer convert(
+        const UnknownDataTypeContainer& from,
+        const TypeInfo& to
     ) const override;
 };
 

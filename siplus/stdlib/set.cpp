@@ -1,9 +1,12 @@
 #include "siplus/stl/functions/set.h"
 #include "siplus/context.h"
-#include "siplus/text/data.h"
-#include "siplus/text/text.h"
+#include "siplus/data.h"
+#include "siplus/parser.h"
 #include "siplus/text/value_retrievers/retriever.h"
 #include "siplus/text/value_retrievers/lambda_value_retriever.h"
+#include "siplus/types/bool.h"
+#include "siplus/types/float.h"
+#include "siplus/types/string.h"
 #include "siplus/util.h"
 #include <unordered_set>
 
@@ -11,41 +14,28 @@ using namespace SIPLUS_NAMESPACE;
 
 namespace std {
 
-hash<text::UnknownDataTypeContainer>::hash(
-    shared_ptr<SIPlusParserContext> context
-) : context_(context) { }
-
-std::uint64_t hash<text::UnknownDataTypeContainer>::operator()(
-    const text::UnknownDataTypeContainer& container
+std::uint64_t hash<UnknownDataTypeContainer>::operator()(
+    const UnknownDataTypeContainer& container
 ) const {
-    if(text::is_numeric(container.type)) {
-        auto base = text::as_base(context_, container);
-
-        if(base.is<long>()) {
-            return long_(base.as<long>());
-        } else if(base.is<double>()) {
-            return double_(base.as<double>());
-        } else {
-            throw runtime_error{util::to_string(
-                "Unknown hash numeric ", base.type.name()
-            )};
-        }
-    } else if(container.is<string>()) {
-        return string_(container.as<string>());
+    if(container.is<types::IntegerType>()) {
+        return long_(container.as<types::IntegerType>());
+    } else if(container.is<types::FloatType>()) {
+        return double_(container.as<types::FloatType>());
+    } else if(container.is<types::StringType>()) {
+        return string_(container.as<types::StringType>());
     } else {
-        throw runtime_error{"Unsure how to hash " + 
-            text::get_type_name(container.type)};
+        throw runtime_error{"Unsure how to hash " + container.type->name()}; 
     }
 }
 
-equal_to<text::UnknownDataTypeContainer>::equal_to(
+equal_to<UnknownDataTypeContainer>::equal_to(
     shared_ptr<SIPlusParserContext> context,
     shared_ptr<text::ValueRetriever> comparator
 ) : context_(context), comparator_(comparator) { }
 
-bool equal_to<text::UnknownDataTypeContainer>::operator()(
-    const text::UnknownDataTypeContainer& lhs,
-    const text::UnknownDataTypeContainer& rhs
+bool equal_to<UnknownDataTypeContainer>::operator()(
+    const UnknownDataTypeContainer& lhs,
+    const UnknownDataTypeContainer& rhs
 ) const {
     auto ctx = context_->builder()
         .with("*lhs", lhs)
@@ -54,11 +44,11 @@ bool equal_to<text::UnknownDataTypeContainer>::operator()(
 
     auto result = comparator_->retrieve(*ctx);
 
-    if(!result.is<bool>()) {
+    if(!result.is<types::BoolType>()) {
         throw runtime_error{"eq didnt return bool"};
     }
 
-    return result.as<bool>();
+    return result.as<types::BoolType>();
 }
 
 } /* std */
@@ -73,7 +63,7 @@ struct set_new_impl : text::ValueRetriever {
         std::shared_ptr<SIPlusParserContext> context
     ) : context_(context) {}
 
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     retrieve(InvocationContext &value) const override;
 
 private:
@@ -82,7 +72,7 @@ private:
     std::shared_ptr<SIPlusParserContext> context_;
 };
 
-text::UnknownDataTypeContainer
+UnknownDataTypeContainer
 set_new_impl::retrieve(InvocationContext& value) const {
     std::shared_ptr<text::ValueRetriever> lhs = 
         std::make_shared<text::LambdaValueRetriever>([](InvocationContext& ctx) {
@@ -99,13 +89,13 @@ set_new_impl::retrieve(InvocationContext& value) const {
         std::vector<std::shared_ptr<text::ValueRetriever>>{ lhs, rhs }
     );
 
-    set_t *set = new set_t{
+    SetType::data_type *set = new SetType::data_type{
         1, 
-        std::hash<text::UnknownDataTypeContainer>{context_},
-        std::equal_to<text::UnknownDataTypeContainer>{ context_, eq }
+        std::hash<UnknownDataTypeContainer>{},
+        std::equal_to<UnknownDataTypeContainer>{ context_, eq }
     };
 
-    return text::make_data(set);
+    return make_data<SetType>(set);
 }
 
 struct set_add_impl : text::ValueRetriever {
@@ -114,7 +104,7 @@ struct set_add_impl : text::ValueRetriever {
         std::shared_ptr<text::ValueRetriever> value
     ) : set_(set), value_(value) {}
 
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     retrieve(InvocationContext &value) const override;
 
 private:
@@ -122,16 +112,16 @@ private:
     std::shared_ptr<text::ValueRetriever> value_;
 };
 
-text::UnknownDataTypeContainer
+UnknownDataTypeContainer
 set_add_impl::retrieve(InvocationContext& context) const {
-    text::UnknownDataTypeContainer set = set_->retrieve(context);
-    text::UnknownDataTypeContainer value = value_->retrieve(context);
+    UnknownDataTypeContainer set = set_->retrieve(context);
+    UnknownDataTypeContainer value = value_->retrieve(context);
 
-    if(!set.is<set_t>()) {
+    if(!set.is<SetType>()) {
         throw std::runtime_error{"Expected first argument to be an instance of a set"};
     }
 
-    set.as<set_t>().insert(value);
+    set.as<SetType>().insert(value);
 
     return set;
 }
@@ -142,7 +132,7 @@ struct set_has_impl : text::ValueRetriever {
         std::shared_ptr<text::ValueRetriever> value
     ) : set_(set), value_(value) {}
 
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     retrieve(InvocationContext &value) const override;
 
 private:
@@ -150,16 +140,16 @@ private:
     std::shared_ptr<text::ValueRetriever> value_;
 };
 
-text::UnknownDataTypeContainer
+UnknownDataTypeContainer
 set_has_impl::retrieve(InvocationContext& context) const {
     auto set = set_->retrieve(context);
     auto value = value_->retrieve(context);
 
-    if(!set.is<set_t>()) {
+    if(!set.is<SetType>()) {
         throw std::runtime_error{"Expected first argument to be an instance of a set"};
     }
 
-    return text::make_data(set.as<set_t>().contains(value));
+    return make_data<types::BoolType>(set.as<SetType>().contains(value));
 }
  
 } /* anonymous */
@@ -191,6 +181,20 @@ std::shared_ptr<text::ValueRetriever> set_has_func::value(
 }
 
 
+std::string SetType::name() const {
+    return "set";
+}
+
+bool SetType::is_iterable() const {
+    return true;
+}
+
+std::unique_ptr<text::Iterator> SetType::iterate(void *data) const {
+    return std::make_unique<set_iterator>(
+        reinterpret_cast<const SetType::data_type*>(data)->begin(),
+        reinterpret_cast<const SetType::data_type*>(data)->end()
+    );
+}
 
 bool set_iterator::more() {
     return begin_ != end_;
@@ -203,20 +207,8 @@ void set_iterator::next() {
 
     begin_++;
 }
-text::UnknownDataTypeContainer set_iterator::current() {
+UnknownDataTypeContainer set_iterator::current() {
     return *begin_;
-}
-
-std::unique_ptr<text::Iterator> set_iterator_provider::iterator(
-    const text::UnknownDataTypeContainer& value
-) {
-    auto& set = value.as<std::unordered_set<text::UnknownDataTypeContainer>>();
-
-    return std::make_unique<set_iterator>(set.begin(), set.end());
-}
-
-bool set_iterator_provider::can_iterate(const text::UnknownDataTypeContainer& value) {
-    return value.is<std::unordered_set<text::UnknownDataTypeContainer>>();
 }
 
 } /* stl */

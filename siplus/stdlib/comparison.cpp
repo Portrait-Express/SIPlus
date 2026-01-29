@@ -1,8 +1,10 @@
 #include "siplus/stl/functions/comparison.h"
 #include "siplus/context.h"
 #include "siplus/invocation_context.h"
-#include "siplus/text/data.h"
+#include "siplus/data.h"
 #include "siplus/text/value_retrievers/retriever.h"
+#include "siplus/types/bool.h"
+#include "siplus/types/integer.h"
 #include <memory>
 
 namespace SIPLUS_NAMESPACE {
@@ -18,7 +20,7 @@ struct lt_impl : text::ValueRetriever  {
         std::shared_ptr<text::ValueRetriever> cmp
     ) : ctx_(context), cmp_(cmp) { }
 
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
@@ -34,7 +36,7 @@ struct gt_impl : text::ValueRetriever  {
 
     explicit gt_impl(std::weak_ptr<SIPlusParserContext> context) { }
 
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
@@ -48,7 +50,7 @@ struct eq_impl : text::ValueRetriever  {
         std::shared_ptr<text::ValueRetriever> cmp
     ) : ctx_(context), cmp_(cmp) { }
 
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
@@ -66,12 +68,12 @@ std::shared_ptr<text::ValueRetriever> lt_func::value(
     return std::make_shared<lt_impl>(ctx_, cmp);
 }
 
-text::UnknownDataTypeContainer 
+UnknownDataTypeContainer 
 lt_impl::retrieve(InvocationContext& val) const {
     auto ctx = ctx_.lock();
     auto cmp_val = cmp_->retrieve(val);
-    auto result = ctx->convert<long>(cmp_val).as<long>();
-    return text::make_data(result < 0);
+    auto result = ctx->convert<types::IntegerType>(cmp_val).as<types::IntegerType>();
+    return make_data<types::BoolType>(result < 0);
 }
 
 std::shared_ptr<text::ValueRetriever> gt_func::value(
@@ -82,12 +84,12 @@ std::shared_ptr<text::ValueRetriever> gt_func::value(
     return std::make_shared<gt_impl>(ctx_, cmp);
 }
 
-text::UnknownDataTypeContainer 
+UnknownDataTypeContainer 
 gt_impl::retrieve(InvocationContext& val) const {
     auto ctx = ctx_.lock();
     auto cmp_val = cmp_->retrieve(val);
-    auto result = ctx->convert<long>(cmp_val).as<long>();
-    return text::make_data(result > 0);
+    auto result = ctx->convert<types::IntegerType>(cmp_val).as<types::IntegerType>();
+    return make_data<types::BoolType>(result > 0);
 }
 
 std::shared_ptr<text::ValueRetriever> eq_func::value(
@@ -98,12 +100,12 @@ std::shared_ptr<text::ValueRetriever> eq_func::value(
     return std::make_shared<eq_impl>(ctx_, cmp);
 }
 
-text::UnknownDataTypeContainer 
+UnknownDataTypeContainer 
 eq_impl::retrieve(InvocationContext& val) const {
     auto ctx = ctx_.lock();
     auto cmp_val = cmp_->retrieve(val);
-    auto result = ctx->convert<long>(cmp_val).as<long>();
-    return text::make_data(result == 0);
+    auto result = ctx->convert<types::IntegerType>(cmp_val).as<types::IntegerType>();
+    return make_data<types::BoolType>(result == 0);
 }
 
 } /* stl */

@@ -6,7 +6,8 @@
 #include <memory>
 
 #include "siplus/invocation_context.h"
-#include "siplus/text/data.h"
+#include "siplus/data.h"
+#include "siplus/types/array.h"
 #include "siplus/util.h"
 
 #include "expr_visitor.h"
@@ -20,22 +21,22 @@ namespace {
 struct LiteralArrayValueRetriever : public text::ValueRetriever {
     LiteralArrayValueRetriever(std::vector<std::shared_ptr<text::ValueRetriever>> items) : items_(items) {}
     
-    text::UnknownDataTypeContainer retrieve(InvocationContext& value) const override;
+    UnknownDataTypeContainer retrieve(InvocationContext& value) const override;
 
 private:
     std::vector<std::shared_ptr<text::ValueRetriever>> items_;
 };
 
-text::UnknownDataTypeContainer 
+UnknownDataTypeContainer 
 LiteralArrayValueRetriever::retrieve(InvocationContext& value) const {
-    std::vector<text::UnknownDataTypeContainer> ret;
+    std::vector<UnknownDataTypeContainer> ret;
     ret.reserve(items_.size());
 
     for(auto item : items_) {
         ret.push_back(item->retrieve(value));
     }
 
-    return text::make_data(ret);
+    return make_data<types::ArrayType>(ret);
 }
 
 
@@ -47,7 +48,7 @@ public:
     AccessorValueRetriever(std::shared_ptr<SIPlusParserContext> context, std::string name);
     AccessorValueRetriever(std::shared_ptr<SIPlusParserContext> context, std::shared_ptr<ValueRetriever> parent, std::string name);
 
-    text::UnknownDataTypeContainer retrieve(InvocationContext& value) const override;
+    UnknownDataTypeContainer retrieve(InvocationContext& value) const override;
 
 private:
     std::shared_ptr<SIPlusParserContext> context_;
@@ -66,14 +67,12 @@ AccessorValueRetriever::AccessorValueRetriever(
     std::string name
 ) : context_(context), parent_(parent), name_(name) {}
 
-text::UnknownDataTypeContainer AccessorValueRetriever::retrieve(InvocationContext& value) const {
+UnknownDataTypeContainer AccessorValueRetriever::retrieve(InvocationContext& value) const {
     if(parent_) {
         auto parent = parent_->retrieve(value);
-        auto accessor = context_->accessor(parent);
-        return accessor->access(parent, name_);
+        return parent.access(name_);
     } else {
-        auto accessor = context_->accessor(value.default_data());
-        return accessor->access(value.default_data(), name_);
+        return value.default_data().access(name_);
     }
 }
 
@@ -85,7 +84,7 @@ public:
     IndexValueRetriever(std::shared_ptr<SIPlusParserContext> context, long index);
     IndexValueRetriever(std::shared_ptr<SIPlusParserContext> context, std::shared_ptr<ValueRetriever> parent, long index);
 
-    text::UnknownDataTypeContainer retrieve(InvocationContext& value) const override;
+    UnknownDataTypeContainer retrieve(InvocationContext& value) const override;
 
 private:
     std::shared_ptr<SIPlusParserContext> context_;
@@ -104,10 +103,10 @@ IndexValueRetriever::IndexValueRetriever(
     long index
 ) : context_(context), parent_(parent), index_(index) {}
 
-text::UnknownDataTypeContainer IndexValueRetriever::retrieve(InvocationContext& value) const {
-    text::UnknownDataTypeContainer val = parent_ ? parent_->retrieve(value) : value.default_data();
+UnknownDataTypeContainer IndexValueRetriever::retrieve(InvocationContext& value) const {
+    UnknownDataTypeContainer val = parent_ ? parent_->retrieve(value) : value.default_data();
 
-    auto iterator = context_->iterator(val)->iterator(val);
+    auto iterator = val.iterate();
 
     size_t i = 0;
     bool more = iterator->more();
@@ -125,17 +124,17 @@ text::UnknownDataTypeContainer IndexValueRetriever::retrieve(InvocationContext& 
 
 class LiteralValueRetriever : public text::ValueRetriever {
 public:
-    explicit LiteralValueRetriever(text::UnknownDataTypeContainer value);
+    explicit LiteralValueRetriever(UnknownDataTypeContainer value);
 
-    virtual text::UnknownDataTypeContainer retrieve(InvocationContext& value) const override;
+    virtual UnknownDataTypeContainer retrieve(InvocationContext& value) const override;
 
 private:
-    text::UnknownDataTypeContainer value_;
+    UnknownDataTypeContainer value_;
 };
 
-LiteralValueRetriever::LiteralValueRetriever(text::UnknownDataTypeContainer value) : value_(value) {}
+LiteralValueRetriever::LiteralValueRetriever(UnknownDataTypeContainer value) : value_(value) {}
 
-text::UnknownDataTypeContainer LiteralValueRetriever::retrieve(InvocationContext& value) const {
+UnknownDataTypeContainer LiteralValueRetriever::retrieve(InvocationContext& value) const {
     return value_;
 }
 
@@ -143,7 +142,7 @@ class DummyValueRetriever : public text::ValueRetriever {
 public:
     DummyValueRetriever() {}
 
-    text::UnknownDataTypeContainer retrieve(InvocationContext& value) const override {
+    UnknownDataTypeContainer retrieve(InvocationContext& value) const override {
         return value.default_data();
     };
 };
@@ -253,7 +252,7 @@ std::any PipedExpressionVisitor::visitLiteral(StringInterpolatorParser::LiteralC
 
     LiteralVisitor visitor{context_, buildContext_, tokens_};
     auto literal = ctx->accept(&visitor);
-    auto data = std::any_cast<text::UnknownDataTypeContainer>(literal);
+    auto data = std::any_cast<UnknownDataTypeContainer>(literal);
     value_ = std::make_shared<LiteralValueRetriever>(data);
     return value_;
 }

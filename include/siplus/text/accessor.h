@@ -1,10 +1,11 @@
+#pragma once
 #ifndef INCLUDE_SIPLUS_TEXT_ACCESSOR_H_
 #define INCLUDE_SIPLUS_TEXT_ACCESSOR_H_
 
 #include <string>
 
 #include "siplus/config.h"
-#include "siplus/text/data.h"
+#include "siplus/data.h"
 
 namespace SIPLUS_NAMESPACE {
 namespace text {

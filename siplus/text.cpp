@@ -6,9 +6,10 @@
 #include "siplus/text/constructor_steps/literal_step.h"
 #include "siplus/text/constructor_steps/repeated_constructor_step.h"
 #include "siplus/text/constructor_steps/retriever_step.h"
-#include "siplus/text/data.h"
+#include "siplus/data.h"
 #include "siplus/text/value_retrievers/literal_retriever.h"
 #include "siplus/text/value_retrievers/accessor_retriever.h"
+#include "siplus/types/string.h"
 
 namespace SIPLUS_NAMESPACE {
 namespace text {
@@ -44,8 +45,7 @@ RepeatedConstructorConstructorStep::RepeatedConstructorConstructorStep(
 std::string RepeatedConstructorConstructorStep::getPart(InvocationContext& val) {
     UnknownDataTypeContainer iterable = retriever_->retrieve(val);
 
-    auto provider = context_->iterator(iterable);
-    auto iterator = provider->iterator(iterable);
+    auto iterator = iterable.iterate();
 
     bool more = iterator->more();
     std::stringstream ss;
@@ -75,11 +75,11 @@ ValueRetrieverConstructorStep::ValueRetrieverConstructorStep(
 std::string ValueRetrieverConstructorStep::getPart(InvocationContext& part) {
     auto value = retriever_->retrieve(part);
 
-    if(!value.is<std::string>()) {
-        value = context_->convert<std::string>(value);
+    if(!value.is<types::StringType>()) {
+        value = context_->convert<types::StringType>(value);
     }
 
-    return value.as<std::string>();
+    return value.as<types::StringType>();
 }
 
 LiteralValueRetriever::LiteralValueRetriever(UnknownDataTypeContainer value) : value_(value) {}
@@ -101,12 +101,9 @@ AccessorValueRetriever::AccessorValueRetriever(
 
 UnknownDataTypeContainer AccessorValueRetriever::retrieve(InvocationContext& value) const {
     if(parent_) {
-        auto parent = parent_->retrieve(value);
-        auto accessor = context_->accessor(parent);
-        return accessor->access(parent, name_);
+        return parent_->retrieve(value).access(name_);
     } else {
-        auto accessor = context_->accessor(value.default_data());
-        return accessor->access(value.default_data(), name_);
+        return value.default_data().access(name_);
     }
 }
 

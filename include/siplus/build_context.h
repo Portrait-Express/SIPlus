@@ -1,10 +1,11 @@
+#pragma once
 #ifndef INCLUDE_SIPLUS_BUILD_CONTEXT_H_
 #define INCLUDE_SIPLUS_BUILD_CONTEXT_H_
 
 #include "siplus/function.h"
 #include "siplus/invocation_context.h"
 #include "siplus/parser.h"
-#include "siplus/text/data.h"
+#include "siplus/data.h"
 #include "siplus/text/value_retrievers/retriever.h"
 #include "siplus/util.h"
 #include <memory>
@@ -21,7 +22,7 @@ struct VariableRetriever : public text::ValueRetriever {
     virtual bool is_const() const = 0;
     virtual std::string name() const = 0;
 
-    virtual void set_value(InvocationContext& context, text::UnknownDataTypeContainer value) = 0;
+    virtual void set_value(InvocationContext& context, UnknownDataTypeContainer value) = 0;
 };
 
 struct BuildContext : public std::enable_shared_from_this<BuildContext> {

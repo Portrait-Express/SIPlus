@@ -1,12 +1,13 @@
 #include "siplus/context.h"
 #include "siplus/invocation_context.h"
-#include "siplus/text/data.h"
-#include "siplus/text/iterator.h"
-#include "../invocation_context_impl.h"
+#include "siplus/data.h"
 #include "siplus/text/value_retrievers/literal_retriever.h"
 #include "siplus/text/value_retrievers/retriever.h"
-#include "siplus/stl/iterators/string_iterator_provider.h"
 #include "siplus/stl/functions/iterable.h"
+#include "siplus/types/array.h"
+#include "siplus/types/bool.h"
+#include "siplus/types/integer.h"
+#include "siplus/types/string.h"
 #include "siplus/util.h"
 #include <sstream>
 
@@ -22,7 +23,7 @@ struct map_impl : public text::ValueRetriever {
         std::shared_ptr<text::ValueRetriever> expr
     ) : context_(context), input_(input), map_expr_(expr) {}
 
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
@@ -37,7 +38,7 @@ struct length_impl : public text::ValueRetriever {
         std::shared_ptr<text::ValueRetriever> input
     ) : context_(context), input_(input) {}
 
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
@@ -52,7 +53,7 @@ struct join_impl : public text::ValueRetriever {
         std::shared_ptr<text::ValueRetriever> delim
     ) : context_(context), input_(input), delimiter_(delim) {}
 
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
@@ -69,25 +70,13 @@ struct contains_impl : public text::ValueRetriever {
     ) : context_(context), input_(input), value_(value) {
     }
 
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
     std::weak_ptr<SIPlusParserContext> context_;
     std::shared_ptr<text::ValueRetriever> input_;
     std::shared_ptr<text::ValueRetriever> value_;
-};
-
-struct string_iterator_impl : text::Iterator {
-    string_iterator_impl(std::string value) : value_(value) { }
-
-    virtual bool more();
-    virtual void next();
-    virtual text::UnknownDataTypeContainer current();
-
-private:
-    std::string value_;
-    long index_ = -1;
 };
 
 }
@@ -101,19 +90,19 @@ map_func::value(
     return std::make_shared<map_impl>(context_, input, expr);
 }
 
-text::UnknownDataTypeContainer
+UnknownDataTypeContainer
 map_impl::retrieve(InvocationContext& val) const {
-    using vec_type = std::vector<text::UnknownDataTypeContainer>;
+    using vec_type = std::vector<UnknownDataTypeContainer>;
 
     std::unique_ptr<vec_type> ret = std::make_unique<vec_type>();
-    text::UnknownDataTypeContainer iterable = val.default_data();
+    UnknownDataTypeContainer iterable = val.default_data();
     auto context = context_.lock();
 
     if(input_) {
         iterable = input_->retrieve(val);
     }
 
-    auto iterator = context->iterator(iterable)->iterator(iterable);
+    auto iterator = iterable.iterate();
 
     bool more = iterator->more();
     while(more) {
@@ -129,7 +118,7 @@ map_impl::retrieve(InvocationContext& val) const {
         more = iterator->more();
     }
 
-    return text::make_data(ret.release());
+    return make_data<types::ArrayType>(ret.release());
 }
 
 std::shared_ptr<text::ValueRetriever>
@@ -141,13 +130,13 @@ length_func::value(
     return std::make_shared<length_impl>(context_, input);
 }
 
-text::UnknownDataTypeContainer
+UnknownDataTypeContainer
 length_impl::retrieve(InvocationContext& value) const {
     std::stringstream ss;
     auto context = context_.lock();
     auto iterable = input_->retrieve(value);
 
-    auto iterator = context->iterator(iterable)->iterator(iterable);
+    auto iterator = iterable.iterate();
 
     long size = 0;
     bool more = iterator->more();
@@ -160,7 +149,7 @@ length_impl::retrieve(InvocationContext& value) const {
         more = iterator->more();
     }
 
-    return text::make_data<long>(size);
+    return make_data<types::IntegerType>(size);
 }
 
 std::shared_ptr<text::ValueRetriever>
@@ -172,22 +161,22 @@ join_func::value(
     return std::make_shared<join_impl>(context_, input, delim);
 }
 
-text::UnknownDataTypeContainer
+UnknownDataTypeContainer
 join_impl::retrieve(InvocationContext& value) const {
     std::stringstream ss;
     auto context = context_.lock();
     auto iterable = input_->retrieve(value);
     auto delimiter_val = delimiter_->retrieve(value);
-    auto delimiter = context->convert<std::string>(delimiter_val).as<std::string>();
+    auto delimiter = context->convert<types::StringType>(delimiter_val).as<types::StringType>();
 
-    auto iterator = context->iterator(iterable)->iterator(iterable);
+    auto iterator = iterable.iterate();
 
     bool more = iterator->more();
     while(more) {
         iterator->next();
         auto current = iterator->current();
 
-        ss << context->convert<std::string>(current).as<std::string>();
+        ss << context->convert<types::StringType>(current).as<types::StringType>();
 
         more = iterator->more();
         if(more) {
@@ -195,7 +184,7 @@ join_impl::retrieve(InvocationContext& value) const {
         }
     }
 
-    return text::make_data(ss.str());
+    return make_data<types::StringType>(ss.str());
 }
 
 std::shared_ptr<text::ValueRetriever>
@@ -207,12 +196,12 @@ contains_func::value(
     return std::make_shared<contains_impl>(context_, input, delim);
 }
 
-text::UnknownDataTypeContainer
+UnknownDataTypeContainer
 contains_impl::retrieve(InvocationContext& value) const {
     auto context = context_.lock();
     auto iterable = input_->retrieve(value);
 
-    auto iterator = context->iterator(iterable)->iterator(iterable);
+    auto iterator = iterable.iterate();
 
     bool more = iterator->more();
     while(more) {
@@ -223,34 +212,13 @@ contains_impl::retrieve(InvocationContext& value) const {
         auto fn = context->function("eq").value(retriever, {value_});
         auto val = fn->retrieve(value);
 
-        if(val.is<bool>() && val.as<bool>()) return val;
+        if(val.is<types::BoolType>() && val.as<types::BoolType>()) return val;
 
         more = iterator->more();
     }
 
-    return text::make_data(false);
+    return make_data<types::BoolType>(false);
 }
-
-bool string_iterator::can_iterate(const text::UnknownDataTypeContainer& value) {
-    return value.is<std::string>();
-}
-
-std::unique_ptr<text::Iterator> string_iterator::iterator(const text::UnknownDataTypeContainer& value) {
-    return std::make_unique<string_iterator_impl>(value.as<std::string>());
-}
-
-bool string_iterator_impl::more() {
-    return index_ < (static_cast<long>(value_.size()) - 1);
-}
-
-void string_iterator_impl::next() {
-    index_++;
-}
-
-text::UnknownDataTypeContainer string_iterator_impl::current() {
-    return text::make_data(std::string{value_[index_]});
-}
-
 
 } /* stl */
 } /* SIPLUS_NAMESPACE */

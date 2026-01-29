@@ -1,3 +1,4 @@
+#pragma once
 #ifndef INCLUDE_FUNCTIONS_TEXT_H_
 #define INCLUDE_FUNCTIONS_TEXT_H_
 
@@ -142,25 +143,25 @@ private:
 };
 
 struct string_concatenator : operator_impl {
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     invoke(
         std::shared_ptr<SIPlusParserContext> context,
-        text::UnknownDataTypeContainer lhs, 
-        text::UnknownDataTypeContainer rhs
+        UnknownDataTypeContainer lhs, 
+        UnknownDataTypeContainer rhs
     ) override;
 
-    bool can_handle(std::type_index lhs, std::type_index rhs) const override;
+    bool can_handle(const TypeInfo& lhs, const TypeInfo& rhs) const override;
 };
 
 struct string_comparator : operator_impl {
-    text::UnknownDataTypeContainer 
+    UnknownDataTypeContainer 
     invoke(
         std::shared_ptr<SIPlusParserContext> context,
-        text::UnknownDataTypeContainer lhs, 
-        text::UnknownDataTypeContainer rhs
+        UnknownDataTypeContainer lhs, 
+        UnknownDataTypeContainer rhs
     ) override;
 
-    bool can_handle(std::type_index lhs, std::type_index rhs) const override;
+    bool can_handle(const TypeInfo& lhs, const TypeInfo& rhs) const override;
 };
 
 } /* stl */
