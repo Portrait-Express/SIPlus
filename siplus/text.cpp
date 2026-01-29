@@ -1,15 +1,15 @@
 #include <sstream>
 
-#include "siplus/context.h"
-#include "siplus/invocation_context.h"
-#include "siplus/text/constructor.h"
-#include "siplus/text/constructor_steps/literal_step.h"
-#include "siplus/text/constructor_steps/repeated_constructor_step.h"
-#include "siplus/text/constructor_steps/retriever_step.h"
-#include "siplus/data.h"
-#include "siplus/text/value_retrievers/literal_retriever.h"
-#include "siplus/text/value_retrievers/accessor_retriever.h"
-#include "siplus/types/string.h"
+#include "siplus/context.hxx"
+#include "siplus/invocation_context.hxx"
+#include "siplus/text/constructor.hxx"
+#include "siplus/text/constructor_steps/literal_step.hxx"
+#include "siplus/text/constructor_steps/repeated_constructor_step.hxx"
+#include "siplus/text/constructor_steps/retriever_step.hxx"
+#include "siplus/data.hxx"
+#include "siplus/text/value_retrievers/literal_retriever.hxx"
+#include "siplus/text/value_retrievers/accessor_retriever.hxx"
+#include "siplus/types/string.hxx"
 
 namespace SIPLUS_NAMESPACE {
 namespace text {

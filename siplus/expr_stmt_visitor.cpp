@@ -1,10 +1,10 @@
-#include "expr_stmt_visitor.h"
-#include "expr_visitor.h"
+#include "expr_stmt_visitor.hxx"
+#include "expr_visitor.hxx"
 #include "generated/StringInterpolatorParser.h"
-#include "siplus/context.h"
-#include "siplus/invocation_context.h"
-#include "siplus/data.h"
-#include "siplus/text/value_retrievers/retriever.h"
+#include "siplus/context.hxx"
+#include "siplus/invocation_context.hxx"
+#include "siplus/data.hxx"
+#include "siplus/text/value_retrievers/retriever.hxx"
 
 #include <iterator>
 #include <memory>

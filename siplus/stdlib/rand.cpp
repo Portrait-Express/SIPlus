@@ -1,9 +1,9 @@
-#include "siplus/data.h"
-#include "siplus/types/float.h"
-#include "siplus/types/integer.h"
-#include "siplus/types/string.h"
-#include "siplus/util.h"
-#include "siplus/stl/functions/rand.h"
+#include "siplus/data.hxx"
+#include "siplus/types/float.hxx"
+#include "siplus/types/integer.hxx"
+#include "siplus/types/string.hxx"
+#include "siplus/util.hxx"
+#include "siplus/stl/functions/rand.hxx"
 #include <random>
 
 namespace SIPLUS_NAMESPACE {

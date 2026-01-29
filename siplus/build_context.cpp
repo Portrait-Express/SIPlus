@@ -1,5 +1,5 @@
-#include "siplus/build_context.h"
-#include "siplus/data.h"
+#include "siplus/build_context.hxx"
+#include "siplus/data.hxx"
 
 namespace SIPLUS_NAMESPACE {
 

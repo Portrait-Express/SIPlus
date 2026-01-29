@@ -1,10 +1,10 @@
-#include "siplus/stl/functions/comparison.h"
-#include "siplus/context.h"
-#include "siplus/invocation_context.h"
-#include "siplus/data.h"
-#include "siplus/text/value_retrievers/retriever.h"
-#include "siplus/types/bool.h"
-#include "siplus/types/integer.h"
+#include "siplus/stl/functions/comparison.hxx"
+#include "siplus/context.hxx"
+#include "siplus/invocation_context.hxx"
+#include "siplus/data.hxx"
+#include "siplus/text/value_retrievers/retriever.hxx"
+#include "siplus/types/bool.hxx"
+#include "siplus/types/integer.hxx"
 #include <memory>
 
 namespace SIPLUS_NAMESPACE {

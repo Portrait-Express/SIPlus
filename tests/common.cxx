@@ -16,9 +16,9 @@
 
 #endif
 
-#include "siplus/context.h"
-#include "siplus/parser.h"
-#include "siplus/data.h"
+#include "siplus/context.hxx"
+#include "siplus/parser.hxx"
+#include "siplus/data.hxx"
 
 #include "common.hxx"
 

@@ -1,5 +1,5 @@
-#include "siplus/data.h"
-#include <siplus/siplus.h>
+#include "siplus/data.hxx"
+#include <siplus/siplus.hxx>
 
 #ifndef SIPLUS_EXAMPLE_DONT_NEED_STDLIB
 #ifndef SIPLUS_INCLUDE_STDLIB

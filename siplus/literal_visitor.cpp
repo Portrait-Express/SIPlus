@@ -1,12 +1,12 @@
-#include "literal_visitor.h"
+#include "literal_visitor.hxx"
 #include "Token.h"
 #include "generated/StringInterpolatorLexer.h"
-#include "interpolation_visitor.h"
-#include "siplus/data.h"
-#include "siplus/types/bool.h"
-#include "siplus/types/float.h"
-#include "siplus/types/integer.h"
-#include "siplus/types/string.h"
+#include "interpolation_visitor.hxx"
+#include "siplus/data.hxx"
+#include "siplus/types/bool.hxx"
+#include "siplus/types/float.hxx"
+#include "siplus/types/integer.hxx"
+#include "siplus/types/string.hxx"
 #include <cstdlib>
 #include <string>
 

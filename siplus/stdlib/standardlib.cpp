@@ -1,12 +1,12 @@
-#include "siplus/stl/functions/rand.h"
-#include "siplus/stl/functions/arithmetic.h"
-#include "siplus/stl/functions/iterable.h"
-#include "siplus/stl/functions/set.h"
-#include "siplus/stl/functions/text.h"
-#include "siplus/stl/functions/typed_operator.h"
-#include "siplus/data.h"
-#include "siplus/stl.h"
-#include "siplus/types/bool.h"
+#include "siplus/stl/functions/rand.hxx"
+#include "siplus/stl/functions/arithmetic.hxx"
+#include "siplus/stl/functions/iterable.hxx"
+#include "siplus/stl/functions/set.hxx"
+#include "siplus/stl/functions/text.hxx"
+#include "siplus/stl/functions/typed_operator.hxx"
+#include "siplus/data.hxx"
+#include "siplus/stl.hxx"
+#include "siplus/types/bool.hxx"
 
 #include <functional>
 #include <memory>

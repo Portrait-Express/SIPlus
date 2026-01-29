@@ -1,5 +1,5 @@
-#include "invocation_context_impl.h"
-#include "siplus/util.h"
+#include "invocation_context_impl.hxx"
+#include "siplus/util.hxx"
 
 namespace SIPLUS_NAMESPACE {
 

@@ -1,11 +1,11 @@
-#include "siplus/data.h"
-#include "siplus/text/iterator.h"
-#include "siplus/types/bool.h"
-#include "siplus/types/string.h"
-#include "siplus/types/integer.h"
-#include "siplus/types/float.h"
-#include "siplus/types/array.h"
-#include "siplus/vector_iterator.h"
+#include "siplus/data.hxx"
+#include "siplus/text/iterator.hxx"
+#include "siplus/types/bool.hxx"
+#include "siplus/types/string.hxx"
+#include "siplus/types/integer.hxx"
+#include "siplus/types/float.hxx"
+#include "siplus/types/array.hxx"
+#include "siplus/vector_iterator.hxx"
 
 namespace SIPLUS_NAMESPACE {
 namespace types {

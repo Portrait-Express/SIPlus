@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "siplus/siplus.h"
+#include "siplus/siplus.hxx"
 
 struct User {
     int id;

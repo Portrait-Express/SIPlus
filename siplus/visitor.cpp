@@ -1,4 +1,4 @@
-#include "visitor.h"
+#include "visitor.hxx"
 
 namespace SIPLUS_NAMESPACE {
 

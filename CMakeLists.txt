@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 
 option(SIPLUS_INCLUDE_STDLIB "Include standard library base for siplus. Can be disabled to reduce binary size" ON)
 option(SIPLUS_SANITIZE_ADDRESS "Set -fsanitize=address for memory leak testing" OFF)
-option(SIPLUS_BUILD_EXAMPLES "Build Examples" OFF)
+option(SIPLUS_BUILD_EXAMPLES "Build Examples" On)
 option(WITH_STATIC_CRT "(MSVC Visual C++) Enable to statically link CRT, which avoids requiring users to install the redistribution package.
  To disable with: -DWITH_STATIC_CRT=Off" On)
 set(SIPLUS_NAMESPACE SIPlus CACHE STRING "Optionally specify a different root namespace")
@@ -55,7 +55,7 @@ if(SIPLUS_INCLUDE_STDLIB)
 endif()
 
 add_library(siplus ${SIPLUS_SOURCES})
-target_precompile_headers(siplus PRIVATE "${PROJECT_SOURCE_DIR}/include/siplus/pch.h")
+target_precompile_headers(siplus PRIVATE "${PROJECT_SOURCE_DIR}/include/siplus/pch.hxx")
 
 if(SIPLUS_BUILD_EXAMPLES)
     add_subdirectory(example)

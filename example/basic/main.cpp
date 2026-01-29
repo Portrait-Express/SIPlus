@@ -1,4 +1,4 @@
-#include <siplus/siplus.h>
+#include <siplus/siplus.hxx>
 #include <iostream>
 
 using namespace SIPLUS_NAMESPACE;

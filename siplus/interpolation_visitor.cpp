@@ -3,10 +3,10 @@
 #include "generated/StringInterpolatorParser.h"
 #include "Token.h"
 
-#include "siplus/text/constructor_steps/literal_step.h"
+#include "siplus/text/constructor_steps/literal_step.hxx"
 
-#include "interpolation_visitor.h"
-#include "statement_visitor.h"
+#include "interpolation_visitor.hxx"
+#include "statement_visitor.hxx"
 
 namespace SIPLUS_NAMESPACE {
 

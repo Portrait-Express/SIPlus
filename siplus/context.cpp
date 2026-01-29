@@ -1,13 +1,13 @@
 #include <string>
 
-#include "siplus/context.h"
-#include "invocation_context_impl.h"
-#include "siplus/data.h"
-#include "siplus/function.h"
-#include "siplus/text/text.h"
+#include "siplus/context.hxx"
+#include "invocation_context_impl.hxx"
+#include "siplus/data.hxx"
+#include "siplus/function.hxx"
+#include "siplus/text/text.hxx"
 
 #ifdef SIPLUS_INCLUDE_STDLIB
-#include "siplus/stl.h"
+#include "siplus/stl.hxx"
 #endif
 
 namespace SIPLUS_NAMESPACE {

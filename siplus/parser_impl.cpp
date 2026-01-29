@@ -4,18 +4,18 @@
 #include "DFA.h"
 #include "Recognizer.h"
 
-#include "siplus/build_context.h"
-#include "siplus/context.h"
-#include "siplus/invocation_context.h"
-#include "siplus/parser.h"
-#include "siplus/text/constructor.h"
-#include "siplus/data.h"
+#include "siplus/build_context.hxx"
+#include "siplus/context.hxx"
+#include "siplus/invocation_context.hxx"
+#include "siplus/parser.hxx"
+#include "siplus/text/constructor.hxx"
+#include "siplus/data.hxx"
 
-#include "block_visitor.h"
+#include "block_visitor.hxx"
 #include "generated/StringInterpolatorLexer.h"
 #include "generated/StringInterpolatorParser.h"
-#include "interpolation_visitor.h"
-#include "parser_impl.h"
+#include "interpolation_visitor.hxx"
+#include "parser_impl.hxx"
 
 #include <sstream>
 

@@ -1,11 +1,11 @@
 #include <cstring>
 
 #include "common.hxx"
-#include "siplus/parser.h"
-#include "siplus/types/array.h"
-#include "siplus/types/float.h"
-#include "siplus/types/integer.h"
-#include "siplus/types/string.h"
+#include "siplus/parser.hxx"
+#include "siplus/types/array.hxx"
+#include "siplus/types/float.hxx"
+#include "siplus/types/integer.hxx"
+#include "siplus/types/string.hxx"
 
 using namespace SIPLUS_NAMESPACE;
 

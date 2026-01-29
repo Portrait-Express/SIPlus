@@ -1,7 +1,7 @@
-#include "siplus/stl/functions/control.h"
-#include "siplus/data.h"
-#include "siplus/types/bool.h"
-#include "siplus/util.h"
+#include "siplus/stl/functions/control.hxx"
+#include "siplus/data.hxx"
+#include "siplus/types/bool.hxx"
+#include "siplus/util.hxx"
 
 namespace SIPLUS_NAMESPACE {
 namespace stl {

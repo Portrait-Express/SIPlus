@@ -1,7 +1,7 @@
-#include "siplus/stl/functions/converting_operator.h"
-#include "siplus/invocation_context.h"
-#include "siplus/data.h"
-#include "siplus/text/value_retrievers/retriever.h"
+#include "siplus/stl/functions/converting_operator.hxx"
+#include "siplus/invocation_context.hxx"
+#include "siplus/data.hxx"
+#include "siplus/text/value_retrievers/retriever.hxx"
 #include <memory>
 #include <stdexcept>
 #include <vector>

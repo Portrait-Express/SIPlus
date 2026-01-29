@@ -1,17 +1,17 @@
-#include "siplus/invocation_context.h"
-#include "siplus/types/array.h"
-#include "siplus/types/integer.h"
-#include "siplus/types/string.h"
-#include "siplus/util.h"
+#include "siplus/invocation_context.hxx"
+#include "siplus/types/array.hxx"
+#include "siplus/types/integer.hxx"
+#include "siplus/types/string.hxx"
+#include "siplus/util.hxx"
 
 #include <algorithm>
 #include <cctype>
 #include <cstring>
 
-#include "siplus/config.h"
-#include "siplus/data.h"
-#include "siplus/text/value_retrievers/retriever.h"
-#include "siplus/stl/functions/text.h"
+#include "siplus/config.hxx"
+#include "siplus/data.hxx"
+#include "siplus/text/value_retrievers/retriever.hxx"
+#include "siplus/stl/functions/text.hxx"
 
 namespace SIPLUS_NAMESPACE {
 namespace stl {

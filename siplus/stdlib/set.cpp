@@ -1,13 +1,13 @@
-#include "siplus/stl/functions/set.h"
-#include "siplus/context.h"
-#include "siplus/data.h"
-#include "siplus/parser.h"
-#include "siplus/text/value_retrievers/retriever.h"
-#include "siplus/text/value_retrievers/lambda_value_retriever.h"
-#include "siplus/types/bool.h"
-#include "siplus/types/float.h"
-#include "siplus/types/string.h"
-#include "siplus/util.h"
+#include "siplus/stl/functions/set.hxx"
+#include "siplus/context.hxx"
+#include "siplus/data.hxx"
+#include "siplus/parser.hxx"
+#include "siplus/text/value_retrievers/retriever.hxx"
+#include "siplus/text/value_retrievers/lambda_value_retriever.hxx"
+#include "siplus/types/bool.hxx"
+#include "siplus/types/float.hxx"
+#include "siplus/types/string.hxx"
+#include "siplus/util.hxx"
 #include <unordered_set>
 
 using namespace SIPLUS_NAMESPACE;

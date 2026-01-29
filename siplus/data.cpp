@@ -1,6 +1,6 @@
-#include "siplus/data.h"
-#include "siplus/text/iterator.h"
-#include "siplus/util.h"
+#include "siplus/data.hxx"
+#include "siplus/text/iterator.hxx"
+#include "siplus/util.hxx"
 
 namespace SIPLUS_NAMESPACE {
 

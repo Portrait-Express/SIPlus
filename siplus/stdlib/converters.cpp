@@ -1,10 +1,10 @@
-#include "siplus/stl/converters.h"
-#include "siplus/data.h"
-#include "siplus/types/bool.h"
-#include "siplus/types/float.h"
-#include "siplus/types/integer.h"
-#include "siplus/types/string.h"
-#include "siplus/util.h"
+#include "siplus/stl/converters.hxx"
+#include "siplus/data.hxx"
+#include "siplus/types/bool.hxx"
+#include "siplus/types/float.hxx"
+#include "siplus/types/integer.hxx"
+#include "siplus/types/string.hxx"
+#include "siplus/util.hxx"
 #include <iomanip>
 
 namespace SIPLUS_NAMESPACE {

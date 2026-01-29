@@ -1,7 +1,7 @@
-#include "siplus/stl/functions/arithmetic.h"
-#include "siplus/data.h"
-#include "siplus/types/float.h"
-#include "siplus/types/integer.h"
+#include "siplus/stl/functions/arithmetic.hxx"
+#include "siplus/data.hxx"
+#include "siplus/types/float.hxx"
+#include "siplus/types/integer.hxx"
 
 namespace SIPLUS_NAMESPACE {
 namespace stl {

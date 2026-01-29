@@ -1,9 +1,9 @@
-#include "statement_visitor.h"
-#include "block_visitor.h"
-#include "interpolation_visitor.h"
+#include "statement_visitor.hxx"
+#include "block_visitor.hxx"
+#include "interpolation_visitor.hxx"
 
-#include "siplus/text/constructor_steps/retriever_step.h"
-#include "siplus/text/constructor_steps/repeated_constructor_step.h"
+#include "siplus/text/constructor_steps/retriever_step.hxx"
+#include "siplus/text/constructor_steps/repeated_constructor_step.hxx"
 
 #include <any>
 #include <memory>

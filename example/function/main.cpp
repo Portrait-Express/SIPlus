@@ -2,7 +2,7 @@
 #include <ostream>
 
 #include "../common.hxx"
-#include "siplus/types/string.h"
+#include "siplus/types/string.hxx"
 
 using namespace SIPLUS_NAMESPACE;
 

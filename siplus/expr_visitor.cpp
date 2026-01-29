@@ -1,18 +1,18 @@
 #include "BufferedTokenStream.h"
-#include "block_visitor.h"
+#include "block_visitor.hxx"
 #include "generated/StringInterpolatorParser.h"
 
 #include <any>
 #include <memory>
 
-#include "siplus/invocation_context.h"
-#include "siplus/data.h"
-#include "siplus/types/array.h"
-#include "siplus/util.h"
+#include "siplus/invocation_context.hxx"
+#include "siplus/data.hxx"
+#include "siplus/types/array.hxx"
+#include "siplus/util.hxx"
 
-#include "expr_visitor.h"
-#include "literal_visitor.h"
-#include "visitor.h"
+#include "expr_visitor.hxx"
+#include "literal_visitor.hxx"
+#include "visitor.hxx"
 
 namespace SIPLUS_NAMESPACE {
 
