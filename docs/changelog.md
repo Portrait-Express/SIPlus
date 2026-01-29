@@ -1,3 +1,8 @@
+# 1.2.0
+_**Note**_: This update contains massive breaking changes, we are not incrementing to 2.0.0 though
+as usage of this library is basically nonexistent.
+- Replaced the old `std::type_index` method of handling types with a new `TypeInfo` that will handle type information centrally.
+
 # 1.1.4
 - Fixed errors when using template-defiend function parameters
 
