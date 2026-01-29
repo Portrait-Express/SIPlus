@@ -19,7 +19,7 @@ struct PersonType : public TypeInfo {
         return "Person"; 
     }
 
-    virtual bool is_iterable() const {
+    virtual bool is_iterable(const UnknownDataTypeContainer& data) const {
         //This is not an iterable type, it has no sub elements you can iterate 
         //over. If your type *is* iterable, implement text::Iterator, and 
         //iterate() on it's TypeInfo implementation.

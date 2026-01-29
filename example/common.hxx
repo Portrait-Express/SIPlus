@@ -16,7 +16,7 @@ struct UserType : SIPLUS_NAMESPACE::TypeInfo {
     using data_type = User;
 
     std::string name() const override;
-    bool is_iterable() const override;
+    bool is_iterable(const SIPLUS_NAMESPACE::UnknownDataTypeContainer& data) const override;
 
     SIPLUS_NAMESPACE::UnknownDataTypeContainer 
     access(const SIPLUS_NAMESPACE::UnknownDataTypeContainer& data, const std::string& name) const override;

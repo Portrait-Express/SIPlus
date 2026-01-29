@@ -55,7 +55,7 @@ namespace stl {
 struct SetType : public TypeInfo {
     using data_type = std::unordered_set<UnknownDataTypeContainer>;
     virtual std::string name() const override;
-    virtual bool is_iterable() const override;
+    virtual bool is_iterable(const UnknownDataTypeContainer& data) const override;
 
     virtual std::unique_ptr<text::Iterator> iterate(const UnknownDataTypeContainer& data) const override;
 };

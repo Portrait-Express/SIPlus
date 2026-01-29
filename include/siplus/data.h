@@ -35,7 +35,7 @@ public:
      *
      * @return True if the type is iterable
      */
-    virtual bool is_iterable() const = 0;
+    virtual bool is_iterable(const UnknownDataTypeContainer& data) const = 0;
 
     /**
      * @brief Access a property on this object.

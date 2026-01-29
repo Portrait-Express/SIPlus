@@ -30,7 +30,7 @@ struct test_data {
 struct test_data_type : SIPLUS_NAMESPACE::TypeInfo {
     using data_type = test_data;
     std::string name() const override { return "test_data"; }
-    bool is_iterable() const override { return false; }
+    bool is_iterable(const SIPLUS_NAMESPACE::UnknownDataTypeContainer& data) const override { return false; }
 
     SIPLUS_NAMESPACE::UnknownDataTypeContainer 
     access(const SIPLUS_NAMESPACE::UnknownDataTypeContainer& ptr, const std::string& name) const override;
@@ -39,7 +39,7 @@ struct test_data_type : SIPLUS_NAMESPACE::TypeInfo {
 struct test_data_y_type : SIPLUS_NAMESPACE::TypeInfo {
     using data_type = struct test_data::y;
     std::string name() const override { return "test_data::y"; }
-    bool is_iterable() const override { return false; }
+    bool is_iterable(const SIPLUS_NAMESPACE::UnknownDataTypeContainer& data) const override { return false; }
 
     SIPLUS_NAMESPACE::UnknownDataTypeContainer 
     access(const SIPLUS_NAMESPACE::UnknownDataTypeContainer& ptr, const std::string& name) const override;
@@ -48,7 +48,7 @@ struct test_data_y_type : SIPLUS_NAMESPACE::TypeInfo {
 struct user_type : SIPLUS_NAMESPACE::TypeInfo {
     using data_type = User;
     std::string name() const override { return "user"; }
-    bool is_iterable() const override { return false; }
+    bool is_iterable(const SIPLUS_NAMESPACE::UnknownDataTypeContainer& data) const override { return false; }
 
     SIPLUS_NAMESPACE::UnknownDataTypeContainer 
     access(const SIPLUS_NAMESPACE::UnknownDataTypeContainer& ptr, const std::string& name) const override;

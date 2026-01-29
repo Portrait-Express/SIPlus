@@ -51,7 +51,7 @@ std::unique_ptr<text::Iterator> UnknownDataTypeContainer::iterate() {
 }
 
 bool UnknownDataTypeContainer::is_iterable() {
-    return type->is_iterable();
+    return type->is_iterable(*this);
 }
 
 UnknownDataTypeContainer::~UnknownDataTypeContainer() {

@@ -3,7 +3,7 @@
 using namespace SIPLUS_NAMESPACE;
 
 std::string UserType::name() const { return "User"; }
-bool UserType::is_iterable() const { return false; }
+bool UserType::is_iterable(const SIPLUS_NAMESPACE::UnknownDataTypeContainer& data) const { return false; }
 
 SIPLUS_NAMESPACE::UnknownDataTypeContainer 
 UserType::access(const SIPLUS_NAMESPACE::UnknownDataTypeContainer& data, const std::string& name) const {

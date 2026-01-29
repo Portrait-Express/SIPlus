@@ -12,7 +12,7 @@ struct IntegerType : public TypeInfo {
     using data_type = long;
 
     virtual std::string name() const override;
-    virtual bool is_iterable() const override;
+    virtual bool is_iterable(const UnknownDataTypeContainer& data) const override;
 };
 
 } /* types */

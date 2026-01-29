@@ -185,7 +185,7 @@ std::string SetType::name() const {
     return "set";
 }
 
-bool SetType::is_iterable() const {
+bool SetType::is_iterable(const UnknownDataTypeContainer& data) const {
     return true;
 }
 

@@ -18,7 +18,7 @@ struct DummyScopeType : public TypeInfo {
     using data_type = std::weak_ptr<InvocationContext>;
 
     virtual std::string name() const { return "<internal-scope>"; }
-    virtual bool is_iterable() const { return false; }
+    virtual bool is_iterable(const UnknownDataTypeContainer& data) const { return false; }
 };
 
 //I hate this solution for storing the scope, but its the best I can come up with

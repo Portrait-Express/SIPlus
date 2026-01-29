@@ -39,16 +39,16 @@ UnknownDataTypeContainer string_iterator_impl::current() {
 } /* anonymous */
 
 std::string IntegerType::name() const { return "long"; }
-bool IntegerType::is_iterable() const { return false; }
+bool IntegerType::is_iterable(const UnknownDataTypeContainer& data) const { return false; }
 
 std::string BoolType::name() const { return "boolean"; }
-bool BoolType::is_iterable() const { return false; }
+bool BoolType::is_iterable(const UnknownDataTypeContainer& data) const { return false; }
 
 std::string FloatType::name() const { return "double"; }
-bool FloatType::is_iterable() const { return false; }
+bool FloatType::is_iterable(const UnknownDataTypeContainer& data) const { return false; }
 
 std::string StringType::name() const { return "string"; }
-bool StringType::is_iterable() const { return true; }
+bool StringType::is_iterable(const UnknownDataTypeContainer& data) const { return true; }
 std::unique_ptr<text::Iterator> StringType::iterate(const UnknownDataTypeContainer& data) const {
     return std::make_unique<string_iterator_impl>(data.as<StringType>());
 }
@@ -58,7 +58,7 @@ UnknownDataTypeContainer make_data(std::string str) {
 }
 
 std::string ArrayType::name() const { return "array"; }
-bool ArrayType::is_iterable() const { return true; }
+bool ArrayType::is_iterable(const UnknownDataTypeContainer& data) const { return true; }
 std::unique_ptr<text::Iterator> ArrayType::iterate(const UnknownDataTypeContainer& data) const {
     return std::make_unique<vector_iterator<UnknownDataTypeContainer>>(
         data.as<ArrayType>().begin(), data.as<ArrayType>().end()
