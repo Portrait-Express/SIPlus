@@ -4,11 +4,11 @@
 
 namespace SIPLUS_NAMESPACE {
 
-UnknownDataTypeContainer TypeInfo::access(void*, const std::string&) const {
+UnknownDataTypeContainer TypeInfo::access(const UnknownDataTypeContainer&, const std::string&) const {
     throw std::runtime_error{util::to_string(name(), " has no accessible properties")};
 }
 
-std::unique_ptr<text::Iterator> TypeInfo::iterate(void *data) const {
+std::unique_ptr<text::Iterator> TypeInfo::iterate(const UnknownDataTypeContainer&) const {
     throw std::runtime_error{util::to_string(name(), " is not iterable")};
 }
 
@@ -43,11 +43,11 @@ UnknownDataTypeContainer& UnknownDataTypeContainer::operator=(UnknownDataTypeCon
 }
 
 UnknownDataTypeContainer UnknownDataTypeContainer::access(const std::string& name) {
-    return type->access(ptr, name);
+    return type->access(*this, name);
 }
 
 std::unique_ptr<text::Iterator> UnknownDataTypeContainer::iterate() {
-    return type->iterate(ptr);
+    return type->iterate(*this);
 }
 
 bool UnknownDataTypeContainer::is_iterable() {

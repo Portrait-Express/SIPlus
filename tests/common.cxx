@@ -43,41 +43,41 @@ struct int_string_converter : text::Converter {
 
 #endif
 
-UnknownDataTypeContainer test_data_y_type::access(void *ptr, const std::string& name) const  {
-    struct test_data::y *data = reinterpret_cast<struct test_data::y*>(ptr);
+UnknownDataTypeContainer test_data_y_type::access(const UnknownDataTypeContainer& ptr, const std::string& name) const  {
+    struct test_data::y& data = ptr.as<test_data_y_type>();
 
     if(name == "b") {
-        return make_data(data->b);
+        return make_data(data.b);
     } else {
         throw std::runtime_error(std::format("No viable property for '{}'", name));
     }
 }
 
-UnknownDataTypeContainer test_data_type::access(void *ptr, const std::string& name) const  {
-    test_data *data = reinterpret_cast<test_data*>(ptr);
+UnknownDataTypeContainer test_data_type::access(const UnknownDataTypeContainer& ptr, const std::string& name) const  {
+    test_data& data = ptr.as<test_data_type>();
 
     if(name == "x") {
-        return make_data(data->x);
+        return make_data(data.x);
     } else if(name == "y") {
-        return make_data(data->y);
+        return make_data(data.y);
     } else if(name == "users") {
-        return make_data(data->users);
+        return make_data(data.users);
     } else {
         throw std::runtime_error(std::format("No viable property for '{}'", name));
     }
 }
 
-UnknownDataTypeContainer user_type::access(void *ptr, const std::string& name) const {
-    User *user = reinterpret_cast<User*>(ptr);
+UnknownDataTypeContainer user_type::access(const UnknownDataTypeContainer& ptr, const std::string& name) const {
+    User& user = ptr.as<user_type>();
 
     if(name == "id") {
-        return make_data(user->id);
+        return make_data(user.id);
     } else if(name == "email") {
-        return make_data(user->email);
+        return make_data(user.email);
     } else if(name == "username") {
-        return make_data(user->username);
+        return make_data(user.username);
     } else if(name == "can_login") {
-        return make_data(user->can_login);
+        return make_data(user.can_login);
     }
 
     throw std::runtime_error(std::format("No viable property for '{}'", name));

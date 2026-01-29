@@ -189,10 +189,9 @@ bool SetType::is_iterable() const {
     return true;
 }
 
-std::unique_ptr<text::Iterator> SetType::iterate(void *data) const {
+std::unique_ptr<text::Iterator> SetType::iterate(const UnknownDataTypeContainer& data) const {
     return std::make_unique<set_iterator>(
-        reinterpret_cast<const SetType::data_type*>(data)->begin(),
-        reinterpret_cast<const SetType::data_type*>(data)->end()
+        data.as<SetType>().begin(), data.as<SetType>().end()
     );
 }
 

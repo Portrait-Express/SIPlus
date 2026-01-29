@@ -7,6 +7,7 @@
 
 #include <concepts>
 #include <functional>
+#include <memory>
 
 #include "siplus/config.h"
 
@@ -44,7 +45,7 @@ public:
      * @return The data held at that property. Throw if the property does not 
      * exist.
      */
-    virtual UnknownDataTypeContainer access(void* data, const std::string& name) const;
+    virtual UnknownDataTypeContainer access(const UnknownDataTypeContainer& data, const std::string& name) const;
 
     /**
      * @brief Create an iterator to iterate over the object.
@@ -53,7 +54,7 @@ public:
      * @return A new iterator for this object. Throws if `is_iterable()` 
      * is false.
      */
-    virtual std::unique_ptr<text::Iterator> iterate(void *data) const;
+    virtual std::unique_ptr<text::Iterator> iterate(const UnknownDataTypeContainer& data) const;
 
     /**
      * @brief Check of this type is an instance of a specific subclass.

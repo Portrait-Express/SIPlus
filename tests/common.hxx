@@ -33,7 +33,7 @@ struct test_data_type : SIPLUS_NAMESPACE::TypeInfo {
     bool is_iterable() const override { return false; }
 
     SIPLUS_NAMESPACE::UnknownDataTypeContainer 
-    access(void* ptr, const std::string& name) const override;
+    access(const SIPLUS_NAMESPACE::UnknownDataTypeContainer& ptr, const std::string& name) const override;
 };
 
 struct test_data_y_type : SIPLUS_NAMESPACE::TypeInfo {
@@ -42,7 +42,7 @@ struct test_data_y_type : SIPLUS_NAMESPACE::TypeInfo {
     bool is_iterable() const override { return false; }
 
     SIPLUS_NAMESPACE::UnknownDataTypeContainer 
-    access(void* ptr, const std::string& name) const override;
+    access(const SIPLUS_NAMESPACE::UnknownDataTypeContainer& ptr, const std::string& name) const override;
 };
 
 struct user_type : SIPLUS_NAMESPACE::TypeInfo {
@@ -51,7 +51,7 @@ struct user_type : SIPLUS_NAMESPACE::TypeInfo {
     bool is_iterable() const override { return false; }
 
     SIPLUS_NAMESPACE::UnknownDataTypeContainer 
-    access(void* ptr, const std::string& name) const override;
+    access(const SIPLUS_NAMESPACE::UnknownDataTypeContainer& ptr, const std::string& name) const override;
 };
 
 namespace SIPLUS_NAMESPACE {

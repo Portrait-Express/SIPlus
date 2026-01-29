@@ -14,7 +14,7 @@ struct StringType : public TypeInfo {
     virtual std::string name() const override;
     virtual bool is_iterable() const override;
 
-    virtual std::unique_ptr<text::Iterator> iterate(void *data) const override;
+    virtual std::unique_ptr<text::Iterator> iterate(const UnknownDataTypeContainer& data) const override;
 };
 
 } /* types */

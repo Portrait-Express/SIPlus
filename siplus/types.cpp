@@ -49,8 +49,8 @@ bool FloatType::is_iterable() const { return false; }
 
 std::string StringType::name() const { return "string"; }
 bool StringType::is_iterable() const { return true; }
-std::unique_ptr<text::Iterator> StringType::iterate(void *data) const {
-    return std::make_unique<string_iterator_impl>(*reinterpret_cast<std::string*>(data));
+std::unique_ptr<text::Iterator> StringType::iterate(const UnknownDataTypeContainer& data) const {
+    return std::make_unique<string_iterator_impl>(data.as<StringType>());
 }
 
 UnknownDataTypeContainer make_data(std::string str) {
@@ -59,10 +59,9 @@ UnknownDataTypeContainer make_data(std::string str) {
 
 std::string ArrayType::name() const { return "array"; }
 bool ArrayType::is_iterable() const { return true; }
-std::unique_ptr<text::Iterator> ArrayType::iterate(void *data) const {
+std::unique_ptr<text::Iterator> ArrayType::iterate(const UnknownDataTypeContainer& data) const {
     return std::make_unique<vector_iterator<UnknownDataTypeContainer>>(
-        reinterpret_cast<ArrayType::data_type*>(data)->begin(),
-        reinterpret_cast<ArrayType::data_type*>(data)->end()
+        data.as<ArrayType>().begin(), data.as<ArrayType>().end()
     );
 }
 
