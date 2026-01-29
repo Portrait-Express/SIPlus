@@ -3,7 +3,15 @@ cmake_minimum_required(VERSION 3.20)
 option(SIPLUS_INCLUDE_STDLIB "Include standard library base for siplus. Can be disabled to reduce binary size" ON)
 option(SIPLUS_SANITIZE_ADDRESS "Set -fsanitize=address for memory leak testing" OFF)
 option(SIPLUS_BUILD_EXAMPLES "Build Examples" OFF)
+option(WITH_STATIC_CRT "(MSVC Visual C++) Enable to statically link CRT, which avoids requiring users to install the redistribution package.
+ To disable with: -DWITH_STATIC_CRT=Off" On)
 set(SIPLUS_NAMESPACE SIPlus CACHE STRING "Optionally specify a different root namespace")
+
+if(WITH_STATIC_CRT)
+  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+else()
+  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+endif(WITH_STATIC_CRT)
 
 project(siplus VERSION 1.1.4)
 
