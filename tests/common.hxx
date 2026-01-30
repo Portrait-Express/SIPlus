@@ -62,6 +62,7 @@ SIPLUS_DEFINE_TYPE_INFO(User, user_type);
 
 SIPLUS_NAMESPACE::Parser& get_test_context();
 int test(std::string name, std::function<int(const SIPLUS_NAMESPACE::Parser&)> test_impl);
+int test(std::string name, std::function<int()> test_impl);
 int group(std::string name, std::function<int(const SIPLUS_NAMESPACE::Parser&)> test_impl);
 int group(std::string name, std::function<int()> test_impl);
 

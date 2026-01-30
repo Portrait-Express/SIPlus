@@ -27,7 +27,7 @@ void langauge_info_free(LanguageInfo *info) {
 struct LanguageInfoType {};
 typedef struct LanguageInfoType LanguageInfoType;
 
-int language_info_is_iterable() {
+int language_info_is_iterable(void *data, void *object) {
     return 0;
 }
 
@@ -66,19 +66,19 @@ int main(int argc, char **argv) {
     if((result = siplus_parser_context(&context, parser))) {
         siplus_error_get(&textResult);
         if(textResult) printf("Error getting context: %s\n", textResult);
-        return result;
+        goto cleanup;
     }
 
     if((result = siplus_parser_get_interpolation(&constructor, parser, "Hello, from { .name }", parseOpts))) {
         siplus_error_get(&textResult);
         if(textResult) printf("Error parsing: %s\n", textResult);
-        return result;
+        goto cleanup;
     }
 
     if((result = siplus_context_builder(&icb, context))) {
         siplus_error_get(&textResult);
         if(textResult) printf("Error preparing: %s\n", textResult);
-        return result;
+        goto cleanup;
     }
 
 
@@ -86,7 +86,7 @@ int main(int argc, char **argv) {
     if((result = siplus_icbuilder_default(icb, container))) {
         siplus_error_get(&textResult);
         if(textResult) printf("Error preparing: %s\n", textResult);
-        return result;
+        goto cleanup;
     } else {
         siplus_data_delete(container);
         container = 0;
@@ -95,17 +95,18 @@ int main(int argc, char **argv) {
     if((result = siplus_icbuilder_build(&ic, icb)))  {
         siplus_error_get(&textResult);
         if(textResult) printf("Error preparing: %s\n", textResult);
-        return result;
+        goto cleanup;
     }
 
     if((result = siplus_text_construct(&textResult, constructor, ic))) {
         siplus_error_get(&textResult);
         if(textResult) printf("Error during invocation: %s\n", textResult);
-        return result;
+        goto cleanup;
     }
 
     printf("Result: %s", textResult);
         
+cleanup:
     siplus_text_result_delete(textResult);
     siplus_invocation_delete(ic);
     siplus_text_delete(constructor);
@@ -113,4 +114,5 @@ int main(int argc, char **argv) {
     siplus_context_delete(context);
     siplus_parse_opts_delete(parseOpts);
     siplus_parser_delete(parser);
+    return result;
 }

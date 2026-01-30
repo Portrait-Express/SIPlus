@@ -136,6 +136,12 @@ int test(std::string name, std::function<int(const Parser&)> test_impl) {
     return result;
 }
 
+int test(std::string name, std::function<int()> test_impl) {
+    return test(name, [&](const Parser&) {
+        return test_impl();
+    });
+}
+
 int group(std::string name, std::function<int(const Parser&)> test_impl) {
     //Remove any slashes from name
     name.erase(std::remove(name.begin(), name.end(), '/'), name.end());

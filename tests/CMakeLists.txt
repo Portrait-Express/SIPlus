@@ -11,7 +11,7 @@ endif()
 
 add_subdirectory(util)
 
-set(TEST_SOURCES test_base.cxx)
+set(TEST_SOURCES test_base.cxx test_c.cxx)
 
 if(SIPLUS_INCLUDE_STDLIB)
     set(TEST_SOURCES ${TEST_SOURCES} test_stdlib.cxx)
