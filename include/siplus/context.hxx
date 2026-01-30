@@ -105,10 +105,10 @@ public:
      */
     std::shared_ptr<text::Converter> try_converter(const TypeInfo& from, const TypeInfo& to) const;
 
-    UnknownDataTypeContainer convert(const UnknownDataTypeContainer& data, const TypeInfo& to);
+    UnknownDataTypeContainer convert(const UnknownDataTypeContainer& data, const TypeInfo& to) const;
 
     template<typename T> requires std::is_base_of_v<TypeInfo, T>
-    UnknownDataTypeContainer convert(const UnknownDataTypeContainer& data) {
+    UnknownDataTypeContainer convert(const UnknownDataTypeContainer& data) const {
         if(data.is<T>()) return data;
         return convert(data, T{});
     }

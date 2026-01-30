@@ -68,7 +68,7 @@ SIPlusParserContext::try_converter(const TypeInfo& from, const TypeInfo& to) con
     return *it;
 }
 
-UnknownDataTypeContainer SIPlusParserContext::convert(const UnknownDataTypeContainer& data, const TypeInfo& to) {
+UnknownDataTypeContainer SIPlusParserContext::convert(const UnknownDataTypeContainer& data, const TypeInfo& to) const {
     if(*data.type == to) return data;
 
     auto converter = this->converter(*data.type, to);
