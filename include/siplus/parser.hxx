@@ -9,7 +9,7 @@
 
 #include "siplus/context.hxx"
 #include "siplus/text/constructor.hxx"
-#include "siplus/config.hxx"
+#include "siplus/config.h"
 
 namespace SIPLUS_NAMESPACE {
 

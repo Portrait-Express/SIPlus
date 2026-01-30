@@ -4,3 +4,4 @@ target_link_libraries(example_lib siplus)
 
 add_subdirectory(basic)
 add_subdirectory(function)
+add_subdirectory(c)

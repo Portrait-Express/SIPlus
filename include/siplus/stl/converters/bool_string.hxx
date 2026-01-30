@@ -2,7 +2,7 @@
 #ifndef INCLUDE_CONVERTERS_BOOL_STRING_HXX_
 #define INCLUDE_CONVERTERS_BOOL_STRING_HXX_
 
-#include "siplus/config.hxx"
+#include "siplus/config.h"
 
 #ifdef SIPLUS_INCLUDE_STDLIB
 

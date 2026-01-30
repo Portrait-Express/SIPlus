@@ -5,7 +5,7 @@
 
 #include "ParseTree.h"
 #include "siplus/build_context.hxx"
-#include "siplus/config.hxx"
+#include "siplus/config.h"
 #include "siplus/context.hxx"
 #include "siplus/text/value_retrievers/retriever.hxx"
 #include "visitor.hxx"

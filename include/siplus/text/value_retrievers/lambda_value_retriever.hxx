@@ -2,7 +2,7 @@
 #ifndef INCLUDE_VALUE_RETRIEVERS_LAMBDA_VALUE_RETRIEVER_HXX_
 #define INCLUDE_VALUE_RETRIEVERS_LAMBDA_VALUE_RETRIEVER_HXX_
 
-#include "siplus/config.hxx"
+#include "siplus/config.h"
 #include "siplus/text/value_retrievers/retriever.hxx"
 
 namespace SIPLUS_NAMESPACE {

@@ -6,7 +6,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "siplus/config.hxx"
+#include "siplus/config.h"
 #include "siplus/data.hxx"
 
 namespace SIPLUS_NAMESPACE {

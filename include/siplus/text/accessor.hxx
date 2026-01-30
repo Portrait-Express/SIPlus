@@ -4,7 +4,7 @@
 
 #include <string>
 
-#include "siplus/config.hxx"
+#include "siplus/config.h"
 #include "siplus/data.hxx"
 
 namespace SIPLUS_NAMESPACE {

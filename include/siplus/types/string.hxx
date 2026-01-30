@@ -2,7 +2,7 @@
 #ifndef INCLUDE_TYPES_STRING_HXX_
 #define INCLUDE_TYPES_STRING_HXX_
 
-#include "siplus/config.hxx"
+#include "siplus/config.h"
 #include "siplus/data.hxx"
 
 namespace SIPLUS_NAMESPACE {
@@ -19,6 +19,8 @@ struct StringType : public TypeInfo {
 
 } /* types */
 
+//Need to add both since const in const char* is not a top level const
+SIPLUS_DEFINE_TYPE_INFO(const char*, types::StringType);
 SIPLUS_DEFINE_TYPE_INFO(char*, types::StringType);
 SIPLUS_DEFINE_TYPE_INFO(types::StringType::data_type, types::StringType);
 

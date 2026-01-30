@@ -2,7 +2,7 @@
 #ifndef INCLUDE_SIPLUS_TEXT_LITERAL_RETRIEVER_HXX_
 #define INCLUDE_SIPLUS_TEXT_LITERAL_RETRIEVER_HXX_
 
-#include "siplus/config.hxx"
+#include "siplus/config.h"
 #include "siplus/invocation_context.hxx"
 #include "siplus/data.hxx"
 #include "siplus/text/value_retrievers/retriever.hxx"

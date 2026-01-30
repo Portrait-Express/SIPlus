@@ -5,7 +5,7 @@
 #include <memory>
 #include <string>
 
-#include "siplus/config.hxx"
+#include "siplus/config.h"
 #include "siplus/context.hxx"
 #include "siplus/invocation_context.hxx"
 #include "siplus/text/value_retrievers/retriever.hxx"

@@ -3,7 +3,7 @@
 #ifndef INCLUDE_TYPES_FLOAT_HXX_
 #define INCLUDE_TYPES_FLOAT_HXX_
 
-#include "siplus/config.hxx"
+#include "siplus/config.h"
 
 namespace SIPLUS_NAMESPACE {
 namespace types {

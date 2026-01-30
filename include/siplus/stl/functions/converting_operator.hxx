@@ -2,7 +2,7 @@
 #ifndef INCLUDE_FUNCTIONS_CONVERTING_OPERATOR_HXX_
 #define INCLUDE_FUNCTIONS_CONVERTING_OPERATOR_HXX_
 
-#include "siplus/config.hxx"
+#include "siplus/config.h"
 
 #ifdef SIPLUS_INCLUDE_STDLIB
 

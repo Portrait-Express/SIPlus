@@ -27,6 +27,7 @@ set(SIPLUS_SOURCES
     ${GENERATED_SOURCES}
     siplus/block_visitor.cpp
     siplus/build_context.cpp
+    siplus/c.cpp
     siplus/context.cpp
     siplus/data.cpp
     siplus/expr_stmt_visitor.cpp

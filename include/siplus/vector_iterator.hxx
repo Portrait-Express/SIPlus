@@ -2,7 +2,7 @@
 #ifndef INCLUDE_SIPLUS_VECTOR_ITERATOR_HXX_
 #define INCLUDE_SIPLUS_VECTOR_ITERATOR_HXX_
 
-#include "siplus/config.hxx"
+#include "siplus/config.h"
 #include "siplus/text/iterator.hxx"
 
 namespace SIPLUS_NAMESPACE {

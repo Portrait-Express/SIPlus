@@ -5,7 +5,7 @@
 #include "generated/StringInterpolatorParserBaseVisitor.h"
 #include "ParseTree.h"
 
-#include "siplus/config.hxx"
+#include "siplus/config.h"
 #include <any>
 
 #define SIPLUS_DECLARE_NODE_RESULT(context, result) template<> struct NodeResultType<context> { using result_type = result; }

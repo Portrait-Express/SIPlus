@@ -9,7 +9,7 @@
 #include <functional>
 #include <memory>
 
-#include "siplus/config.hxx"
+#include "siplus/config.h"
 
 namespace SIPLUS_NAMESPACE {
 
@@ -78,7 +78,7 @@ template<typename T>
 struct type_info_for { };
 
 template<typename T>
-using type_info_for_t = type_info_for<std::decay_t<T>>::type;
+using type_info_for_t = type_info_for<std::remove_cvref_t<std::decay_t<T>>>::type;
 
 template<typename _>
 concept True = true;

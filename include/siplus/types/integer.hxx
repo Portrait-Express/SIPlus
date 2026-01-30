@@ -2,7 +2,7 @@
 #ifndef INCLUDE_TYPES_INTEGER_HXX_
 #define INCLUDE_TYPES_INTEGER_HXX_
 
-#include "siplus/config.hxx"
+#include "siplus/config.h"
 #include "siplus/data.hxx"
 
 namespace SIPLUS_NAMESPACE {

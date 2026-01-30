@@ -4,7 +4,7 @@
 
 #include <memory>
 
-#include "siplus/config.hxx"
+#include "siplus/config.h"
 #include "siplus/context.hxx"
 #include "siplus/text/constructor_steps/constructor_step.hxx"
 #include "siplus/text/value_retrievers/retriever.hxx"

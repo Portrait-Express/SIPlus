@@ -8,7 +8,7 @@
 #include <cctype>
 #include <cstring>
 
-#include "siplus/config.hxx"
+#include "siplus/config.h"
 #include "siplus/data.hxx"
 #include "siplus/text/value_retrievers/retriever.hxx"
 #include "siplus/stl/functions/text.hxx"

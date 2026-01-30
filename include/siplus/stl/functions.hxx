@@ -2,7 +2,7 @@
 #ifndef INCLUDE_STL_FUNCTIONS_HXX_
 #define INCLUDE_STL_FUNCTIONS_HXX_
 
-#include "siplus/config.hxx"
+#include "siplus/config.h"
 
 #ifdef SIPLUS_INCLUDE_STDLIB
 
