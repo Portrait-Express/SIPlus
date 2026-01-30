@@ -107,6 +107,12 @@ typedef void (*SIPlusUnknownDataContainerDeleter)(void *data);
 
 
 
+typedef int (*SIPlusIteratorMore)(void *data);
+typedef int (*SIPlusIteratorNext)(void *data);
+typedef int (*SIPlusIteratorCurrent)(SIPlusUnknownDataContainer **result, void *data);
+typedef void (*SIPlusIteratorDeleter)(void *data);
+
+
 /**
  * @brief Callback for TypeInfo::is_iterable
  *
@@ -180,6 +186,7 @@ SIPLUS_EXPORTED void siplus_parse_opts_delete(SIPlusParseOpts *opts);
 
 SIPLUS_EXPORTED int siplus_context_add_function(
     SIPlusContext *context, const char *name, void *data, SIPlusFunction function, SIPlusFunctionDeleter deleter);
+SIPLUS_EXPORTED int siplus_context_use_stl(SIPlusContext *context);
 SIPLUS_EXPORTED int siplus_context_builder(SIPlusInvocationContextBuilder **builder, SIPlusContext *context);
 SIPLUS_EXPORTED void siplus_context_delete(SIPlusContext *context);
 
@@ -204,6 +211,10 @@ SIPLUS_EXPORTED void siplus_type_delete(SIPlusTypeInfo *type);
 
 
 
+SIPLUS_EXPORTED int siplus_iterator_new(
+    SIPlusIterator **iterator, void *data, 
+    SIPlusIteratorMore more, SIPlusIteratorNext next, 
+    SIPlusIteratorCurrent current, SIPlusIteratorDeleter deleter);
 SIPLUS_EXPORTED void siplus_iterator_delete(SIPlusIterator *iterator);
 
 

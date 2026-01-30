@@ -218,6 +218,58 @@ std::unique_ptr<text::Iterator> CType::iterate(const UnknownDataTypeContainer &d
     return ret;
 }
 
+struct CIterator : text::Iterator {
+    CIterator(
+        void *data,
+        SIPlusIteratorMore more,
+        SIPlusIteratorNext next,
+        SIPlusIteratorCurrent current,
+        SIPlusIteratorDeleter deleter
+    ) : data_(data), more_(more), next_(next), current_(current), deleter_(deleter) {}
+
+    bool more() override;
+    void next() override;
+    UnknownDataTypeContainer current() override;
+
+    ~CIterator() { if(deleter_) deleter_(data_); }
+
+    void *data_;
+    SIPlusIteratorMore more_;
+    SIPlusIteratorNext next_;
+    SIPlusIteratorCurrent current_;
+    SIPlusIteratorDeleter deleter_;
+};
+
+
+bool CIterator::more() {
+    return more_(data_);
+}
+
+void CIterator::next() {
+    if(auto err = next_(data_); err) {
+        throw std::runtime_error{
+            last_message.value_or(
+                util::to_string(
+                    "next() on iterator failed with ", error_name(err)
+                ))};
+    }
+}
+
+UnknownDataTypeContainer CIterator::current() {
+    SIPlusUnknownDataContainer *container;
+    if(auto err = current_(&container, data_); err) {
+        throw std::runtime_error{
+            last_message.value_or(
+                util::to_string(
+                    "current() on iterator failed with ", error_name(err)
+                ))};
+    }
+
+    auto ret = std::move(container->container);
+    siplus_data_delete(container);
+    return *ret;
+}
+
 } /* namespace anonymous */
 
 
@@ -402,6 +454,14 @@ SIPLUS_EXPORTED int siplus_context_add_function(
     return siplus_error_set(SIPLUS_OK);
 }
 
+SIPLUS_EXPORTED int siplus_context_use_stl(SIPlusContext *context) {
+    if(!context) return siplus_error_set(SIPLUS_INVALID_ARG, "context cannot be NULL");
+
+    context->context->use_stl();
+
+    return siplus_error_set(SIPLUS_OK, NULL);
+}
+
 SIPLUS_EXPORTED int siplus_context_builder(SIPlusInvocationContextBuilder **builder, SIPlusContext *context) {
     if(!context) return siplus_error_set(SIPLUS_INVALID_ARG, "context cannot be NULL");
     if(!builder) return siplus_error_set(SIPLUS_INVALID_ARG, "builder cannot be NULL");
@@ -479,6 +539,23 @@ SIPLUS_EXPORTED void siplus_type_delete(SIPlusTypeInfo *type) {
 
 
 
+
+SIPLUS_EXPORTED int siplus_iterator_new(
+    SIPlusIterator **iterator, void *data, 
+    SIPlusIteratorMore more, SIPlusIteratorNext next, 
+    SIPlusIteratorCurrent current, SIPlusIteratorDeleter deleter
+) {
+    if(!iterator) return siplus_error_set(SIPLUS_INVALID_ARG, "iterator cannot be NULL");
+    if(!more) return siplus_error_set(SIPLUS_INVALID_ARG, "more cannot be NULL");
+    if(!next) return siplus_error_set(SIPLUS_INVALID_ARG, "next cannot be NULL");
+    if(!current) return siplus_error_set(SIPLUS_INVALID_ARG, "current cannot be NULL");
+
+    *iterator = new SIPlusIterator{
+        std::make_unique<CIterator>(data, more, next, current, deleter)
+    };
+
+    return siplus_error_set(SIPLUS_OK);
+}
 
 SIPLUS_EXPORTED void siplus_iterator_delete(SIPlusIterator *iterator) {
     if(!iterator) return;
