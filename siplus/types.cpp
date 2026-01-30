@@ -1,11 +1,11 @@
 #include "siplus/data.hxx"
 #include "siplus/text/iterator.hxx"
+#include "siplus/text/range_iterator.hxx"
 #include "siplus/types/bool.hxx"
 #include "siplus/types/string.hxx"
 #include "siplus/types/integer.hxx"
 #include "siplus/types/float.hxx"
 #include "siplus/types/array.hxx"
-#include "siplus/vector_iterator.hxx"
 
 namespace SIPLUS_NAMESPACE {
 namespace types {
@@ -60,7 +60,8 @@ UnknownDataTypeContainer make_data(std::string str) {
 std::string ArrayType::name() const { return "array"; }
 bool ArrayType::is_iterable(const UnknownDataTypeContainer& data) const { return true; }
 std::unique_ptr<text::Iterator> ArrayType::iterate(const UnknownDataTypeContainer& data) const {
-    return std::make_unique<vector_iterator<UnknownDataTypeContainer>>(
+    using it_t = ArrayType::data_type::const_iterator;
+    return std::make_unique<range_iterator<it_t, it_t>>(
         data.as<ArrayType>().begin(), data.as<ArrayType>().end()
     );
 }
