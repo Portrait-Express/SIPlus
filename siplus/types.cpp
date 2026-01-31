@@ -61,7 +61,7 @@ std::string ArrayType::name() const { return "array"; }
 bool ArrayType::is_iterable(const UnknownDataTypeContainer& data) const { return true; }
 std::unique_ptr<text::Iterator> ArrayType::iterate(const UnknownDataTypeContainer& data) const {
     using it_t = ArrayType::data_type::const_iterator;
-    return std::make_unique<range_iterator<it_t, it_t>>(
+    return std::make_unique<value_range_iterator<it_t, it_t>>(
         data.as<ArrayType>().begin(), data.as<ArrayType>().end()
     );
 }
