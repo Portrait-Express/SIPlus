@@ -67,10 +67,11 @@ template<typename BIt, typename EIt> requires std::is_copy_assignable_v<iterator
 struct value_range_iterator : text::Iterator {
     using value_type = iterator_value_type<BIt>;
 
+    template<typename _BIt, typename _EIt>
     value_range_iterator(
-        BIt begin,
-        EIt end
-    ) : cur(begin), end(end) { }
+        _BIt&& begin,
+        _EIt&& end
+    ) : cur(std::forward<_BIt>(begin)), end(std::forward<_EIt>(end)) { }
 
     bool more() override {
         return cur != end;
@@ -101,7 +102,7 @@ struct value_range_iterator : text::Iterator {
         }
     }
 
-    ~value_range_iterator() override { };
+    ~value_range_iterator() override { }
 
 private:
     bool begun_ = false;
