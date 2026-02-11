@@ -1,9 +1,37 @@
 #include "siplus/csiplus.h"
 #include "siplus/siplus.hxx"
+#include "siplus/types/bool.hxx"
+#include "siplus/types/float.hxx"
+#include "siplus/types/string.hxx"
 #include "siplus/util.hxx"
 #include <cstring>
 #include <exception>
+#include <iostream>
 #include <memory>
+
+#define __STR(x) #x
+#define STR(x) __STR(x)
+
+#define __COUNT(a1,a2,a3,a4,a5,a6,a7,a8,a9,a,...) a
+#define COUNT(...) __COUNT(__VA_ARGS__, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+
+
+#define __CONCAT_EX(a, b) a##b
+#define CONCAT_EX(a, b) __CONCAT_EX(a, b)
+
+#define __SIPLUS_NOT_NULL(var) \
+    if(!var) return siplus_error_set(SIPLUS_INVALID_ARG, STR(var) " cannot be NULL");
+
+#define _SIPLUS_NOT_NULL_9(var,...) _SIPLUS_NOT_NULL_8(__VA_ARGS__) __SIPLUS_NOT_NULL(var)
+#define _SIPLUS_NOT_NULL_8(var,...) _SIPLUS_NOT_NULL_7(__VA_ARGS__) __SIPLUS_NOT_NULL(var)
+#define _SIPLUS_NOT_NULL_7(var,...) _SIPLUS_NOT_NULL_6(__VA_ARGS__) __SIPLUS_NOT_NULL(var)
+#define _SIPLUS_NOT_NULL_6(var,...) _SIPLUS_NOT_NULL_5(__VA_ARGS__) __SIPLUS_NOT_NULL(var)
+#define _SIPLUS_NOT_NULL_5(var,...) _SIPLUS_NOT_NULL_4(__VA_ARGS__) __SIPLUS_NOT_NULL(var)
+#define _SIPLUS_NOT_NULL_4(var,...) _SIPLUS_NOT_NULL_3(__VA_ARGS__) __SIPLUS_NOT_NULL(var)
+#define _SIPLUS_NOT_NULL_3(var,...) _SIPLUS_NOT_NULL_2(__VA_ARGS__) __SIPLUS_NOT_NULL(var)
+#define _SIPLUS_NOT_NULL_2(var,...) _SIPLUS_NOT_NULL_1(__VA_ARGS__) __SIPLUS_NOT_NULL(var)
+#define _SIPLUS_NOT_NULL_1(var) __SIPLUS_NOT_NULL(var)
+#define SIPLUS_NOT_NULL(...) CONCAT_EX(_SIPLUS_NOT_NULL_, COUNT(__VA_ARGS__))(__VA_ARGS__)
 
 using namespace SIPLUS_NAMESPACE;
 
@@ -99,9 +127,17 @@ struct CValueRetriever : text::ValueRetriever {
 };
 
 UnknownDataTypeContainer CValueRetriever::retrieve(InvocationContext& value) const {
+    SIPlusUnknownDataContainer *container;
     auto ptr = std::make_unique<_SIPlusInvocationContext>(value.shared_from_this());
     
-    auto container = impl(data, ptr.get());
+    auto result = impl(&container, data, ptr.get());
+    if(result != SIPLUS_OK) {
+        throw std::runtime_error{
+            last_message.value_or(
+                util::to_string(
+                    "SIPlusRetrieverImpl() failed with ", error_name(result)))
+        };
+    }
 
     UnknownDataTypeContainer ret = *container->container;
 
@@ -133,14 +169,30 @@ std::shared_ptr<text::ValueRetriever> CFunction::value(
     std::shared_ptr<text::ValueRetriever> parent,
     std::vector<std::shared_ptr<text::ValueRetriever>> parameters
 ) const {
-    auto argc = parameters.size();
-    auto parentPtr = new _SIPlusValueRetriever(parent);
-    auto paramsPtr = new _SIPlusValueRetriever*[argc];
+    size_t argc = parameters.size();
+    SIPlusValueRetriever *retrieverPtr = nullptr;
+    SIPlusValueRetriever *parentPtr = nullptr;
+    SIPlusValueRetriever **paramsPtr = new _SIPlusValueRetriever*[argc];
+
+    if(parent) {
+        parentPtr = new _SIPlusValueRetriever(parent);
+    }
+
     for(int i = 0; i < argc; i++) {
         paramsPtr[i] = new _SIPlusValueRetriever(parameters[i]);
     }
 
-    auto retrieverPtr = impl(data, parentPtr, argc, paramsPtr);
+    auto result = impl(&retrieverPtr, data, parentPtr, argc, paramsPtr);
+    delete[] paramsPtr;
+
+    if(result) {
+        throw std::runtime_error{
+            last_message.value_or(
+                util::to_string(
+                    "SIPlusFunction() on function failed with ", error_name(result)
+                ))};
+    }
+
     auto retriever = retrieverPtr->retriever;
 
     siplus_value_delete(retrieverPtr);
@@ -270,10 +322,31 @@ UnknownDataTypeContainer CIterator::current() {
     return *ret;
 }
 
+template<simple_value_retrievable_type T, typename Out>
+int siplus_data_as(Out *result, SIPlusUnknownDataContainer *value) {
+    if(!result) return siplus_error_set(SIPLUS_INVALID_ARG, "result cannot be NULL");
+    if(!value) return siplus_error_set(SIPLUS_INVALID_ARG, "value cannot be NULL");
+    if(!value->container->is<T>()) {
+        auto msg = util::to_string("value was not an instance of ", T{}.name());
+        return siplus_error_set(SIPLUS_INVALID_ARG, msg);
+    }
+
+    *result = value->container->as<T>();
+    return SIPLUS_OK;
+} 
+
+
 } /* namespace anonymous */
 
 
 extern "C" {
+
+
+
+SIPLUS_EXPORTED void siplus_string_delete(const char *ptr) {
+    if(!ptr) { return; }
+    delete[] ptr;
+}
 
 
 
@@ -284,7 +357,7 @@ SIPLUS_EXPORTED int siplus_error_get(char **message) {
 
             *message = new char[size + 1];
             strncpy(*message, last_message->c_str(), size);
-            (*message)[size + 1] = 0;
+            (*message)[size] = 0;
         } else {
             *message = nullptr;
         }
@@ -303,11 +376,6 @@ SIPLUS_EXPORTED int siplus_error_set(int err, const char *message) {
     return err;
 }
 
-SIPLUS_EXPORTED void siplus_error_message_delete(const char *message) {
-    if(!message) return;
-    delete message;
-}
-
 
 
 SIPLUS_EXPORTED SIPlusParser *siplus_parser_new() {
@@ -315,8 +383,7 @@ SIPLUS_EXPORTED SIPlusParser *siplus_parser_new() {
 }
 
 SIPLUS_EXPORTED int siplus_parser_context(SIPlusContext **context, SIPlusParser *parser) {
-    if(!parser) return siplus_error_set(SIPLUS_INVALID_ARG, "parser cannot be NULL");
-    if(!context) return siplus_error_set(SIPLUS_INVALID_ARG, "context cannot be NULL");
+    SIPLUS_NOT_NULL(parser, context);
 
     *context =  new _SIPlusParserContext(parser->parser.context().shared_from_this());
     return siplus_error_set(SIPLUS_OK);
@@ -324,9 +391,7 @@ SIPLUS_EXPORTED int siplus_parser_context(SIPlusContext **context, SIPlusParser 
 
 SIPLUS_EXPORTED int siplus_parser_get_interpolation(
     SIPlusTextConstructor **constructor, SIPlusParser *parser, const char *text, SIPlusParseOpts *opts) {
-    if(!constructor) return siplus_error_set(SIPLUS_INVALID_ARG, "constructor cannot be NULL");
-    if(!parser) return siplus_error_set(SIPLUS_INVALID_ARG, "parser cannot be NULL");
-    if(!text) return siplus_error_set(SIPLUS_INVALID_ARG, "text cannot be NULL");
+    SIPLUS_NOT_NULL(constructor, parser, text);
 
     *constructor = new _SIPlusTextConstructor();
 
@@ -341,9 +406,7 @@ SIPLUS_EXPORTED int siplus_parser_get_interpolation(
 
 SIPLUS_EXPORTED int siplus_parser_get_expression(
     SIPlusValueRetriever **retriever, SIPlusParser *parser, const char *expr, SIPlusParseOpts *opts) {
-    if(!retriever) return siplus_error_set(SIPLUS_INVALID_ARG, "retriever cannot be NULL");
-    if(!parser) return siplus_error_set(SIPLUS_INVALID_ARG, "parser cannot be NULL");
-    if(!expr) return siplus_error_set(SIPLUS_INVALID_ARG, "expr cannot be NULL");
+    SIPLUS_NOT_NULL(retriever, parser, expr);
 
     *retriever = new _SIPlusValueRetriever();
 
@@ -366,7 +429,7 @@ SIPLUS_EXPORTED void siplus_parser_delete(SIPlusParser *parser) {
 
 
 SIPLUS_EXPORTED int siplus_value_create(SIPlusValueRetriever **retriever, void* context, SIPlusRetrieverImpl impl, SIPlusRetrieverDeleter deleter) {
-    if(!impl) return siplus_error_set(SIPLUS_INVALID_ARG, "impl cannot be NULL");
+    SIPLUS_NOT_NULL(impl);
 
     *retriever = new _SIPlusValueRetriever();
     (*retriever)->retriever = std::make_shared<CValueRetriever>(context, impl, deleter);
@@ -375,7 +438,7 @@ SIPLUS_EXPORTED int siplus_value_create(SIPlusValueRetriever **retriever, void* 
 }
 
 SIPLUS_EXPORTED int siplus_value_retrieve(SIPlusUnknownDataContainer **data, SIPlusValueRetriever *value, SIPlusInvocationContext *context) {
-    if(!value) return siplus_error_set(SIPLUS_INVALID_ARG, "value cannot be NULL");
+    SIPLUS_NOT_NULL(value);
 
     try {
         auto result = value->retriever->retrieve(*context->context);
@@ -396,7 +459,7 @@ SIPLUS_EXPORTED void siplus_value_delete(SIPlusValueRetriever *retriever) {
 
 
 SIPLUS_EXPORTED int siplus_text_construct(char **text, SIPlusTextConstructor *constructor, SIPlusInvocationContext *context) {
-    if(!constructor) return siplus_error_set(SIPLUS_INVALID_ARG, "value cannot be NULL");
+    SIPLUS_NOT_NULL(constructor);
 
     try {
         auto result = constructor->constructor->construct_with(context->context);
@@ -415,11 +478,6 @@ SIPLUS_EXPORTED void siplus_text_delete(SIPlusTextConstructor *parser) {
     delete parser;
 }
 
-SIPLUS_EXPORTED void siplus_text_result_delete(const char *text) {
-    if(!text) return;
-    delete[] text;
-}
-
 
 
 
@@ -429,8 +487,7 @@ SIPLUS_EXPORTED SIPlusParseOpts *siplus_parse_opts_new() {
 }
 
 SIPLUS_EXPORTED int siplus_parse_opts_add_global(SIPlusParseOpts *opts, const char *name) {
-    if(!opts) return siplus_error_set(SIPLUS_INVALID_ARG, "opts cannot be NULL");
-    if(!name) return siplus_error_set(SIPLUS_INVALID_ARG, "name cannot be NULL");
+    SIPLUS_NOT_NULL(opts, name);
 
     opts->opts.globals.emplace_back(name);
 
@@ -447,15 +504,14 @@ SIPLUS_EXPORTED void siplus_parse_opts_delete(SIPlusParseOpts *opts) {
 
 SIPLUS_EXPORTED int siplus_context_add_function(
     SIPlusContext *parser, const char *name, void *data, SIPlusFunction function, SIPlusFunctionDeleter deleter) {
-    if(!parser) return siplus_error_set(SIPLUS_INVALID_ARG, "parser cannot be NULL");
-    if(!function) return siplus_error_set(SIPLUS_INVALID_ARG, "function cannot be NULL");
+    SIPLUS_NOT_NULL(parser, function);
 
     parser->context->emplace_function<CFunction>(name, data, function, deleter);
     return siplus_error_set(SIPLUS_OK);
 }
 
 SIPLUS_EXPORTED int siplus_context_use_stl(SIPlusContext *context) {
-    if(!context) return siplus_error_set(SIPLUS_INVALID_ARG, "context cannot be NULL");
+    SIPLUS_NOT_NULL(context);
 
     context->context->use_stl();
 
@@ -463,8 +519,7 @@ SIPLUS_EXPORTED int siplus_context_use_stl(SIPlusContext *context) {
 }
 
 SIPLUS_EXPORTED int siplus_context_builder(SIPlusInvocationContextBuilder **builder, SIPlusContext *context) {
-    if(!context) return siplus_error_set(SIPLUS_INVALID_ARG, "context cannot be NULL");
-    if(!builder) return siplus_error_set(SIPLUS_INVALID_ARG, "builder cannot be NULL");
+    SIPLUS_NOT_NULL(context, builder);
     *builder = new _SIPlusInvocationContextBuilder{context->context->builder()};
     return siplus_error_set(SIPLUS_OK);
 }
@@ -478,29 +533,30 @@ SIPLUS_EXPORTED void siplus_context_delete(SIPlusContext *context) {
 
 
 SIPLUS_EXPORTED int siplus_icbuilder_with(SIPlusInvocationContextBuilder *builder, const char *name, SIPlusUnknownDataContainer *container) {
-    if(!builder) return siplus_error_set(SIPLUS_INVALID_ARG, "builder cannot be NULL");
-    if(!name) return siplus_error_set(SIPLUS_INVALID_ARG, "name cannot be NULL");
-    if(!container) return siplus_error_set(SIPLUS_INVALID_ARG, "container cannot be NULL");
+    SIPLUS_NOT_NULL(builder, name, container);
 
     builder->builder.with(name, *container->container);
     return siplus_error_set(SIPLUS_OK);
 }
 
 SIPLUS_EXPORTED int siplus_icbuilder_default(SIPlusInvocationContextBuilder *builder, SIPlusUnknownDataContainer *container) {
-    if(!builder) return siplus_error_set(SIPLUS_INVALID_ARG, "builder cannot be NULL");
-    if(!container) return siplus_error_set(SIPLUS_INVALID_ARG, "container cannot be NULL");
+    SIPLUS_NOT_NULL(builder, container);
 
     builder->builder.use_default(*container->container);
     return siplus_error_set(SIPLUS_OK);
 }
 
 SIPLUS_EXPORTED int siplus_icbuilder_build(SIPlusInvocationContext **context, SIPlusInvocationContextBuilder *builder) {
-    if(!context) return siplus_error_set(SIPLUS_INVALID_ARG, "context cannot be NULL");
-    if(!builder) return siplus_error_set(SIPLUS_INVALID_ARG, "builder cannot be NULL");
+    SIPLUS_NOT_NULL(context, builder);
 
     *context = new SIPlusInvocationContext(builder->builder.build());
     delete builder;
     return siplus_error_set(SIPLUS_OK);
+}
+
+SIPLUS_EXPORTED void siplus_icbuilder_delete(SIPlusInvocationContextBuilder *builder) {
+    if(!builder) return;
+    delete builder;
 }
 
 
@@ -520,9 +576,7 @@ SIPLUS_EXPORTED int siplus_type_new(
     SIPlusTypeIsIterable is_iterable, SIPlusTypeAccess access, 
     SIPlusTypeIterate iterate, SIPlusTypeDeleter deleter
 ) {
-    if(!type) return siplus_error_set(SIPLUS_INVALID_ARG, "type cannot be NULL");
-    if(!name) return siplus_error_set(SIPLUS_INVALID_ARG, "name cannot be NULL");
-    if(!is_iterable) return siplus_error_set(SIPLUS_INVALID_ARG, "is_iterable cannot be NULL");
+    SIPLUS_NOT_NULL(type, name, is_iterable);
 
     *type = new SIPlusTypeInfo{
         std::make_shared<CType>(
@@ -531,6 +585,40 @@ SIPLUS_EXPORTED int siplus_type_new(
     };
 
     return siplus_error_set(SIPLUS_OK);
+}
+
+SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_int() {
+    return new SIPlusTypeInfo{ std::make_shared<types::IntegerType>() };
+}
+
+SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_float() {
+    return new SIPlusTypeInfo{ std::make_shared<types::FloatType>() };
+}
+
+SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_string() {
+    return new SIPlusTypeInfo{ std::make_shared<types::StringType>() };
+}
+
+SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_bool() {
+    return new SIPlusTypeInfo{ std::make_shared<types::BoolType>() };
+}
+
+SIPLUS_EXPORTED int siplus_type_is(SIPlusTypeInfo *first, SIPlusTypeInfo *second) {
+    if(!first) return 0;
+    if(!second) return 0;
+
+    return *first->info == *second->info;
+}
+
+SIPLUS_EXPORTED int siplus_type_name(char **name, SIPlusTypeInfo *first) {
+    SIPLUS_NOT_NULL(name, first);
+
+    auto str = first->info->name();
+    *name = new char[str.size() + 1];
+    strncpy(*name, str.c_str(), str.size());
+    *name[str.size()] = 0;
+
+    return SIPLUS_OK;
 }
 
 SIPLUS_EXPORTED void siplus_type_delete(SIPlusTypeInfo *type) {
@@ -545,10 +633,7 @@ SIPLUS_EXPORTED int siplus_iterator_new(
     SIPlusIteratorMore more, SIPlusIteratorNext next, 
     SIPlusIteratorCurrent current, SIPlusIteratorDeleter deleter
 ) {
-    if(!iterator) return siplus_error_set(SIPLUS_INVALID_ARG, "iterator cannot be NULL");
-    if(!more) return siplus_error_set(SIPLUS_INVALID_ARG, "more cannot be NULL");
-    if(!next) return siplus_error_set(SIPLUS_INVALID_ARG, "next cannot be NULL");
-    if(!current) return siplus_error_set(SIPLUS_INVALID_ARG, "current cannot be NULL");
+    SIPLUS_NOT_NULL(iterator, more, next, current)
 
     *iterator = new SIPlusIterator{
         std::make_unique<CIterator>(data, more, next, current, deleter)
@@ -572,7 +657,6 @@ SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_float(double value)
     return new SIPlusUnknownDataContainer{std::make_unique<UnknownDataTypeContainer>(make_data(value))};
 }
 
-using a = std::remove_cv_t<const char *>;
 SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_string(const char *text){
     return new SIPlusUnknownDataContainer{std::make_unique<UnknownDataTypeContainer>(make_data(text))};
 }
@@ -585,6 +669,75 @@ SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make(SIPlusTypeInfo *typ
     return new SIPlusUnknownDataContainer{
         std::make_unique<UnknownDataTypeContainer>(type->info, data, deleter)
     };
+}
+
+SIPLUS_EXPORTED int siplus_data_is(SIPlusUnknownDataContainer *container, SIPlusTypeInfo *type) {
+    SIPLUS_NOT_NULL(container, type);
+    
+    return *container->container->type == *type->info;
+}
+
+SIPLUS_EXPORTED int siplus_data_type(SIPlusTypeInfo **type, SIPlusUnknownDataContainer *container) {
+    SIPLUS_NOT_NULL(container, type);
+
+    *type = new _SIPlusTypeInfo{};
+    (*type)->info = container->container->type;
+
+    return SIPLUS_OK;
+}
+
+SIPLUS_EXPORTED int siplus_data_ptr(void **data, SIPlusUnknownDataContainer *container) {
+    SIPLUS_NOT_NULL(data, container);
+    
+    *data = container->container->ptr;
+    return SIPLUS_OK;
+}
+
+SIPLUS_EXPORTED int siplus_data_is_int(SIPlusUnknownDataContainer *value) {
+    if(!value) return 0;
+    return value->container->is<types::IntegerType>();
+}
+
+SIPLUS_EXPORTED int siplus_data_is_float(SIPlusUnknownDataContainer *value) {
+    if(!value) return 0;
+    return value->container->is<types::FloatType>();
+}
+
+SIPLUS_EXPORTED int siplus_data_is_bool(SIPlusUnknownDataContainer *value) {
+    if(!value) return 0;
+    return value->container->is<types::BoolType>();
+}
+
+SIPLUS_EXPORTED int siplus_data_is_string(SIPlusUnknownDataContainer *value) {
+    if(!value) return 0;
+    return value->container->is<types::StringType>();
+}
+
+SIPLUS_EXPORTED int siplus_data_as_int(long *result, SIPlusUnknownDataContainer *value) {
+    return siplus_data_as<types::IntegerType>(result, value);
+}
+
+SIPLUS_EXPORTED int siplus_data_as_float(double *result, SIPlusUnknownDataContainer *value) {
+    return siplus_data_as<types::FloatType>(result, value);
+}
+
+SIPLUS_EXPORTED int siplus_data_as_bool(int *result, SIPlusUnknownDataContainer *value) {
+    return siplus_data_as<types::BoolType>(result, value);
+}
+
+SIPLUS_EXPORTED int siplus_data_as_string(char **result, SIPlusUnknownDataContainer *value) {
+    SIPLUS_NOT_NULL(result, value);
+
+    if(!value->container->is<types::StringType>()) {
+        return siplus_error_set(SIPLUS_INVALID_ARG, "value was not an instance of string");
+    }
+    
+    std::string& text = value->container->as<types::StringType>();
+    *result = new char[text.size() + 1];
+    strncpy(*result, text.c_str(), text.size());
+    *result[text.size()] = 0;
+
+    return SIPLUS_OK;
 }
 
 SIPLUS_EXPORTED void siplus_data_delete(SIPlusUnknownDataContainer *container) {

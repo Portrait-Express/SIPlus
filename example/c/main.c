@@ -107,7 +107,7 @@ int main(int argc, char **argv) {
     printf("Result: %s", textResult);
         
 cleanup:
-    siplus_text_result_delete(textResult);
+    siplus_string_delete(textResult);
     siplus_invocation_delete(ic);
     siplus_text_delete(constructor);
     siplus_type_delete(typeInfo);

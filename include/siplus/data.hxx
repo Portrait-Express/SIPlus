@@ -69,7 +69,7 @@ public:
         return dynamic_cast<const T*>(this) != nullptr;
     }
 
-    bool operator==(const TypeInfo& other) {
+    bool operator==(const TypeInfo& other) const {
         return name() == other.name();
     }
 };
