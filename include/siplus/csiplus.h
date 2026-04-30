@@ -232,13 +232,42 @@ SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_int(long value);
 SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_float(double value);
 SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_string(const char *text);
 SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_bool(int value);
-SIPLUS_EXPORTED int siplus_data_is_int(SIPlusUnknownDataContainer *value);
-SIPLUS_EXPORTED int siplus_data_is_float(SIPlusUnknownDataContainer *value);
-SIPLUS_EXPORTED int siplus_data_is_bool(SIPlusUnknownDataContainer *value);
-SIPLUS_EXPORTED int siplus_data_is_string(SIPlusUnknownDataContainer *value);
+
+/**
+ * @brief Get this data container as a int.
+ *
+ * @param[out] result The location to store the result
+ * @param[in] value The container to read
+ * @return Error code
+ */
 SIPLUS_EXPORTED int siplus_data_as_int(long *result, SIPlusUnknownDataContainer *value);
+
+/**
+ * @brief Get this data container as a float.
+ *
+ * @param[out] result The location to store the result
+ * @param[in] value The container to read
+ * @return Error code
+ */
 SIPLUS_EXPORTED int siplus_data_as_float(double *result, SIPlusUnknownDataContainer *value);
+
+/**
+ * @brief Get this data container as a bool.
+ *
+ * @param[out] result The location to store the result
+ * @param[in] value The container to read
+ * @return Error code
+ */
 SIPLUS_EXPORTED int siplus_data_as_bool(int *result, SIPlusUnknownDataContainer *value);
+
+/**
+ * @brief Get this data container as a string. The value in `result` after this call,
+ * must eventually be freed with `siplus_string_delete`
+ *
+ * @param[out] result The location to store the result
+ * @param[in] value The container to read
+ * @return Error code
+ */
 SIPLUS_EXPORTED int siplus_data_as_string(char **result, SIPlusUnknownDataContainer *value);
 
 SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make(SIPlusTypeInfo *type, void *data, SIPlusUnknownDataContainerDeleter deleter);

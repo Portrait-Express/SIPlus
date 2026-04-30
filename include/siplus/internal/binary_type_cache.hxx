@@ -27,8 +27,12 @@ struct BinaryTypeCache {
     std::shared_ptr<U> emplace_item(Ts&&... args) {
         //put at front to prioritized newest entries.
         auto value = std::make_shared<U>(std::forward<Ts>(args)...);
-        items_.push_front(std::static_pointer_cast<T>(value));
+        emplace_item(std::static_pointer_cast<T>(value));
         return value;
+    }
+
+    void emplace_item(std::shared_ptr<T> val) {
+        items_.push_front(val);
     }
 
     iterator find(const TypeInfo& first, const TypeInfo& second) {

@@ -35,8 +35,10 @@ public:
         swap(first.impl_, second.impl_);
     }
 
-    text::TextConstructor get_interpolation(const std::string& text, const ParseOpts& opts = ParseOpts{}) const;
-    std::shared_ptr<text::ValueRetriever> get_expression(const std::string& expression, const ParseOpts& opts = ParseOpts{}) const;
+    text::TextConstructor get_interpolation(const std::string& text) const;
+    text::TextConstructor get_interpolation(const std::string& text, const ParseOpts& opts) const;
+    std::shared_ptr<text::ValueRetriever> get_expression(const std::string& expression) const;
+    std::shared_ptr<text::ValueRetriever> get_expression(const std::string& expression, const ParseOpts& opts) const;
 
 
     SIPlusParserContext& context();

@@ -129,8 +129,16 @@ Parser::~Parser() {
     //is destroyed.
 } 
 
+text::TextConstructor Parser::get_interpolation(const std::string& text) const {
+    return impl_->get_interpolation(text, ParseOpts{});
+}
+
 text::TextConstructor Parser::get_interpolation(const std::string& text, const ParseOpts& opts) const {
     return impl_->get_interpolation(text, opts);
+}
+
+std::shared_ptr<text::ValueRetriever> Parser::get_expression(const std::string& text) const {
+    return impl_->get_expression(text, ParseOpts{});
 }
 
 std::shared_ptr<text::ValueRetriever> Parser::get_expression(const std::string& text, const ParseOpts& opts) const {

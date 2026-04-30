@@ -56,6 +56,7 @@ public:
      */
     virtual std::unique_ptr<text::Iterator> iterate(const UnknownDataTypeContainer& data) const;
 
+#ifndef SWIG
     /**
      * @brief Check of this type is an instance of a specific subclass.
      * Simple wrapper for dynamic_cast<T*>(this) !== nullptr
@@ -68,6 +69,7 @@ public:
     bool is() const {
         return dynamic_cast<const T*>(this) != nullptr;
     }
+#endif // SWIG
 
     bool operator==(const TypeInfo& other) const {
         return name() == other.name();
@@ -86,11 +88,13 @@ concept True = true;
 template<typename T>
 concept is_pointer = std::is_pointer_v<T>;
 
+#ifndef SWIG
 template<typename Type>
 concept simple_value_retrievable_type = requires(const Type a) {
     { Type{} } -> std::same_as<Type>;
     { std::declval<typename Type::data_type>() } -> True;
 } && std::is_base_of_v<TypeInfo, Type>;
+#endif // SWIG
 
 /**
  * struct UnknownDataTypeContainer - Container to hold data that will be used by a template.
@@ -111,6 +115,7 @@ struct UnknownDataTypeContainer {
     UnknownDataTypeContainer& operator=(UnknownDataTypeContainer other);
     explicit operator bool() { return ptr; }
 
+#ifndef SWIG
     /**
      * @brief Checks if this object is an instance of the type.
      *
@@ -121,6 +126,7 @@ struct UnknownDataTypeContainer {
     bool is() const {
         return type->is<T>();
     }
+#endif // SWIG
 
     template<simple_value_retrievable_type T>
     T::data_type& as() const {

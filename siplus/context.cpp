@@ -79,6 +79,14 @@ ContextInvocationContextBuilder SIPlusParserContext::builder() const {
     return ContextInvocationContextBuilder{shared_from_this()};
 }
 
+void SIPlusParserContext::emplace_function(std::string name, std::shared_ptr<Function> function) {
+    functions_[name] = function;
+}
+
+void SIPlusParserContext::emplace_converter(std::shared_ptr<text::Converter> converter) {
+    converters_.emplace_item(converter);
+}
+
 #ifdef SIPLUS_INCLUDE_STDLIB
 
 void

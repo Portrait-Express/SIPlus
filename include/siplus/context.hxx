@@ -107,6 +107,10 @@ public:
 
     UnknownDataTypeContainer convert(const UnknownDataTypeContainer& data, const TypeInfo& to) const;
 
+    void emplace_function(std::string name, std::shared_ptr<Function> function);
+    void emplace_converter(std::shared_ptr<text::Converter> converter);
+
+#ifndef SWIG
     template<typename T> requires std::is_base_of_v<TypeInfo, T>
     UnknownDataTypeContainer convert(const UnknownDataTypeContainer& data) const {
         if(data.is<T>()) return data;
@@ -123,14 +127,17 @@ public:
     template<typename T, typename ...Ts, typename = std::enable_if_t<std::is_base_of_v<Function, T>>>
     std::shared_ptr<T> emplace_function(std::string name, Ts&&... args) {
         auto function = std::make_shared<T>(std::forward<Ts>(args)...);
-        functions_[name] = function;
+        emplace_function(name, function);
         return function;
     }
 
     template<typename T, typename ...Ts, typename = std::enable_if_t<std::is_base_of_v<text::Converter, T>>>
     std::shared_ptr<T> emplace_converter(Ts&&... args) {
-        return converters_.emplace_item<T>(std::forward<Ts>(args)...);
+        auto converter = std::make_shared<T>(std::forward<Ts>(args)...);
+        emplace_converter(converter);
+        return converter;
     }
+#endif // SWIG
 
 private:
     //accessing caches
