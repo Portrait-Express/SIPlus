@@ -596,9 +596,7 @@ SIPLUS_EXPORTED int siplus_icbuilder_default(SIPlusInvocationContextBuilder *bui
 
 SIPLUS_EXPORTED int siplus_icbuilder_build(SIPlusInvocationContext **context, SIPlusInvocationContextBuilder *builder) {
     SIPLUS_NOT_NULL(context, builder);
-
     *context = new SIPlusInvocationContext(builder->builder.build());
-    delete builder;
     return siplus_error_set(SIPLUS_OK);
 }
 

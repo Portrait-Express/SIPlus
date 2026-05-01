@@ -109,6 +109,7 @@ int main(int argc, char **argv) {
 cleanup:
     siplus_string_delete(textResult);
     siplus_invocation_unref(ic);
+    siplus_icbuilder_delete(icb);
     siplus_text_unref(constructor);
     siplus_type_unref(typeInfo);
     siplus_context_unref(context);
