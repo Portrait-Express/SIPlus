@@ -286,7 +286,6 @@ int test_function_retriever_impl(SIPlusUnknownDataContainer **result, void *data
 }
 
 void test_function_retriever_delete(void *data) {
-    std::cout << "FUCK" << std::endl;
     auto tfrd = reinterpret_cast<TestFunctionRetrieverData*>(data);
     siplus_value_unref(tfrd->param);
     delete tfrd;
@@ -376,7 +375,6 @@ int get_testcontext(SIPlusInvocationContext **ic, SIPlusParser *parser) {
     if(auto result = siplus_icbuilder_build(ic, icb); result)  {
         return finish(result);
     }
-    icb = 0;
 
     return finish(SIPLUS_OK);
 }
@@ -500,11 +498,15 @@ bool test_expression(SIPlusParser *parser, std::string text, T&& expected, bool 
     }
 
     auto result = siplus_value_retrieve(&container, retriever, context);
-    if((expect_fail && !result) || (!expect_fail && result)) {
-        siplus_error_get(&textResult);
-        if(textResult != NULL) printf("Expression: %s - %s\n", text.c_str(), textResult);
-        siplus_string_delete(textResult);
-        return finish(result);
+    if(result) {
+        if(!expect_fail) {
+            siplus_error_get(&textResult);
+            if(textResult != NULL) printf("Expression: %s - %s\n", text.c_str(), textResult);
+            siplus_string_delete(textResult);
+            return finish(result);
+        } else {
+            return finish(SIPLUS_OK);
+        }
     }
 
     bool is_equal = test_equal(container, std::forward<T>(expected));
@@ -553,8 +555,8 @@ int test_c(int argc, char **argv) {
         result = test_expression(parser, "test 1", 1);
         if(result) { return finish(1); }
 
-        result = test_expression(parser, "test 2", 2);
-        if(!result) { return finish(1); }
+        result = test_expression(parser, "test 2", 2, true);
+        if(result) { return finish(1); }
 
 
         return finish(0);

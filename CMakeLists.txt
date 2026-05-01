@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.20)
-
 option(SIPLUS_INCLUDE_STDLIB "Include standard library base for siplus. Can be disabled to reduce binary size" ON)
 option(SIPLUS_SANITIZE_ADDRESS "Set -fsanitize=address for memory leak testing" OFF)
 option(SIPLUS_BUILD_EXAMPLES "Build Examples" On)
@@ -12,6 +11,10 @@ if(WITH_STATIC_CRT)
 else()
   set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 endif(WITH_STATIC_CRT)
+
+if(BUILD_SHARED_LIBS) 
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+endif()
 
 project(siplus VERSION 1.1.4)
 
