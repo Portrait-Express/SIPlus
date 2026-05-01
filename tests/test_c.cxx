@@ -231,7 +231,7 @@ int language_info_access(SIPlusUnknownDataContainer **result, void *info, void *
     } else if(std::string{property} == "addons") {
         auto type = addon_list_type_new();
         *result = siplus_data_make(type, language->addons, [](void*){});
-        siplus_type_delete(type);
+        siplus_type_unref(type);
         return siplus_error_set(SIPLUS_OK, NULL);
     }
 
@@ -288,7 +288,7 @@ int test_function_retriever_impl(SIPlusUnknownDataContainer **result, void *data
 void test_function_retriever_delete(void *data) {
     std::cout << "FUCK" << std::endl;
     auto tfrd = reinterpret_cast<TestFunctionRetrieverData*>(data);
-    siplus_value_delete(tfrd->param);
+    siplus_value_unref(tfrd->param);
     delete tfrd;
 }
 
@@ -301,14 +301,14 @@ int test_function_value(SIPlusValueRetriever **result, void *data, SIPlusValueRe
     SIPlusValueRetriever *param;
     if(parent) {
         param = parent;
-        for(int i = 0; i < paramc; i++) { siplus_value_delete(paramv[i]); }
+        for(int i = 0; i < paramc; i++) { siplus_value_unref(paramv[i]); }
         if(paramc > 0) {
             return siplus_error_set(SIPLUS_INVALID_ARG, "Expected no parameters when parent is specified");
         }
     } else {
         for(int i = 0; i < paramc; i++) { 
             if(i > 0) {
-                siplus_value_delete(paramv[i]); 
+                siplus_value_unref(paramv[i]); 
             } else {
                 param = paramv[i];
             }
@@ -343,7 +343,7 @@ SIPlusUnknownDataContainer *get_testdata() {
         delete reinterpret_cast<LanguageInfo*>(info); 
     });
 
-    siplus_type_delete(typeInfo);
+    siplus_type_unref(typeInfo);
 
     return ret;
 }
@@ -355,7 +355,7 @@ int get_testcontext(SIPlusInvocationContext **ic, SIPlusParser *parser) {
 
     auto finish = [&](int code) {
         siplus_data_delete(data);
-        siplus_context_delete(context);
+        siplus_context_unref(context);
         siplus_icbuilder_delete(icb);
         return code;
     };
@@ -389,12 +389,14 @@ int get_testcontext(SIPlusInvocationContext **ic, SIPlusParser *parser) {
  */
 int get_parser(SIPlusParser **parser) {
     SIPlusContext *context = nullptr;
+    SIPlusFunction *function = nullptr;
     TestFunctionData *tfd = new TestFunctionData{};
     char *errorMsg = nullptr;
 
     auto finish = [&](int result) {
         if(result) siplus_parser_delete(*parser);
-        siplus_context_delete(context);
+        siplus_context_unref(context);
+        siplus_function_unref(function);
         return result;
     };
 
@@ -406,8 +408,12 @@ int get_parser(SIPlusParser **parser) {
 
     siplus_context_use_stl(context);
 
+    if(auto result = siplus_function_create(&function, reinterpret_cast<void*>(tfd), test_function_value, test_function_delete); result) {
+        return finish(result);
+    }
+
     //Add custom `test` function
-    if(auto result = siplus_context_add_function(context, "test", reinterpret_cast<void*>(tfd), test_function_value, test_function_delete); result) {
+    if(auto result = siplus_context_add_function(context, "test", function); result) {
         return finish(result);
     }
 
@@ -422,8 +428,8 @@ int test_interpolation(SIPlusParser *parser, std::string text, std::string expec
 
     auto finish = [&](int code) {
         siplus_parse_opts_delete(opts);
-        siplus_invocation_delete(context);
-        siplus_text_delete(constructor);
+        siplus_invocation_unref(context);
+        siplus_text_unref(constructor);
         return code;
     };
 
@@ -473,9 +479,9 @@ bool test_expression(SIPlusParser *parser, std::string text, T&& expected, bool 
 
     auto finish = [&](int code) {
         siplus_parse_opts_delete(opts);
-        siplus_invocation_delete(context);
+        siplus_invocation_unref(context);
         siplus_data_delete(container);
-        siplus_value_delete(retriever);
+        siplus_value_unref(retriever);
         return code;
     };
 
@@ -512,7 +518,7 @@ bool test_expression(SIPlusParser *parser, std::string text, T&& expected, bool 
             << ". Got value of type " << std::string{typeName} << std::endl;
 
         siplus_string_delete(typeName);
-        siplus_type_delete(info);
+        siplus_type_unref(info);
         return finish(SIPLUS_ERR);
     }
     

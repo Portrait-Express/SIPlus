@@ -108,10 +108,10 @@ int main(int argc, char **argv) {
         
 cleanup:
     siplus_string_delete(textResult);
-    siplus_invocation_delete(ic);
-    siplus_text_delete(constructor);
-    siplus_type_delete(typeInfo);
-    siplus_context_delete(context);
+    siplus_invocation_unref(ic);
+    siplus_text_unref(constructor);
+    siplus_type_unref(typeInfo);
+    siplus_context_unref(context);
     siplus_parse_opts_delete(parseOpts);
     siplus_parser_delete(parser);
     return result;

@@ -34,9 +34,9 @@ using simple_value_retrievable_type = false;
 %include "include/siplus/data.hxx"
 %include "include/siplus/stl.hxx"
 
-#include "include/siplus/text/constructor.hxx"
-#include "include/siplus/text/converter.hxx"
-#include "include/siplus/text/iterator.hxx"
+%include "include/siplus/text/constructor.hxx"
+%include "include/siplus/text/converter.hxx"
+%include "include/siplus/text/iterator.hxx"
 %include "include/siplus/text/value_retrievers/retriever.hxx"
 
 %include "include/siplus/types/array.hxx"
