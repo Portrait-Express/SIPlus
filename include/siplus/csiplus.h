@@ -4,7 +4,7 @@
 
 #include "siplus/config.h"
 
-#ifdef MSVC
+#ifdef _MSC_VER
 #  ifdef SIPLUS_EXPORTING
 #    define SIPLUS_EXPORTED __declspec(dllexport)
 #  else
