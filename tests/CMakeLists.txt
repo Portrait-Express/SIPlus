@@ -60,5 +60,5 @@ endforeach ()
 if(SIPLUS_RUN_TESTS) 
     add_custom_command(TARGET runner
                        POST_BUILD
-                       COMMAND ctest -C ${CMAKE_BUILD_TYPE} --output-on-failure)
+                       COMMAND ctest -C "$<IF:$<CONFIG:Debug>,Debug,Release>" --output-on-failure)
 endif()
