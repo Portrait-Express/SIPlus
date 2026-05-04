@@ -12,6 +12,8 @@ else()
   set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 endif(WITH_STATIC_CRT)
 
+add_compile_definitions(SIPLUS_BUILD)
+
 if(BUILD_SHARED_LIBS) 
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
     add_compile_definitions(SIPLUS_EXPORTING)
@@ -67,8 +69,16 @@ if(SIPLUS_BUILD_EXAMPLES)
 endif()
 
 if(SIPLUS_SANITIZE_ADDRESS)
+    if(MSVC)
+        message(FATAL_ERROR "Due to limitations with MSVC, ASAN on Windows is currently not supported")
+    endif()
+
     target_compile_options(siplus PUBLIC -fsanitize=address)
     target_link_options(siplus PUBLIC -fsanitize=address)
+endif()
+
+if(MSVC)
+    target_compile_options(siplus PUBLIC -Zc:preprocessor)
 endif()
 
 configure_file(

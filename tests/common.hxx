@@ -118,8 +118,8 @@ struct test_expression_compare<std::vector<SIPLUS_NAMESPACE::UnknownDataTypeCont
         strVal.reserve(val.size());
 
         for(auto& v : val) {
-            if(!v.is<SIPlus::types::StringType>()) return false;
-            strVal.push_back(v.as<SIPlus::types::StringType>());
+            if(!v.is<SIPLUS_NAMESPACE::types::StringType>()) return false;
+            strVal.push_back(v.as<SIPLUS_NAMESPACE::types::StringType>());
         }
 
         return strVal == other;

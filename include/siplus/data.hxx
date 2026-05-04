@@ -8,6 +8,7 @@
 #include <concepts>
 #include <functional>
 #include <memory>
+#include <string>
 
 #include "siplus/config.h"
 

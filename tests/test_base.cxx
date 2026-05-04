@@ -9,7 +9,7 @@
 
 using namespace SIPLUS_NAMESPACE;
 
-int test_base(int, char**) {
+int test_base(int, char** const) {
     return tests(
         group("Expression", [](const Parser& parser) {
             return tests(

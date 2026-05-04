@@ -24,7 +24,7 @@
 
 using namespace SIPLUS_NAMESPACE;
 
-int common(int, char**) { return 0; } //dummy for ctest
+int common(int, char** const) { return 0; } //dummy for ctest
 
 #ifndef SIPLUS_INCLUDE_STDLIB
 

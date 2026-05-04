@@ -1,9 +1,15 @@
 enable_testing()
 
+if(MSVC) 
+    set(USE_ASAN_DEFAULT OFF)
+else()
+    set(USE_ASAN_DEFAULT ON)
+endif()
+
 option(SIPLUS_RUN_TESTS "Whether or not to run built tests" ON)
 option(SIPLUS_BUILD_TESTS "Whether or not to build tests" ON)
 option(SIPLUS_TESTS_USE_CPPTRACE "Include cpptrace in built tests for stack traces" ON)
-option(SIPLUS_TESTS_USE_ASAN "Sets -fsanitize=address for tests. Separate from SIPLUS_SANITIZE_ADDRESS" ON)
+option(SIPLUS_TESTS_USE_ASAN "Sets -fsanitize=address for tests. Separate from SIPLUS_SANITIZE_ADDRESS" ${USE_ASAN_DEFAULT})
 
 if(NOT SIPLUS_BUILD_TESTS)
 return()
@@ -35,6 +41,10 @@ endif()
 if(SIPLUS_TESTS_USE_ASAN)
     target_compile_options(runner PUBLIC -fsanitize=address)
     target_link_options(runner PUBLIC -fsanitize=address)
+
+    if(MSVC)
+        message(FATAL_ERROR "Due to limitations with MSVC, ASAN on Windows is currently not supported")
+    endif()
 endif()
 
 target_link_libraries(runner PRIVATE siplus ${SIPLUS_TEST_LIBRARIES})
@@ -50,5 +60,5 @@ endforeach ()
 if(SIPLUS_RUN_TESTS) 
     add_custom_command(TARGET runner
                        POST_BUILD
-                       COMMAND ctest -C ${CONFIGURATION} --output-on-failure)
+                       COMMAND ctest -C ${CMAKE_BUILD_TYPE} --output-on-failure)
 endif()

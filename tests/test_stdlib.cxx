@@ -433,7 +433,7 @@ int test_converters() {
     });
 }
 
-int test_stdlib(int, char**) {
+int test_stdlib(int, char** const) {
     auto ctx = get_test_context().context().shared_from_this();
     auto res = group("stdlib", []() {
         return tests(

@@ -4,14 +4,18 @@
 
 #include "siplus/config.h"
 
-#ifdef _MSC_VER
-#  ifdef SIPLUS_EXPORTING
+#ifdef SIPLUS_BUILD
+#  if defined(SIPLUS_EXPORTING) && defined(_MSC_VER)
 #    define SIPLUS_EXPORTED __declspec(dllexport)
 #  else
-#    define SIPLUS_EXPORTED __declspec(dllimport)
+#    define SIPLUS_EXPORTED
 #  endif
 #else
-#  define SIPLUS_EXPORTED
+#  ifdef _MSC_VER
+#    define SIPLUS_EXPORTED __declspec(dllimport)
+#  else
+#    define SIPLUS_EXPORTED
+#  endif
 #endif
 
 enum SIPlusErrors {

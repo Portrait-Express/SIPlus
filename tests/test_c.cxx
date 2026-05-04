@@ -391,8 +391,12 @@ int get_parser(SIPlusParser **parser) {
     TestFunctionData *tfd = new TestFunctionData{};
     char *errorMsg = nullptr;
 
+    
     auto finish = [&](int result) {
-        if(result) siplus_parser_delete(*parser);
+        if (result) {
+            siplus_parser_delete(*parser);
+            *parser = nullptr;
+        }
         siplus_context_unref(context);
         siplus_function_unref(function);
         return result;
@@ -527,7 +531,7 @@ bool test_expression(SIPlusParser *parser, std::string text, T&& expected, bool 
     return finish(SIPLUS_OK);
 }
 
-int test_c(int argc, char **argv) {
+int test_c(int argc, char** const argv) {
     return test("C API", []() {
         int result = 0;
         SIPlusParser *parser = nullptr;
@@ -543,7 +547,6 @@ int test_c(int argc, char **argv) {
         if(auto result = get_parser(&parser); result) {
             siplus_error_get(&textResult);
             if(textResult != NULL) printf("%s\n", textResult);
-            siplus_string_delete(textResult);
             return finish(result);
         }
 
