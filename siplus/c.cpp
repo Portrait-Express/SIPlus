@@ -35,6 +35,8 @@
 #define _SIPLUS_NOT_NULL_1(var) __SIPLUS_NOT_NULL(var)
 #define SIPLUS_NOT_NULL(...) CONCAT_EX(_SIPLUS_NOT_NULL_, COUNT(__VA_ARGS__))(__VA_ARGS__)
 
+#define SIPLUS_TRY(body) { try { body } catch(std::exception& e) { return siplus_error_set(SIPLUS_INVOKE_ERROR, e.what()); } }
+
 using namespace SIPLUS_NAMESPACE;
 
 static thread_local int last_error = SIPLUS_OK;
@@ -649,6 +651,38 @@ SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_bool() {
     return new SIPlusTypeInfo{ std::make_shared<types::BoolType>() };
 }
 
+SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_array() {
+    return new SIPlusTypeInfo{ std::make_shared<types::ArrayType>() };
+}
+
+SIPLUS_EXPORTED int siplus_type_access(SIPlusUnknownDataContainer **result, SIPlusTypeInfo *type, SIPlusUnknownDataContainer *data, char *property) 
+SIPLUS_TRY({
+    SIPLUS_NOT_NULL(result, type, data, property);
+
+    *result = new SIPlusUnknownDataContainer{
+        std::make_unique<UnknownDataTypeContainer>(type->info->access(*data->container, property))
+    };
+
+    return SIPLUS_OK;
+})
+
+SIPLUS_EXPORTED int siplus_type_is_iterable(int *result, SIPlusTypeInfo *info, SIPlusUnknownDataContainer *data) 
+SIPLUS_TRY({
+    SIPLUS_NOT_NULL(info, data);
+
+    *result = info->info->is_iterable(*data->container) ? 1 : 0;
+    return SIPLUS_OK;
+})
+
+SIPLUS_EXPORTED int siplus_type_iterate(SIPlusIterator **result, SIPlusTypeInfo *typeInfo, SIPlusUnknownDataContainer *container) 
+SIPLUS_TRY({
+    SIPLUS_NOT_NULL(result, typeInfo, container);
+
+    *result = new SIPlusIterator{ typeInfo->info->iterate(*container->container) };
+
+    return SIPLUS_OK;
+})
+
 SIPLUS_EXPORTED int siplus_type_is(SIPlusTypeInfo *first, SIPlusTypeInfo *second) {
     if(!first) return 0;
     if(!second) return 0;
@@ -662,12 +696,13 @@ SIPLUS_EXPORTED int siplus_type_name(char **name, SIPlusTypeInfo *first) {
     auto str = first->info->name();
     *name = new char[str.size() + 1];
     strncpy(*name, str.c_str(), str.size());
-    *name[str.size()] = 0;
+    (*name)[str.size()] = 0;
 
     return SIPLUS_OK;
 }
 
 SIPLUS_EXPORTED void siplus_type_unref(SIPlusTypeInfo *type) {
+    if(!type) return;
     delete type;
 }
 
@@ -785,7 +820,7 @@ SIPLUS_EXPORTED int siplus_data_as_string(char **result, SIPlusUnknownDataContai
     std::string& text = value->container->as<types::StringType>();
     *result = new char[text.size() + 1];
     strncpy(*result, text.c_str(), text.size());
-    *result[text.size()] = 0;
+    (*result)[text.size()] = 0;
 
     return SIPLUS_OK;
 }

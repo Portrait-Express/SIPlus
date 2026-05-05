@@ -23,8 +23,7 @@ enum SIPlusErrors {
     SIPLUS_ERR,
     SIPLUS_INVALID_ARG,
     SIPLUS_PARSE_ERROR,
-    SIPLUS_INVOKE_ERROR,
-    SIPLUS_FALSE
+    SIPLUS_INVOKE_ERROR
 };
 
 #ifdef __cplusplus
@@ -199,6 +198,10 @@ SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_int();
 SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_float();
 SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_string();
 SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_bool();
+SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_array();
+SIPLUS_EXPORTED int siplus_type_access(SIPlusUnknownDataContainer **result, SIPlusTypeInfo *type, SIPlusUnknownDataContainer *data, char *property);
+SIPLUS_EXPORTED int siplus_type_is_iterable(int *result, SIPlusTypeInfo *info, SIPlusUnknownDataContainer *data);
+SIPLUS_EXPORTED int siplus_type_iterate(SIPlusIterator **result, SIPlusTypeInfo *typeInfo, SIPlusUnknownDataContainer *container);
 SIPLUS_EXPORTED int siplus_type_name(char **name, SIPlusTypeInfo *first);
 SIPLUS_EXPORTED void siplus_type_unref(SIPlusTypeInfo *type);
 
