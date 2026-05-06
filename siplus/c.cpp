@@ -401,11 +401,12 @@ SIPLUS_EXPORTED int siplus_parser_get_interpolation(
     SIPlusTextConstructor **constructor, SIPlusParser *parser, const char *text, SIPlusParseOpts *opts) {
     SIPLUS_NOT_NULL(constructor, parser, text);
 
-    *constructor = new _SIPlusTextConstructor();
 
     try {
         auto result = parser->parser.get_interpolation(text, opts ? opts->opts : ParseOpts{});
-        (*constructor)->constructor = std::make_shared<text::TextConstructor>(result);
+        *constructor = new _SIPlusTextConstructor{
+            std::make_shared<text::TextConstructor>(result)
+        };
         return siplus_error_set(SIPLUS_OK);
     } catch(std::exception& e) {
         return siplus_error_set(SIPLUS_PARSE_ERROR, e.what());

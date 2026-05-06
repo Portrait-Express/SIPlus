@@ -6,11 +6,11 @@ option(WITH_STATIC_CRT "(MSVC Visual C++) Enable to statically link CRT, which a
  To disable with: -DWITH_STATIC_CRT=Off" On)
 set(SIPLUS_NAMESPACE SIPlus CACHE STRING "Optionally specify a different root namespace")
 
-if(WITH_STATIC_CRT)
-  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-else()
-  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
-endif(WITH_STATIC_CRT)
+project(siplus VERSION 1.1.4)
+
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_compile_definitions(SIPLUS_BUILD)
 
@@ -19,11 +19,18 @@ if(BUILD_SHARED_LIBS)
     add_compile_definitions(SIPLUS_EXPORTING)
 endif()
 
-project(siplus VERSION 1.1.4)
+if(MSVC)
+# Needed for some ungodly reason. I blame Microsoft.
+# MSVC CRT includes a constexpr Mutex constructor that breaks ABI compatibility.
+# This is needed to disable it, since antlr uses it.
+    add_compile_definitions(_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR)
 
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+    if(WITH_STATIC_CRT)
+      set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    else()
+      set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+    endif(WITH_STATIC_CRT)
+endif()
 
 add_subdirectory(dependencies)
 
