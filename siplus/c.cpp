@@ -723,6 +723,29 @@ SIPLUS_EXPORTED int siplus_iterator_new(
     return siplus_error_set(SIPLUS_OK);
 }
 
+SIPLUS_EXPORTED int siplus_iterator_next(SIPlusIterator *iterator) SIPLUS_TRY({
+    SIPLUS_NOT_NULL(iterator);
+
+    iterator->iterator->next();
+    return SIPLUS_OK;
+})
+
+SIPLUS_EXPORTED int siplus_iterator_more(int *result, SIPlusIterator *iterator) SIPLUS_TRY({
+    SIPLUS_NOT_NULL(result, iterator);
+
+    *result = iterator->iterator->more() ? 1 : 0;
+    return SIPLUS_OK;
+})
+
+SIPLUS_EXPORTED int siplus_iterator_current(SIPlusUnknownDataContainer **result, SIPlusIterator *iterator) SIPLUS_TRY({
+    SIPLUS_NOT_NULL(result, iterator);
+
+    *result = new SIPlusUnknownDataContainer{
+        std::make_unique<UnknownDataTypeContainer>(iterator->iterator->current())
+    };
+    return SIPLUS_OK;
+})
+
 SIPLUS_EXPORTED void siplus_iterator_delete(SIPlusIterator *iterator) {
     if(!iterator) return;
     delete iterator;

@@ -208,6 +208,9 @@ SIPLUS_EXPORTED void siplus_type_unref(SIPlusTypeInfo *type);
 
 
 SIPLUS_EXPORTED int siplus_iterator_new(SIPlusIterator **iterator, void *data, SIPlusIteratorMore more, SIPlusIteratorNext next, SIPlusIteratorCurrent current, SIPlusIteratorDeleter deleter);
+SIPLUS_EXPORTED int siplus_iterator_next(SIPlusIterator *iterator);
+SIPLUS_EXPORTED int siplus_iterator_more(int *result, SIPlusIterator *iterator);
+SIPLUS_EXPORTED int siplus_iterator_current(SIPlusUnknownDataContainer **result, SIPlusIterator *iterator);
 SIPLUS_EXPORTED void siplus_iterator_delete(SIPlusIterator *iterator);
 
 
