@@ -324,6 +324,8 @@ int test_set() {
             test_expression(R"(set_new | set_add 143 | set_has 143)", true),
             test_expression(R"(set_new | set_add 143 | set_add "test" | set_has 420)", false),
             test_expression(R"(set_new | set_add "test" | set_add 143 | set_has "test")", true),
+            test_expression(R"(set_new | set_add "test" | set_add 143 | set_has "test")", true),
+            test_expression(R"(set_new | set_add "test" | set_add 143 | map (1) | length)", 2),
             test_expression(R"(
                             var $set = set_new;
                             var $i = 0;

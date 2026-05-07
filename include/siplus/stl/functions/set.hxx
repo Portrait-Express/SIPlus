@@ -96,23 +96,6 @@ struct set_add_func : Function {
     ) const override;
 };
 
-/**
- * struct set_iterator - Iterator implementation for a set
- */
-struct set_iterator : text::Iterator {
-    set_iterator(SetType::data_type::const_iterator begin, SetType::data_type::const_iterator end) 
-        : begin_(begin), end_(end) { }
-
-    bool more() override;
-    void next() override;
-    UnknownDataTypeContainer current() override;
-
-private:
-    SetType::data_type::const_iterator begin_;
-    SetType::data_type::const_iterator end_;
-    bool next_called_;
-};
-
 } /* stl */
 } /* SIPLUS_NAMESPACE */
 

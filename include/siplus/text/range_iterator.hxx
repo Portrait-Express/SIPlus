@@ -9,7 +9,7 @@
 
 namespace SIPLUS_NAMESPACE {
 
-template<typename BIt, typename EIt>
+template<typename BIt, typename EIt = BIt>
 struct range_iterator : text::Iterator {
     range_iterator(
         BIt begin,

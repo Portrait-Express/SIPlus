@@ -1,7 +1,7 @@
 #include "siplus/stl/functions/set.hxx"
 #include "siplus/context.hxx"
 #include "siplus/data.hxx"
-#include "siplus/parser.hxx"
+#include "siplus/text/range_iterator.hxx"
 #include "siplus/text/value_retrievers/retriever.hxx"
 #include "siplus/text/value_retrievers/lambda_value_retriever.hxx"
 #include "siplus/types/bool.hxx"
@@ -190,24 +190,9 @@ bool SetType::is_iterable(const UnknownDataTypeContainer& data) const {
 }
 
 std::unique_ptr<text::Iterator> SetType::iterate(const UnknownDataTypeContainer& data) const {
-    return std::make_unique<set_iterator>(
+    return std::make_unique<range_iterator<SetType::data_type::iterator>>(
         data.as<SetType>().begin(), data.as<SetType>().end()
     );
-}
-
-bool set_iterator::more() {
-    return begin_ != end_;
-}
-void set_iterator::next() {
-    if(!next_called_) {
-        next_called_ = true;
-        return;
-    }
-
-    begin_++;
-}
-UnknownDataTypeContainer set_iterator::current() {
-    return *begin_;
 }
 
 } /* stl */
