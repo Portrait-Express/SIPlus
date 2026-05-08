@@ -24,15 +24,18 @@ target_link_libraries(myproject siplus)
 
 ## Installation (Other languages)
 (Limited) Bindings are available for some other languages.
-- @portrait-express/siplus [siplus-js](https://github.com/Portrait-Express/siplus-js)
+- (JS) [@portrait-express/siplus](https://github.com/Portrait-Express/siplus-js)
+- (C#) [SIPlus.NET](https://github.com/Portrait-Express/SIPlus.NET)
 
 ## Language Syntax
 Syntax for the language can be found [here](./docs/syntax.md).
 
 ## Usage
 
-WARNING: Current this library is still in development (despite a >1.0.0 semver). It is recommended to currently pin an exact version to keep a stable API. Public API aspects will be changing frequently.
+See [examples](./example).
 
-See examples in the [example/](example/) folder.
-- [Minimal](example/basic/main.cpp)
-- [Custom Function](example/function/main.cpp)
+**NOTE**: This library should be considered BETA. While the API surface for the library is now mostly cemented, there 
+still likely are a few uncaught bugs lying around. Some API aspects may change slightly from version to version. 
+Major versions will not necessarily mean that there are no breaking changes, but if any, they will be minor. Large API
+changes (such as the std::type_index to TypeInfo change) will increment major versions. Patch versions will be 
+guaranteed to be interchangable.
