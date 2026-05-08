@@ -13,9 +13,26 @@
 namespace SIPLUS_NAMESPACE {
 namespace text {
 
+/**
+ * @brief A ValueRetriever that accesses a property on a container.
+ */
 class AccessorValueRetriever : public ValueRetriever {
 public:
+    /**
+     * @brief Make a new AccessorValueRetriever. Uses default_data() as the parent object.
+     *
+     * @param[in] accessor The ParserContext
+     * @param[in] name The name of the property
+     */
     AccessorValueRetriever(std::shared_ptr<SIPlusParserContext> accessor, std::string name);
+
+    /**
+     * @brief Make a new AccessorValueRetriever with a dedicated parent.
+     *
+     * @param[in] accessor The ParserContext
+     * @param[in] parent The Value retriever to read the property from.
+     * @param[in] name The name of the property
+     */
     AccessorValueRetriever(std::shared_ptr<SIPlusParserContext> accessor, std::shared_ptr<ValueRetriever> parent, std::string name);
 
     UnknownDataTypeContainer retrieve(InvocationContext& value) const override;

@@ -113,21 +113,66 @@ struct NullType : public TypeInfo {
 
 /**
  * struct UnknownDataTypeContainer - Container to hold data that will be used by a template.
+ * The data should be heap-allocated, so that its lifetime does not end while still in use 
+ * by a container. 
+ *
+ * Internally it stores the data as a void*, alongside a TypeInfo object for information on 
+ * how to use said pointer. 
+ *
+ * If your TypeInfo provides MyType::data_type, then you may use
+ * as<type> on this object to cast the void* to MyType::data_type. Remember, as() does no 
+ * type-checking, so double check before using as().
+ *
+ * The container may be copied and moved at will, but only one copy of the data exists.
+ * The container has a reference counter to invoke the deleter.
  */
 struct UnknownDataTypeContainer {
     using deleter = std::function<void (void*)>; 
 
+    /**
+     * @brief Construct an empty UnknownDataTypeContainer. Use this to create null.
+     */
     UnknownDataTypeContainer();
+
+    /**
+     * @brief Create a container with a type, and data, but no deleter. If you don't 
+     * delete the void* yourself, it WILL leak.
+     *
+     * @param[in] type The type of the object
+     * @param[in] ptr The void* to the data
+     */
     UnknownDataTypeContainer(std::shared_ptr<TypeInfo> type, void *ptr);
+
+    /**
+     * @brief Create a container with a type, data, and a deleter. The deleter 
+     * will be invoked once the reference count reaches 0
+     *
+     * @param[in] type The type of the object
+     * @param[in] ptr The void* to the data
+     * @param[in] deleter The deleter callback to invoke on deletion
+     */
     UnknownDataTypeContainer(std::shared_ptr<TypeInfo> type, void *ptr, deleter deleter);
 
     UnknownDataTypeContainer(const UnknownDataTypeContainer& other);
     UnknownDataTypeContainer(UnknownDataTypeContainer&& other);
 
+    /**
+     * @type Get the type of this data container. DO NOT ASSIGN TO THIS UNLESS YOU KNOW WHAT YOU ARE DOING.
+     */
     std::shared_ptr<TypeInfo> type = std::make_shared<types::NullType>();
+    //This probably should not be an exposed property, but it is. Maybe we should change it to type()
+    
+
+    /**
+     * The void* to the data.
+     */
     void *ptr = 0;
 
     UnknownDataTypeContainer& operator=(UnknownDataTypeContainer other);
+
+    /**
+     * @brief Returns true if this container is not null
+     */
     explicit operator bool() { return ptr; }
 
 #ifndef SWIG
@@ -143,6 +188,11 @@ struct UnknownDataTypeContainer {
     }
 #endif // SWIG
 
+    /**
+     * @brief Casts this object to a T::data_type&. This does NO type checking. Check is<> first.
+     *
+     * @tparam simple_value_retrievable_type The type to cast to
+     */
     template<simple_value_retrievable_type T>
     T::data_type& as() const {
         return *reinterpret_cast<T::data_type*>(ptr);

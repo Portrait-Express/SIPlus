@@ -15,6 +15,9 @@
 namespace SIPLUS_NAMESPACE {
 namespace stl {
 
+/**
+ * struct if_func - If statement
+ */
 struct if_func : Function  {
     explicit if_func(std::weak_ptr<SIPlusParserContext> context) 
         : context_(context) { }
@@ -28,6 +31,9 @@ private:
     std::weak_ptr<SIPlusParserContext> context_;
 };
 
+/**
+ * struct while_func - While loop
+ */
 struct while_func : Function  {
     explicit while_func(std::weak_ptr<SIPlusParserContext> context) 
         : context_(context) { }

@@ -10,8 +10,17 @@
 namespace SIPLUS_NAMESPACE {
 namespace text {
 
+/**
+ * @brief This is one step in the TextConstructor sequence
+ */
 class TextConstructorStep {
 public:
+    /**
+     * @brief Get the next part of the Template to append to the text
+     *
+     * @param[in] value The InvocationContext
+     * @return The next part of the template
+     */
     virtual std::string getPart(InvocationContext& value) = 0;
 };
     

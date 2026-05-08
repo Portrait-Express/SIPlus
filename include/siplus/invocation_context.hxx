@@ -11,11 +11,45 @@
 
 namespace SIPLUS_NAMESPACE {
     
+/**
+ * struct InvocationContext - Represents a context for a single invocation of a template.
+ *
+ * InvocationContexts must not be reused, but you may call build() multiple times on the 
+ * builder to get mutliple instances of the same context.
+ */
 struct InvocationContext : public std::enable_shared_from_this<InvocationContext> {
+    /**
+     * @brief Get the default data (The data at '.')
+     *
+     * @return Data container
+     */
     virtual UnknownDataTypeContainer default_data() const;
+
+    /**
+     * @brief Checks if a variable is defined.
+     *
+     * @param[in] key The name of the variable
+     * @return true if the variable is defined.
+     */
     virtual bool variable_defined(std::string key) const = 0;
+
+    /**
+     * @brief Get the value of a variable.
+     *
+     * @param[in] key The variable name
+     * @return The data in the variable
+     */
     virtual const UnknownDataTypeContainer variable(std::string key) const = 0;
+
+    /**
+     * @brief Set a variable's value. Using this as a side-effect is highly 
+     * discouraged.
+     *
+     * @param[in] key The variable name
+     * @param[in] val The value
+     */
     virtual void set_variable(std::string key, const UnknownDataTypeContainer& val) = 0;
+
     virtual ~InvocationContext() = default;
 };
 
@@ -37,7 +71,10 @@ private:
 InvocationContextWrapperBuilder wrap_scope(std::shared_ptr<InvocationContext> context);
 
 /**
- * struct InvocationContextWrapper - Wraps another InvocationContext to hold new data, while still accessing prior data.
+ * struct InvocationContextWrapper - Wraps another InvocationContext to hold new data, 
+ * while still accessing prior data.
+ *
+ * Implementation for scopes. Wrapping an InvocationContext effectively creates a new scope.
  */
 struct InvocationContextWrapper : InvocationContext {
     friend struct InvocationContextWrapperBuilder;

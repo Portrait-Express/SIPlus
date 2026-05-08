@@ -775,7 +775,7 @@ SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_bool(int value){
     return new SIPlusUnknownDataContainer{std::make_unique<UnknownDataTypeContainer>(make_data<types::BoolType>(value))};
 }
 
-SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_null(int value) {
+SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_null() {
     return new SIPlusUnknownDataContainer{std::make_unique<UnknownDataTypeContainer>()};
 }
 

@@ -15,6 +15,9 @@
 namespace SIPLUS_NAMESPACE {
 namespace stl {
 
+/**
+ * struct lt_func - Less than function
+ */
 struct lt_func : Function  {
     explicit lt_func(
         std::weak_ptr<SIPlusParserContext> context,
@@ -31,6 +34,9 @@ private:
     std::shared_ptr<Function> cmp_;
 };
 
+/**
+ * struct gt_func - Greater than function
+ */
 struct gt_func : Function  {
     explicit gt_func(
         std::weak_ptr<SIPlusParserContext> context,
@@ -47,6 +53,9 @@ private:
     std::shared_ptr<Function> cmp_;
 };
 
+/**
+ * struct eq_func - Equality function
+ */
 struct eq_func : Function  {
     explicit eq_func(
         std::weak_ptr<SIPlusParserContext> context,

@@ -10,8 +10,16 @@
 namespace SIPLUS_NAMESPACE {
 namespace text {
 
+/**
+ * @brief Returns the same chunk of text every time.
+ */
 class LiteralConstructorStep : public TextConstructorStep {
 public:
+    /**
+     * @brief Create a new LiteralConstructorStep
+     *
+     * @param[in] part The text to return
+     */
     explicit LiteralConstructorStep(std::string part);
 
     virtual std::string getPart(InvocationContext& value) override;

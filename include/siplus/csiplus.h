@@ -155,78 +155,509 @@ typedef int (*SIPlusTypeAccess)(SIPlusUnknownDataContainer **result, void *data,
  */
 typedef void (*SIPlusTypeDeleter)(void *data);
 
+/**
+ * @brief Free a string result. Any function that uses char** to return text 
+ * must have this called afterwards unless otherwise specified.
+ *
+ * @param[in] ptr The text pointer returned from another siplus_* function
+ */
 SIPLUS_EXPORTED void siplus_string_delete(const char *ptr);
 
+/**
+ * @brief Get the error message. Free the pointer with `siplus_string_delete`.
+ *
+ * @param[out] message The message
+ * @return The error code stored with the message.
+ */
 SIPLUS_EXPORTED int siplus_error_get(char **message);
+
+/**
+ * @brief Set an error. If any of your function implementations fail, call this.
+ *
+ * @param[in] err The error code
+ * @param[in] message The error message. This is copied and stored, so you may free your message.
+ * @return The value passed into `err`
+ */
 SIPLUS_EXPORTED int siplus_error_set(int err, const char *message);
 
+
+
+/**
+ * @brief Create a new parser instance.
+ *
+ * @return The new parser.
+ */
 SIPLUS_EXPORTED SIPlusParser *siplus_parser_new();
+
+/**
+ * @brief Get the parser's context
+ *
+ * @param[out] context The context
+ * @param[in] parser The parser
+ * @return Error code
+ */
 SIPLUS_EXPORTED int siplus_parser_context(SIPlusContext **context,  SIPlusParser *parser);
+
+/**
+ * @brief Get an interpolation from the parser
+ *
+ * @param[out] constructor The constructor result. You will need to `unref` this when you are finished.
+ * @param[in] parser The parser
+ * @param[in] text The interpolation's text
+ * @param[in] opts Parser options. Pass NULL to use default as a shortcut.
+ * @return Error code
+ */
 SIPLUS_EXPORTED int siplus_parser_get_interpolation(SIPlusTextConstructor **constructor, SIPlusParser *parser, const char *text, SIPlusParseOpts *opts);
+/**
+ * @brief Get an expression ValueRetriever
+ *
+ * @param[out] retriever The retriever result. You will need to `unref` this when you are finished.
+ * @param[in] parser The parser
+ * @param[in] expr The expression
+ * @param[in] opts Parser options. Pass NULL to use default as a shortcut.
+ * @return Error code
+ */
 SIPLUS_EXPORTED int siplus_parser_get_expression(SIPlusValueRetriever **retriever, SIPlusParser *parser, const char *expr, SIPlusParseOpts *opts);
+
+/**
+ * @brief Delete a parser. 
+ *
+ * @param[in] parser The parser to delete
+ */
 SIPLUS_EXPORTED void siplus_parser_delete(SIPlusParser *parser);
 
+
+
+/**
+ * @brief Create a new function
+ *
+ * @param[out] function The function. You will need to `unref` this when you are finished.
+ * @param[in] data Any data you wish to store with this function.
+ * @param[in] value `value` implementation
+ * @param[in] deleter Deleter for `data` when this function is deleted
+ * @return Error code
+ */
 SIPLUS_EXPORTED int siplus_function_create(SIPlusFunction **function, void *data, SIPlusFunctionValue value, SIPlusFunctionDeleter deleter);
+
+/**
+ * @brief Get the value from a function
+ *
+ * @param[out] retriever The result of `value`. You will need to `unref` this when you are finished.
+ * @param[in] function The function
+ * @param[in] parent Parent value. Use NULL if none.
+ * @param[in] paramc Parameter count
+ * @param[in] params Parameter list
+ * @return Error code
+ */
 SIPLUS_EXPORTED int siplus_function_value(SIPlusValueRetriever **retriever, SIPlusFunction *function, SIPlusValueRetriever *parent, int paramc, SIPlusValueRetriever **params);
+
+/**
+ * @brief Dereference a function. These are reference counted, so this will not 
+ * always result in a deletion of your function.
+ *
+ * @param[in] function The function
+ */
 SIPLUS_EXPORTED void siplus_function_unref(SIPlusFunction *function);
 
-SIPLUS_EXPORTED int siplus_text_construct(char **text, SIPlusTextConstructor *value, SIPlusInvocationContext *context);
-SIPLUS_EXPORTED void siplus_text_unref(SIPlusTextConstructor *parser);
 
-SIPLUS_EXPORTED int siplus_value_create(SIPlusValueRetriever **retriever, void* context, SIPlusRetrieverImpl impl, SIPlusRetrieverDeleter deleter);
+
+/**
+ * @brief Get the result from a TextConstructor.
+ *
+ * @param[out] text The result. Delete this with `siplus_string_delete`
+ * @param[in] value The text constructor
+ * @param[in] context The invocation context
+ * @return Error code
+ */
+SIPLUS_EXPORTED int siplus_text_construct(char **text, SIPlusTextConstructor *value, SIPlusInvocationContext *context);
+
+/**
+ * @brief Dereference a TextConstructor.
+ *
+ * @param[in] constructor The constructor
+ */
+SIPLUS_EXPORTED void siplus_text_unref(SIPlusTextConstructor *constructor);
+
+
+
+/**
+ * @brief Create a new ValueRetriever
+ *
+ * @param[out] retriever The ValueRetriever
+ * @param[in] data Data to store with your retriever
+ * @param[in] impl The implementation to retrieve the value
+ * @param[in] deleter Deleter for `data`
+ * @return Error Code
+ */
+SIPLUS_EXPORTED int siplus_value_create(SIPlusValueRetriever **retriever, void* data, SIPlusRetrieverImpl impl, SIPlusRetrieverDeleter deleter);
+
+/**
+ * @brief retrieve the value from a ValueRetriever
+ *
+ * @param[out] data The result of the operation
+ * @param[in] value The ValueRetriever
+ * @param[in] context The invocation context
+ * @return Error Code
+ */
 SIPLUS_EXPORTED int siplus_value_retrieve(SIPlusUnknownDataContainer **data, SIPlusValueRetriever *value, SIPlusInvocationContext *context);
+
+/**
+ * @brief Dereference a ValueRetriever. These are reference counted, so this will not 
+ * always result in a deletion of your ValueRetriever.
+ *
+ * @param[in] function The ValueRetriever
+ */
 SIPLUS_EXPORTED void siplus_value_unref(SIPlusValueRetriever *parser);
 
+
+
+/**
+ * @brief Create new Parser Opts
+ *
+ * @return New parser options
+ */
 SIPLUS_EXPORTED SIPlusParseOpts *siplus_parse_opts_new();
+/**
+ * @brief Add a global to be available in a template.
+ *
+ * @param[in] opts The options
+ * @param[in] name The name of the global variable
+ * @return Error code
+ */
 SIPLUS_EXPORTED int siplus_parse_opts_add_global(SIPlusParseOpts *opts, const char *name);
+
+/**
+ * @brief Delete parser options
+ *
+ * @param[in] opts The options to free
+ */
 SIPLUS_EXPORTED void siplus_parse_opts_delete(SIPlusParseOpts *opts);
 
+
+
+/**
+ * @brief Add a function to a ParserContext, to make it available during template creation.
+ *
+ * @param[in] context The context
+ * @param[in] name The name of the function
+ * @param[in] function The function
+ * @return Error Code
+ */
 SIPLUS_EXPORTED int siplus_context_add_function(SIPlusContext *context, const char *name, SIPlusFunction *function);
+
+/**
+ * @brief Attach the STL library of functions and converters.
+ *
+ * @param[in] context Context
+ * @return Error Code
+ */
 SIPLUS_EXPORTED int siplus_context_use_stl(SIPlusContext *context);
+
+/**
+ * @brief Get a builder for an InvocationContext.
+ *
+ * @param[out] builder The created ContextBuilder
+ * @param[in] context The Parser context
+ * @return Error Code
+ */
 SIPLUS_EXPORTED int siplus_context_builder(SIPlusInvocationContextBuilder **builder, SIPlusContext *context);
+
+/**
+ * @brief Dereference a ParserContext. Call this for any context received from siplus_parser_context().
+ *
+ * @param[in] function The function
+ */
 SIPLUS_EXPORTED void siplus_context_unref(SIPlusContext *context);
 
+
+
+/**
+ * @brief Define a value for a variable for this Invocation.
+ *
+ * @param[in] builder The InvocationContextBuilder
+ * @param[in] name The name of the variable
+ * @param[in] container The data
+ * @return Error Code
+ */
 SIPLUS_EXPORTED int siplus_icbuilder_with(SIPlusInvocationContextBuilder *builder, const char *name, SIPlusUnknownDataContainer *container);
+
+/**
+ * @brief Set the default data to use
+ *
+ * @param[in] builder The InvocationContextBuilder
+ * @param[in] container The data
+ * @return Error code
+ */
 SIPLUS_EXPORTED int siplus_icbuilder_default(SIPlusInvocationContextBuilder *builder, SIPlusUnknownDataContainer *container);
+
+/**
+ * @brief Get an InvocationContext from the Builder
+ *
+ * @param[out] context The InvocationContext
+ * @param[in] builder The builder
+ * @return Error code
+ */
 SIPLUS_EXPORTED int siplus_icbuilder_build(SIPlusInvocationContext **context, SIPlusInvocationContextBuilder *builder);
+
+/**
+ * @brief Free an InvocationContextBuilder
+ *
+ * @param[in] builder The builder
+ */
 SIPLUS_EXPORTED void siplus_icbuilder_delete(SIPlusInvocationContextBuilder *builder);
 
+
+
+/**
+ * @brief Free an InvocationContext
+ *
+ * @param[in] context The InvocationContext
+ */
 SIPLUS_EXPORTED void siplus_invocation_unref(SIPlusInvocationContext *context);
 
+
+
+/**
+ * @brief Create a new TypeInfo
+ *
+ * @param[out] type The TypeInfo
+ * @param[in] data Data to store with the type.
+ * @param[in] name The name of your type
+ * @param[in] is_iterable `is_iterable()` implementation. REQUIRED
+ * @param[in] access `access()` implementation. You may pass NULL of there are no accessible properties.
+ * @param[in] iterate iterate() implementation. You may pass NULL if your type is not iterable.
+ * @param[in] deleter Deleter for `data`. You may pass NULL.
+ * @return Error Code
+ */
 SIPLUS_EXPORTED int siplus_type_new(SIPlusTypeInfo **type, void *data, const char *name, SIPlusTypeIsIterable is_iterable, SIPlusTypeAccess access, SIPlusTypeIterate iterate, SIPlusTypeDeleter deleter);
+
+/**
+ * @brief Get the base IntegerType TypeInfo
+ *
+ * @return The TypeInfo
+ */
 SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_int();
+
+/**
+ * @brief Get the base FloatType TypeInfo
+ *
+ * @return The TypeInfo
+ */
 SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_float();
+
+/**
+ * @brief Get the base StringType TypeInfo
+ *
+ * @return The TypeInfo
+ */
 SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_string();
+
+/**
+ * @brief Get the base BoolType TypeInfo
+ *
+ * @return The TypeInfo
+ */
 SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_bool();
+
+/**
+ * @brief Get the base ArrayType TypeInfo
+ *
+ * @return The TypeInfo
+ */
 SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_array();
+
+/**
+ * @brief Get the base NullType TypeInfo
+ *
+ * @return The TypeInfo
+ */
 SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_null();
+
+/**
+ * @brief Call `access` for a type
+ *
+ * @param[out] result The result
+ * @param[in] type The TypeInfo
+ * @param[in] data The data object
+ * @param[in] property The property to access
+ * @return Error code
+ */
 SIPLUS_EXPORTED int siplus_type_access(SIPlusUnknownDataContainer **result, SIPlusTypeInfo *type, SIPlusUnknownDataContainer *data, char *property);
+
+/**
+ * @brief Check if a type is iterable
+ *
+ * @param[out] result The result. 1 if the type is iterable.
+ * @param[in] info The type info
+ * @param[in] data The data object
+ * @return Error code
+ */
 SIPLUS_EXPORTED int siplus_type_is_iterable(int *result, SIPlusTypeInfo *info, SIPlusUnknownDataContainer *data);
+
+/**
+ * @brief Iterate on a type
+ *
+ * @param[out] result The iterator
+ * @param[in] typeInfo The TypeInfo
+ * @param[in] container The data
+ * @return Error code
+ */
 SIPLUS_EXPORTED int siplus_type_iterate(SIPlusIterator **result, SIPlusTypeInfo *typeInfo, SIPlusUnknownDataContainer *container);
+
+/**
+ * @brief Get the name of the type. Delete the result with `siplus_string_delete`.
+ *
+ * @param[out] name The name of the type
+ * @param[in] first The type
+ * @return Error Code
+ */
 SIPLUS_EXPORTED int siplus_type_name(char **name, SIPlusTypeInfo *first);
+
+/**
+ * @brief Dereference a TypeInfo. These are reference counted, so this will not 
+ * always result in a deletion of your TypeInfo.
+ *
+ * @param[in] type The TypeInfo
+ */
 SIPLUS_EXPORTED void siplus_type_unref(SIPlusTypeInfo *type);
 
 
 
+/**
+ * @brief Create a new Iterator
+ *
+ * @param[out] iterator The created iterator
+ * @param[in] data Data to store with your iterator
+ * @param[in] more Check if there is more elements
+ * @param[in] next Move to the next value.
+ * @param[in] current Implementation to get the current value.
+ * @param[in] deleter Deleter for `data`
+ * @return Error code
+ */
 SIPLUS_EXPORTED int siplus_iterator_new(SIPlusIterator **iterator, void *data, SIPlusIteratorMore more, SIPlusIteratorNext next, SIPlusIteratorCurrent current, SIPlusIteratorDeleter deleter);
+
+/**
+ * @brief Move to the next Iterator item.
+ *
+ * @param[in] iterator The iterator
+ * @return Error code
+ */
 SIPLUS_EXPORTED int siplus_iterator_next(SIPlusIterator *iterator);
+
+/**
+ * @brief Check if there are more items remaining
+ *
+ * @param[out] result 1 if there are more items, and next() can be called.
+ * @param[in] iterator The iterator
+ * @return Error code
+ */
 SIPLUS_EXPORTED int siplus_iterator_more(int *result, SIPlusIterator *iterator);
+
+/**
+ * @brief Get the current item
+ *
+ * @param[out] result The result
+ * @param[in] iterator The iterator
+ * @return Error code
+ */
 SIPLUS_EXPORTED int siplus_iterator_current(SIPlusUnknownDataContainer **result, SIPlusIterator *iterator);
+
+/**
+ * @brief Delete an iterator. Iterators are uniquely referenced, and this WILL lead 
+ * to deletion of the iterator, unlike most other instances.
+ *
+ * @param[in] iterator The iterator
+ */
 SIPLUS_EXPORTED void siplus_iterator_delete(SIPlusIterator *iterator);
 
 
 
+/**
+ * @brief Make a data container for a long.
+ *
+ * @param[in] value 
+ * @return Data container
+ */
 SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_int(long value);
-SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_float(double value);
-SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_string(const char *text);
-SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_bool(int value);
-SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_null(int value);
 
+/**
+ * @brief Make a data container for a double.
+ *
+ * @param[in] value 
+ * @return Data container
+ */
+SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_float(double value);
+
+/**
+ * @brief Make a data container for a string.
+ *
+ * @param[in] value 
+ * @return Data container
+ */
+SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_string(const char *text);
+
+/**
+ * @brief Make a data container for a boolean.
+ *
+ * @param[in] value 
+ * @return Data container
+ */
+SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_bool(int value);
+
+/**
+ * @brief Make a data container for null.
+ *
+ * @param[in] value 
+ * @return Data container
+ */
+SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_null();
+
+/**
+ * @brief Check if a data container holds an IntegerType
+ *
+ * @param[in] container Data container
+ * @return 1 if container is an IntegerType
+ */
 SIPLUS_EXPORTED int siplus_data_is_int(SIPlusUnknownDataContainer *container);
+
+/**
+ * @brief Check if a data container holds an FloatType
+ *
+ * @param[in] container Data container
+ * @return 1 if container is a FloatType
+ */
 SIPLUS_EXPORTED int siplus_data_is_float(SIPlusUnknownDataContainer *container);
+
+/**
+ * @brief Check if a data container holds an StringType
+ *
+ * @param[in] container Data container
+ * @return 1 if container is a StringType
+ */
 SIPLUS_EXPORTED int siplus_data_is_string(SIPlusUnknownDataContainer *container);
+
+/**
+ * @brief Check if a data container holds an BoolType
+ *
+ * @param[in] container Data container
+ * @return 1 if container is a BoolType
+ */
 SIPLUS_EXPORTED int siplus_data_is_bool(SIPlusUnknownDataContainer *container);
+
+/**
+ * @brief Check if a data container holds a NullType
+ *
+ * @param[in] container Data container
+ * @return 1 if container is a NullType
+ */
 SIPLUS_EXPORTED int siplus_data_is_null(SIPlusUnknownDataContainer *container);
+
+/**
+ * @brief Check if a data container holds an ArrayType
+ *
+ * @param[in] container Data container
+ * @return 1 if container is an ArrayType
+ */
 SIPLUS_EXPORTED int siplus_data_is_array(SIPlusUnknownDataContainer *container);
 
 /**

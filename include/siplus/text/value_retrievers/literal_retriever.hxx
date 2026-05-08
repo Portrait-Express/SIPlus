@@ -10,8 +10,16 @@
 namespace SIPLUS_NAMESPACE {
 namespace text {
 
+/**
+ * @brief Retrieves a literal value determined at construction
+ */
 class LiteralValueRetriever : public ValueRetriever {
 public:
+    /**
+     * @brief Create a new LiteralValueRetriever with specified data
+     *
+     * @param[in] value The data to return on retrieval
+     */
     explicit LiteralValueRetriever(UnknownDataTypeContainer value);
 
     virtual UnknownDataTypeContainer retrieve(InvocationContext& value) const override;

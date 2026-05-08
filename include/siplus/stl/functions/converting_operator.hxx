@@ -15,6 +15,9 @@
 namespace SIPLUS_NAMESPACE {
 namespace stl {
 
+/**
+ * struct operator_impl - Base implementation for a binary operator
+ */
 struct operator_impl {
     virtual UnknownDataTypeContainer invoke(
         std::shared_ptr<SIPlusParserContext>   context,
@@ -27,6 +30,13 @@ struct operator_impl {
     virtual ~operator_impl() = default;
 };
 
+/**
+ * struct converting_operator_function - Base implementation for a function that 
+ * tries to implicitly convert its parameters to be the same type for an operation.
+ * 
+ * Tries to cast lhs to rhs, then rhs to lhs. If neither works, then tries to find an 
+ * operator that can both types as is, if none is found, this fails.
+ */
 struct converting_operator_function : Function {
     explicit converting_operator_function(
         std::weak_ptr<SIPlusParserContext> context
@@ -37,6 +47,11 @@ struct converting_operator_function : Function {
         std::vector<std::shared_ptr<text::ValueRetriever>> parameters
     ) const override;
 
+    /**
+     * @brief Add a implementation
+     *
+     * @return this
+     */
     template<typename T, typename... Ts>
     converting_operator_function& emplace_impl(const Ts&&... args) {
         cache_.emplace_item<T>(std::forward<Ts>(args)...);

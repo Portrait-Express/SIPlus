@@ -9,6 +9,19 @@
 
 namespace SIPLUS_NAMESPACE {
 
+/**
+ * struct range_iterator - This is a commonly used iterator type in the STL. It is made
+ * available here for you to use in your implementations.
+ *
+ * A simple Iterator Implementation that works with begin() and end() iterators from 
+ * std C++.
+ *
+ * If your <T> for your container is UnknownDataTypeContainer, this returns that 
+ * container directly, otherwise it will call make_data for each value.
+ *
+ * @tparam BIt Type of the beginning iterator. This must be copyable.
+ * @tparam EIt Type of the end iterator
+ */
 template<typename BIt, typename EIt = BIt>
 struct range_iterator : text::Iterator {
     range_iterator(

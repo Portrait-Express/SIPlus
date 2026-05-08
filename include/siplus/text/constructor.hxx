@@ -13,10 +13,23 @@
 namespace SIPLUS_NAMESPACE {
 namespace text {
 
+/**
+ * @brief An object representing a string template.
+ */
 class TextConstructor {
 public:
+    /**
+     * @brief Add a step to the constructor.
+     *
+     * @param[in] step The constructor step
+     */
     void addStep(std::shared_ptr<TextConstructorStep>);
 
+    /**
+     * @brief Invoke this template with a new InvocationContext
+     *
+     * @param[in] data The InvocationContext
+     */
     std::string construct_with(std::shared_ptr<InvocationContext> data);
 private:
 

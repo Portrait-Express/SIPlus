@@ -12,6 +12,14 @@
 namespace SIPLUS_NAMESPACE {
 namespace internal {
 
+/**
+ * struct BinaryTypeCache - Used to store a pair of types to a value. This is used 
+ * for caching converter can_convet, or similar results.
+ *
+ * @tparam T The value type
+ * @tparam T::*Handle the member to call on the value to determine if it can handle 
+ * a pair of types
+ */
 template<typename T, bool (T::*Handle)(const TypeInfo&, const TypeInfo&) const = T::can_handle>
 struct BinaryTypeCache {
     using iterator = std::list<std::shared_ptr<T>>::iterator;
@@ -97,6 +105,9 @@ private:
 
     iterator convert_constness(const_iterator it) {
         //dont think about it too much... It cant hurt you any more
+        //
+        //I keep getting mentally flashbanged whenever I look at this - 05/08/2026
+        
         return items_.erase(it, it);
     }
 };

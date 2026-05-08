@@ -91,6 +91,10 @@ private:
     std::weak_ptr<SIPlusParserContext> context_;
 };
 
+/**
+ * struct contains_func - Checks if an iterable contains another value.
+ * Uses `eq` to compare values.
+ */
 struct contains_func : Function {
     explicit contains_func(
         std::weak_ptr<SIPlusParserContext> context

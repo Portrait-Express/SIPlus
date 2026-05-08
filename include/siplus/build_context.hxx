@@ -25,6 +25,9 @@ struct VariableRetriever : public text::ValueRetriever {
     virtual void set_value(InvocationContext& context, UnknownDataTypeContainer value) = 0;
 };
 
+/**
+ * struct BuildContext - This is used internally only, it likely should not be in the public headers.
+ */
 struct BuildContext : public std::enable_shared_from_this<BuildContext> {
     BuildContext() {}
     explicit BuildContext(std::shared_ptr<BuildContext> parent) : parent_(parent) {}

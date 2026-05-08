@@ -33,6 +33,8 @@ _OStream& operator<<(_OStream& out, const UnknownDataTypeContainer& val) {
         out << val.as<types::StringType>();
     } else if(val.is<types::ArrayType>()) {
         out << val.as<types::ArrayType>();
+    } else if(val.is<types::NullType>()) {
+        out << "null";
     } else {
         out << '{' << val.type->name() << ' ' << val.ptr << '}';
     }

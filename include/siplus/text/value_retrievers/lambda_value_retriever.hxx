@@ -8,6 +8,9 @@
 namespace SIPLUS_NAMESPACE {
 namespace text {
 
+/**
+ * struct LambdaValueRetriever - Generate a value on invocation using a lambda.
+ */
 struct LambdaValueRetriever : text::ValueRetriever {
     using func = std::function<UnknownDataTypeContainer (InvocationContext&)>;
 

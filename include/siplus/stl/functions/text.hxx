@@ -16,6 +16,9 @@
 namespace SIPLUS_NAMESPACE {
 namespace stl {
  
+/**
+ * struct str_func - Explicitly convert a value to a string
+ */
 struct str_func : Function  {
     explicit str_func(std::weak_ptr<SIPlusParserContext> context) : context_(context) { }
 
@@ -118,6 +121,9 @@ private:
     std::weak_ptr<SIPlusParserContext> ctx_;
 };
 
+/**
+ * struct split_function - Split a string on a delimiter
+ */
 struct split_function : Function {
     split_function(std::weak_ptr<SIPlusParserContext> context) : ctx_(context) {}
 
@@ -130,6 +136,9 @@ private:
     std::weak_ptr<SIPlusParserContext> ctx_;
 };
 
+/**
+ * struct substr_function - Get a substring from a string
+ */
 struct substr_function : Function {
     substr_function(std::weak_ptr<SIPlusParserContext> context) : ctx_(context) {}
 
@@ -142,6 +151,9 @@ private:
     std::weak_ptr<SIPlusParserContext> ctx_;
 };
 
+/**
+ * struct string_concatenator - String implementation for add
+ */
 struct string_concatenator : operator_impl {
     UnknownDataTypeContainer 
     invoke(
@@ -153,6 +165,9 @@ struct string_concatenator : operator_impl {
     bool can_handle(const TypeInfo& lhs, const TypeInfo& rhs) const override;
 };
 
+/**
+ * struct string_comparator - String comparer
+ */
 struct string_comparator : operator_impl {
     UnknownDataTypeContainer 
     invoke(

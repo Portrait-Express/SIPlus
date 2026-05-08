@@ -13,6 +13,9 @@
 namespace SIPLUS_NAMESPACE {
 namespace stl {
     
+/**
+ * struct string_bool_converter - Converts a string to a bool. The empty string is false, anything else is true.
+ */
 struct string_bool_converter : text::Converter {
 public:
     bool can_convert(const TypeInfo& from, const TypeInfo& to) const override;

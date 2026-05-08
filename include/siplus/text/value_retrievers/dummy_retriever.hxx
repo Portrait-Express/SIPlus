@@ -8,6 +8,9 @@
 namespace SIPLUS_NAMESPACE {
 namespace text {
 
+/**
+ * @brief Simply returns the value of '.'. Used in a few locations internally.
+ */
 class DummyValueRetriever : public ValueRetriever {
 public:
     DummyValueRetriever() {}

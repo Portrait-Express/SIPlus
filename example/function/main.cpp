@@ -19,10 +19,10 @@ struct access_func : Function {
 
 private:
     /**
-     * If your function need to store the context, use a weak_ptr. If you use 
-     * a normal shared_ptr, the context ends up storing a shared_ptr to itself 
-     * through this function object causing a reference loop and it will never 
-     * be destroyed.
+     * If your function needs to store the context, make sure to use a weak_ptr. 
+     * If you use a normal shared_ptr, the context ends up storing a shared_ptr 
+     * to itself through this function object causing a reference loop and it 
+     * will never be destroyed.
      */
     std::weak_ptr<SIPlusParserContext> context_;
 
@@ -57,13 +57,13 @@ int main(int, char**) {
 
     //Create parser
     Parser p;
-    ParseOpts opts;
-
-    //Set up parser.
     p.context().use_stl();
     
     //Emplace our custom function
     p.context().emplace_function<access_func>("access", p.context().shared_from_this());
+    
+    //Or:
+    //p.context().emplace_function("access", std::make_shared<access_func>(p.context().shared_from_this()));
 
     auto constructor = p.get_interpolation(templateText);
 

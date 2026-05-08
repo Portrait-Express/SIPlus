@@ -12,6 +12,11 @@
 namespace SIPLUS_NAMESPACE {
 namespace text {
 
+/**
+ * @brief Uses the direct output from a ValueRetriever as the return step. Converts
+ * the value from the ValueRetriever to a string using any viable converter found in 
+ * the context.
+ */
 class ValueRetrieverConstructorStep : public TextConstructorStep {
 public:
     explicit ValueRetrieverConstructorStep(

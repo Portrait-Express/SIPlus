@@ -18,6 +18,13 @@
 namespace SIPLUS_NAMESPACE {
 namespace stl {
 
+/**
+ * struct typed_binary_operator_function - A Binary operator implementation that 
+ * tries to convert its operands to type specified in code prior to operating.
+ *
+ * @tparam simple_value_retrievable_type The type to convert the operands to
+ * @tparam simple_value_retrievable_type The type to make_data with the result
+ */
 template<simple_value_retrievable_type T, simple_value_retrievable_type V>
 struct typed_binary_operator_function : Function {
     using operator_function = std::function<typename V::data_type (typename T::data_type, typename T::data_type)>;
@@ -66,6 +73,13 @@ private:
     operator_function operator_;
 };
 
+/**
+ * struct typed_unary_operator_function - Like typed_binary_operator_function, 
+ * but for unary operations.
+ *
+ * @tparam simple_value_retrievable_type The type to convert the operands to
+ * @tparam simple_value_retrievable_type The type to make_data with the result
+ */
 template<simple_value_retrievable_type T, simple_value_retrievable_type V>
 struct typed_unary_operator_function : Function {
     using operator_function = std::function<typename V::data_type (typename T::data_type)>;

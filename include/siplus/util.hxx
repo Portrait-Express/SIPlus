@@ -106,6 +106,13 @@ auto constexpr get_parameters_first_parent(
     return detail::get_parameters_first_parent_<N, NO>(parent, parameters, std::make_index_sequence<N+NO>());
 }
 
+/**
+ * @brief Concatenate a number of parameters to a string. Uses operator<< 
+ * to convert to strings. This is used internally occasionally.
+ *
+ * @tparam Ts Param types
+ * @param[in] value Parameters to write.
+ */
 template<typename ...Ts>
 std::string to_string(const Ts&... value) {
     std::stringstream ss;

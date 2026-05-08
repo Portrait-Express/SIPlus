@@ -10,6 +10,9 @@
 namespace SIPLUS_NAMESPACE {
 namespace text {
 
+/**
+ * @deprecated This was used prior to the TypeInfo change. Needs to be removed.
+ */
 class Accessor {
 public:
     virtual UnknownDataTypeContainer access(const UnknownDataTypeContainer& value, const std::string& name) = 0;

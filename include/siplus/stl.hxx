@@ -12,7 +12,13 @@
 namespace SIPLUS_NAMESPACE {
 namespace stl {
     
+/**
+ * @brief Attach the standard library functions and converters to the context.
+ *
+ * @param[in] context The context to attach to
+ */
 void attach_stl(SIPlusParserContext& context);
+// Should this be implicit? Is there really a case where it wont be called?
     
 } /* stl */
 }

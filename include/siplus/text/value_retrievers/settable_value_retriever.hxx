@@ -8,6 +8,10 @@
 namespace SIPLUS_NAMESPACE {
 namespace text {
     
+/**
+ * struct SettableValueRetriever - INTERNAL ONLY Similar to a LiteralValueRetriever
+ * but allows changing the value later. This is used to store variables internally.
+ */
 struct SettableValueRetriever : text::ValueRetriever {
     struct clear_binding {
         clear_binding(SettableValueRetriever& parent) : parent_(parent) {}

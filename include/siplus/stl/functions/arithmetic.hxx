@@ -29,6 +29,9 @@ struct base_numeric_operator_impl : operator_impl {
     }
 };
 
+/**
+ * struct numeric_adder - Implementation for adding
+ */
 struct numeric_adder : base_numeric_operator_impl {
     UnknownDataTypeContainer 
     invoke(
@@ -38,6 +41,9 @@ struct numeric_adder : base_numeric_operator_impl {
     ) override;
 };
 
+/**
+ * struct numeric_subtractor - Implementation for subtracting
+ */
 struct numeric_subtractor : base_numeric_operator_impl {
     UnknownDataTypeContainer 
     invoke(
@@ -47,6 +53,9 @@ struct numeric_subtractor : base_numeric_operator_impl {
     ) override;
 };
 
+/**
+ * struct numeric_multiplier - Implementation for Multiplication
+ */
 struct numeric_multiplier : base_numeric_operator_impl {
     UnknownDataTypeContainer 
     invoke(
@@ -56,6 +65,9 @@ struct numeric_multiplier : base_numeric_operator_impl {
     ) override;
 };
 
+/**
+ * struct numeric_divider - Implementation for division
+ */
 struct numeric_divider : base_numeric_operator_impl {
     UnknownDataTypeContainer 
     invoke(
@@ -65,6 +77,9 @@ struct numeric_divider : base_numeric_operator_impl {
     ) override;
 };
 
+/**
+ * struct numeric_comparator - Implementation for comparison
+ */
 struct numeric_comparator : base_numeric_operator_impl {
     UnknownDataTypeContainer 
     invoke(

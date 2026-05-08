@@ -9,8 +9,18 @@
 namespace SIPLUS_NAMESPACE {
 namespace text {
 
+/**
+ * @brief A ValueRetriever is an object that supplies a value on invocation. This is used
+ * to represent Expression templates.
+ */
 class ValueRetriever {
 public:
+    /**
+     * @brief Override this to provide a value on invocation.
+     *
+     * @param[in] value The InvocationContext
+     * @return The result of your retriever
+     */
     virtual UnknownDataTypeContainer retrieve(InvocationContext& value) const = 0;
 
     virtual ~ValueRetriever() = default;
