@@ -760,19 +760,19 @@ SIPLUS_EXPORTED void siplus_iterator_delete(SIPlusIterator *iterator) {
 
 
 SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_int(long value) {
-    return new SIPlusUnknownDataContainer{std::make_unique<UnknownDataTypeContainer>(make_data(value))};
+    return new SIPlusUnknownDataContainer{std::make_unique<UnknownDataTypeContainer>(make_data<types::IntegerType>(value))};
 }
 
 SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_float(double value){
-    return new SIPlusUnknownDataContainer{std::make_unique<UnknownDataTypeContainer>(make_data(value))};
+    return new SIPlusUnknownDataContainer{std::make_unique<UnknownDataTypeContainer>(make_data<types::FloatType>(value))};
 }
 
 SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_string(const char *text){
-    return new SIPlusUnknownDataContainer{std::make_unique<UnknownDataTypeContainer>(make_data(text))};
+    return new SIPlusUnknownDataContainer{std::make_unique<UnknownDataTypeContainer>(make_data<types::StringType>(text))};
 }
 
 SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_bool(int value){
-    return new SIPlusUnknownDataContainer{std::make_unique<UnknownDataTypeContainer>(make_data(value))};
+    return new SIPlusUnknownDataContainer{std::make_unique<UnknownDataTypeContainer>(make_data<types::BoolType>(value))};
 }
 
 SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_null(int value) {
