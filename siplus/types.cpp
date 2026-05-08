@@ -1,3 +1,6 @@
+#include <exception>
+#include <stdexcept>
+
 #include "siplus/data.hxx"
 #include "siplus/text/iterator.hxx"
 #include "siplus/text/range_iterator.hxx"
@@ -37,6 +40,12 @@ UnknownDataTypeContainer string_iterator_impl::current() {
 }
 
 } /* anonymous */
+
+std::string NullType::name() const { return "null"; }
+UnknownDataTypeContainer NullType::access(const UnknownDataTypeContainer& data, const std::string& name) const {
+    throw std::runtime_error{"Cannot access properties on null"};
+}
+bool NullType::is_iterable(const UnknownDataTypeContainer& data) const { return false; }
 
 std::string IntegerType::name() const { return "long"; }
 bool IntegerType::is_iterable(const UnknownDataTypeContainer& data) const { return false; }

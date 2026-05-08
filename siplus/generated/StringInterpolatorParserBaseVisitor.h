@@ -51,6 +51,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitNull(StringInterpolatorParser::NullContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual std::any visitLiteral(StringInterpolatorParser::LiteralContext *ctx) override {
     return visitChildren(ctx);
   }

@@ -6,8 +6,9 @@
 
 #ifdef SIPLUS_INCLUDE_STDLIB
 
-#include "siplus/stl/converters/numeric.hxx"
 #include "siplus/stl/converters/bool_string.hxx"
+#include "siplus/stl/converters/null.hxx"
+#include "siplus/stl/converters/numeric.hxx"
 #include "siplus/stl/converters/string_bool.hxx"
 
 #endif  // SIPLUS_INCLUDE_STDLIB

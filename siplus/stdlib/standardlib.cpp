@@ -1,10 +1,11 @@
+#include "siplus/stl/converters/null.hxx"
 #include "siplus/stl/functions/rand.hxx"
 #include "siplus/stl/functions/arithmetic.hxx"
 #include "siplus/stl/functions/iterable.hxx"
 #include "siplus/stl/functions/set.hxx"
 #include "siplus/stl/functions/text.hxx"
+#include "siplus/stl/functions/type.hxx"
 #include "siplus/stl/functions/typed_operator.hxx"
-#include "siplus/data.hxx"
 #include "siplus/stl.hxx"
 #include "siplus/types/bool.hxx"
 
@@ -25,11 +26,14 @@ void attach_stl(SIPlusParserContext& context) {
     context.emplace_converter<bool_string_converter>();
     context.emplace_converter<numeric_string_converter>();
     context.emplace_converter<numeric_bool_converter>();
+    context.emplace_converter<null_bool_converter>();
+    context.emplace_converter<null_string_converter>();
 
     //Misc
     context.emplace_function<str_func>("str", context.shared_from_this());
     context.emplace_function<if_func>("if", context.shared_from_this());
     context.emplace_function<while_func>("while", context.shared_from_this());
+    context.emplace_function<type_function>("type");
 
     //Set functions
     context.emplace_function<set_new_func>("set_new", context.shared_from_this());

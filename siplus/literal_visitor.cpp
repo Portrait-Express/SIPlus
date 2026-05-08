@@ -104,4 +104,8 @@ std::any LiteralVisitor::visitBoolean(StringInterpolatorParser::BooleanContext *
     return make_data<types::BoolType>(parse_bool(node->getText()));
 }
 
+std::any LiteralVisitor::visitNull(StringInterpolatorParser::NullContext *ctx) {
+    return UnknownDataTypeContainer{};
+}
+
 }

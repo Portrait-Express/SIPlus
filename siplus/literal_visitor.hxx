@@ -23,6 +23,7 @@ public:
     std::any visitFloat(StringInterpolatorParser::FloatContext *ctx) override;
     std::any visitInteger(StringInterpolatorParser::IntegerContext *ctx) override;
     std::any visitBoolean(StringInterpolatorParser::BooleanContext *ctx) override;
+    std::any visitNull(StringInterpolatorParser::NullContext *ctx) override;
 
 private:
     std::shared_ptr<SIPlusParserContext> context_;

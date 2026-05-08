@@ -15,7 +15,8 @@ string: STRING_START ( STRING_TEXT | STRING_ESCAPE )* STRING_END ;
 integer: INT ;
 float: FLOAT ;
 boolean: TRUE | FALSE ;
-literal: string | integer | float | boolean ;
+null: NULL ;
+literal: string | integer | float | boolean | null ;
 
 argument: expr_item | expr_block ;
 arg_list: argument? ( WS+ argument )*;

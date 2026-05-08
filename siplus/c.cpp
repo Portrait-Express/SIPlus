@@ -1,4 +1,5 @@
 #include "siplus/csiplus.h"
+#include "siplus/data.hxx"
 #include "siplus/siplus.hxx"
 #include "siplus/types/array.hxx"
 #include "siplus/types/bool.hxx"
@@ -656,6 +657,10 @@ SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_array() {
     return new SIPlusTypeInfo{ std::make_shared<types::ArrayType>() };
 }
 
+SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_null() {
+    return new SIPlusTypeInfo{ std::make_shared<types::NullType>() };
+}
+
 SIPLUS_EXPORTED int siplus_type_access(SIPlusUnknownDataContainer **result, SIPlusTypeInfo *type, SIPlusUnknownDataContainer *data, char *property) 
 SIPLUS_TRY({
     SIPLUS_NOT_NULL(result, type, data, property);
@@ -770,6 +775,10 @@ SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_bool(int value){
     return new SIPlusUnknownDataContainer{std::make_unique<UnknownDataTypeContainer>(make_data(value))};
 }
 
+SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_null(int value) {
+    return new SIPlusUnknownDataContainer{std::make_unique<UnknownDataTypeContainer>()};
+}
+
 SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make(SIPlusTypeInfo *type, void *data, SIPlusUnknownDataContainerDeleter deleter) {
     return new SIPlusUnknownDataContainer{
         std::make_unique<UnknownDataTypeContainer>(type->info, data, deleter)
@@ -804,6 +813,11 @@ SIPLUS_EXPORTED int siplus_data_is_bool(SIPlusUnknownDataContainer *container) {
 SIPLUS_EXPORTED int siplus_data_is_array(SIPlusUnknownDataContainer *container) {
     if(!container) return 0;
     return container->container->type->is<types::ArrayType>() ? 1 : 0;
+}
+
+SIPLUS_EXPORTED int siplus_data_is_null(SIPlusUnknownDataContainer *container) {
+    if(!container) return 0;
+    return container->container->type->is<types::NullType>() ? 1 : 0;
 }
 
 SIPLUS_EXPORTED int siplus_data_type(SIPlusTypeInfo **type, SIPlusUnknownDataContainer *container) {

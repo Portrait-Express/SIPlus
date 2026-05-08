@@ -1,5 +1,6 @@
 #include "siplus/stl/converters.hxx"
 #include "siplus/data.hxx"
+#include "siplus/stl/converters/null.hxx"
 #include "siplus/types/bool.hxx"
 #include "siplus/types/float.hxx"
 #include "siplus/types/integer.hxx"
@@ -84,6 +85,31 @@ UnknownDataTypeContainer string_bool_converter::convert(
     bool value = !from.as<types::StringType>().empty();
     return make_data<types::BoolType>(value);
 }
+
+
+bool null_bool_converter::can_convert(const TypeInfo& from, const TypeInfo& to) const {
+    return from.is<types::NullType>() && to.is<types::BoolType>();
+}
+
+UnknownDataTypeContainer null_bool_converter::convert(
+    const UnknownDataTypeContainer& from,
+    const TypeInfo& to
+) const {
+    return make_data<types::BoolType>(false);
+}
+
+bool null_string_converter::can_convert(const TypeInfo& from, const TypeInfo& to) const {
+    return from.is<types::NullType>() && to.is<types::StringType>();
+}
+
+UnknownDataTypeContainer null_string_converter::convert(
+    const UnknownDataTypeContainer& from,
+    const TypeInfo& to
+) const {
+    return make_data<types::StringType>("");
+}
+
+
 
 } /* stl */
 } /* SIPLUS_NAMESPACE */

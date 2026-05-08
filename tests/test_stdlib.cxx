@@ -178,7 +178,24 @@ int test_if() {
 int test_while() {
     return test("while", [](const Parser& parser) {
         return tests(
-            test_expression<long>(R"(var $v = 0; while (lt $v 3) ($v = add $v 1; 0); $v)", 3)
+            test_expression<long>(R"(var $v = 0; while (lt $v 3) ($v = add $v 1; 0); $v)", 3),
+            test("Uninitialized return value", []() {
+                return tests(
+                    test_expression(R"(while false 12 | and true)", false)
+                );
+            })
+        );
+    });
+}
+
+int test_type() {
+    return test("type", []() {
+        return tests(
+            test_expression(R"(2 | type)", "long"),
+            test_expression(R"(2.4 | type)", "double"),
+            test_expression(R"(false | type)", "boolean"),
+            test_expression(R"([1,2] | type)", "array"),
+            test_expression(R"(null | type)", "null")
         );
     });
 }
@@ -386,6 +403,7 @@ int test_functions() {
             test_str(),
             test_if(),
             test_while(),
+            test_type(),
 
             test_set(),
 

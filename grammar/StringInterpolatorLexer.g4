@@ -8,6 +8,7 @@ mode TEMPLATE;
 
 TRUE: 'true' ;
 FALSE: 'false' ;
+NULL: 'null' ;
 VAR: 'var' ;
 PERSIST: 'persist' ;
 CONST: 'const' ;

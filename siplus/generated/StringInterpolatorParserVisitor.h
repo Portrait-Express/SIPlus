@@ -37,6 +37,8 @@ public:
 
     virtual std::any visitBoolean(StringInterpolatorParser::BooleanContext *context) = 0;
 
+    virtual std::any visitNull(StringInterpolatorParser::NullContext *context) = 0;
+
     virtual std::any visitLiteral(StringInterpolatorParser::LiteralContext *context) = 0;
 
     virtual std::any visitArgument(StringInterpolatorParser::ArgumentContext *context) = 0;

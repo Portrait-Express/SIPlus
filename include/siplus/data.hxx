@@ -97,6 +97,20 @@ concept simple_value_retrievable_type = requires(const Type a) {
 } && std::is_base_of_v<TypeInfo, Type>;
 #endif // SWIG
 
+namespace types {
+
+/**
+ * struct NullType - This is the default type of an UnknownDataTypeContainer. Used to 
+ * represent an empty container.
+ */
+struct NullType : public TypeInfo {
+    virtual std::string name() const override;
+    virtual UnknownDataTypeContainer access(const UnknownDataTypeContainer& data, const std::string& name) const override;
+    virtual bool is_iterable(const UnknownDataTypeContainer& data) const override;
+};
+
+} /* types */
+
 /**
  * struct UnknownDataTypeContainer - Container to hold data that will be used by a template.
  */
@@ -110,7 +124,7 @@ struct UnknownDataTypeContainer {
     UnknownDataTypeContainer(const UnknownDataTypeContainer& other);
     UnknownDataTypeContainer(UnknownDataTypeContainer&& other);
 
-    std::shared_ptr<TypeInfo> type;
+    std::shared_ptr<TypeInfo> type = std::make_shared<types::NullType>();
     void *ptr = 0;
 
     UnknownDataTypeContainer& operator=(UnknownDataTypeContainer other);

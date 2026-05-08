@@ -12,25 +12,25 @@
 class  StringInterpolatorParser : public antlr4::Parser {
 public:
   enum {
-    NORMAL_TEXT = 1, NORMAL_ESCAPE = 2, OPEN = 3, TRUE = 4, FALSE = 5, VAR = 6, 
-    PERSIST = 7, CONST = 8, DOT = 9, HASH = 10, SLASH = 11, CLOSE = 12, 
-    OPENP = 13, CLOSEP = 14, OPENB = 15, CLOSEB = 16, COMMA = 17, PIPE = 18, 
-    DOLLAR = 19, SEMICOLON = 20, QUESTION = 21, AT = 22, EQUAL = 23, ARROW = 24, 
-    BACKSLASH = 25, STRING_START = 26, WS = 27, INT = 28, FLOAT = 29, ID = 30, 
-    ANY = 31, STRING_TEXT = 32, STRING_ESCAPE = 33, STRING_END = 34
+    NORMAL_TEXT = 1, NORMAL_ESCAPE = 2, OPEN = 3, TRUE = 4, FALSE = 5, NULL_ = 6, 
+    VAR = 7, PERSIST = 8, CONST = 9, DOT = 10, HASH = 11, SLASH = 12, CLOSE = 13, 
+    OPENP = 14, CLOSEP = 15, OPENB = 16, CLOSEB = 17, COMMA = 18, PIPE = 19, 
+    DOLLAR = 20, SEMICOLON = 21, QUESTION = 22, AT = 23, EQUAL = 24, ARROW = 25, 
+    BACKSLASH = 26, STRING_START = 27, WS = 28, INT = 29, FLOAT = 30, ID = 31, 
+    ANY = 32, STRING_TEXT = 33, STRING_ESCAPE = 34, STRING_END = 35
   };
 
   enum {
     RuleProperty_name = 0, RuleProperty_index = 1, RuleProperty_item = 2, 
     RuleProperty = 3, RuleVariable_reference = 4, RuleString = 5, RuleInteger = 6, 
-    RuleFloat = 7, RuleBoolean = 8, RuleLiteral = 9, RuleArgument = 10, 
-    RuleArg_list = 11, RuleFunc = 12, RuleArray_item = 13, RuleArray = 14, 
-    RuleExpr_item = 15, RulePiped_expression = 16, RuleExpr = 17, RuleAssign_stmt = 18, 
-    RuleFunction_parameter = 19, RuleFunction_parameters = 20, RuleFunction_def_stmt = 21, 
-    RuleSimple_expr_stmt = 22, RuleExpr_stmt = 23, RuleExpr_block_contents = 24, 
-    RuleExpr_block = 25, RuleEval = 26, RuleLoop_start = 27, RuleLoop_end = 28, 
-    RuleLoop = 29, RuleStmt = 30, RuleNormal = 31, RuleInterpolated_str = 32, 
-    RuleExpression_program = 33, RuleProgram = 34
+    RuleFloat = 7, RuleBoolean = 8, RuleNull = 9, RuleLiteral = 10, RuleArgument = 11, 
+    RuleArg_list = 12, RuleFunc = 13, RuleArray_item = 14, RuleArray = 15, 
+    RuleExpr_item = 16, RulePiped_expression = 17, RuleExpr = 18, RuleAssign_stmt = 19, 
+    RuleFunction_parameter = 20, RuleFunction_parameters = 21, RuleFunction_def_stmt = 22, 
+    RuleSimple_expr_stmt = 23, RuleExpr_stmt = 24, RuleExpr_block_contents = 25, 
+    RuleExpr_block = 26, RuleEval = 27, RuleLoop_start = 28, RuleLoop_end = 29, 
+    RuleLoop = 30, RuleStmt = 31, RuleNormal = 32, RuleInterpolated_str = 33, 
+    RuleExpression_program = 34, RuleProgram = 35
   };
 
   explicit StringInterpolatorParser(antlr4::TokenStream *input);
@@ -59,6 +59,7 @@ public:
   class IntegerContext;
   class FloatContext;
   class BooleanContext;
+  class NullContext;
   class LiteralContext;
   class ArgumentContext;
   class Arg_listContext;
@@ -219,6 +220,19 @@ public:
 
   BooleanContext* boolean();
 
+  class  NullContext : public antlr4::ParserRuleContext {
+  public:
+    NullContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *NULL_();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  NullContext* null();
+
   class  LiteralContext : public antlr4::ParserRuleContext {
   public:
     LiteralContext(antlr4::ParserRuleContext *parent, size_t invokingState);
@@ -227,6 +241,7 @@ public:
     IntegerContext *integer();
     FloatContext *float_();
     BooleanContext *boolean();
+    NullContext *null();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;

@@ -199,6 +199,7 @@ SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_float();
 SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_string();
 SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_bool();
 SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_array();
+SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_null();
 SIPLUS_EXPORTED int siplus_type_access(SIPlusUnknownDataContainer **result, SIPlusTypeInfo *type, SIPlusUnknownDataContainer *data, char *property);
 SIPLUS_EXPORTED int siplus_type_is_iterable(int *result, SIPlusTypeInfo *info, SIPlusUnknownDataContainer *data);
 SIPLUS_EXPORTED int siplus_type_iterate(SIPlusIterator **result, SIPlusTypeInfo *typeInfo, SIPlusUnknownDataContainer *container);
@@ -219,11 +220,13 @@ SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_int(long value);
 SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_float(double value);
 SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_string(const char *text);
 SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_bool(int value);
+SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_null(int value);
 
 SIPLUS_EXPORTED int siplus_data_is_int(SIPlusUnknownDataContainer *container);
 SIPLUS_EXPORTED int siplus_data_is_float(SIPlusUnknownDataContainer *container);
 SIPLUS_EXPORTED int siplus_data_is_string(SIPlusUnknownDataContainer *container);
 SIPLUS_EXPORTED int siplus_data_is_bool(SIPlusUnknownDataContainer *container);
+SIPLUS_EXPORTED int siplus_data_is_null(SIPlusUnknownDataContainer *container);
 SIPLUS_EXPORTED int siplus_data_is_array(SIPlusUnknownDataContainer *container);
 
 /**
