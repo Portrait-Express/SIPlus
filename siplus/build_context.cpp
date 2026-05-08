@@ -21,7 +21,6 @@ struct VariableRetrieverImpl : VariableRetriever {
 private:
     std::string name_;
     bool is_const_:1 = false;
-    bool initialized_:1 = false;
 };
 
 bool VariableRetrieverImpl::is_persist() const { return false; }
@@ -38,13 +37,12 @@ void VariableRetrieverImpl::set_value(
     InvocationContext& context, 
     UnknownDataTypeContainer value
 ) {
-    if(is_const() && initialized_) {
+    if(is_const() && context.variable_defined(name_)) {
         throw std::runtime_error{util::to_string(
             "Attempted to mutate a const variable '$", name(), "'."
         )};
     }
 
-    initialized_ = true;
     context.set_variable(name_, value);
 }
 

@@ -29,6 +29,7 @@ int test_base(int, char** const) {
                         test("const", [](const Parser& parser) {
                             return tests(
                                 test_expression<types::IntegerType>("const var $A = (.x); $A", 2),
+                                test_expression<types::IntegerType>("const var $A = 3; $A", 3),
                                 expect_throw([&]() {
                                     parser.get_expression("const var $a = 2; $a = 5; $a", ParseOpts{});
                                 })
@@ -125,6 +126,30 @@ int test_base(int, char** const) {
             return tests(
                 test_interpolation("{ add $job 3 }", "5", {{"job", make_data<types::IntegerType>(2)}})
             );
+        }),
+
+        // const var fails on second invocation
+        test("const", [](const Parser& parser) {
+            auto b = parser.context().builder().use_default(make_data(2));
+
+            auto builder1 = get_test_context().context().builder().use_default(make_data(2)).build();
+            auto builder2 = get_test_context().context().builder().use_default(make_data(2)).build();
+
+            auto retriever = get_test_context().get_expression("const var $a = 2; $a");
+            auto result1 = retriever->retrieve(*builder1);
+            auto result2 = retriever->retrieve(*builder2);
+
+            if(result1.as<types::IntegerType>() != 2) {
+                std::cout << "Expected (first)\"const var $a = 2; $a\" to be 2. Got " << result1.as<types::IntegerType>() << std::endl;
+                return 1;
+            }
+
+            if(result2.as<types::IntegerType>() != 2) {
+                std::cout << "Expected (second)\"const var $a = 2; $a\" to be 2. Got " << result1.as<types::IntegerType>() << std::endl;
+                return 1;
+            }
+
+            return 0;
         })
     );
 }
