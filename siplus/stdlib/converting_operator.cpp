@@ -2,6 +2,7 @@
 #include "siplus/invocation_context.hxx"
 #include "siplus/data.hxx"
 #include "siplus/text/value_retrievers/retriever.hxx"
+#include "siplus/util.hxx"
 #include <memory>
 #include <stdexcept>
 #include <vector>
@@ -46,26 +47,7 @@ converting_operator_function::value(
     std::shared_ptr<text::ValueRetriever> parent,
     std::vector<std::shared_ptr<text::ValueRetriever>> parameters
 ) const {
-    std::shared_ptr<text::ValueRetriever> lhs;
-    std::shared_ptr<text::ValueRetriever> rhs;
-
-    if(parent) {
-        lhs = parent;
-
-        if(parameters.size() != 1) {
-            throw std::runtime_error{""};
-        }
-
-        rhs = parameters[0];
-    } else {
-        if(parameters.size() != 2) {
-            throw std::runtime_error{""};
-        }
-
-        lhs = parameters[0];
-        rhs = parameters[1];
-    }
-
+    auto [lhs, rhs] = util::get_parameters_first_parent<2>(parent, parameters);
     return std::make_shared<converting_operator_impl>(*this, context_, lhs, rhs);
 }
 
