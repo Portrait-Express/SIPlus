@@ -31,9 +31,8 @@ struct rand_impl : text::ValueRetriever {
     rand_impl(
         std::weak_ptr<SIPlusParserContext> context,
         std::shared_ptr<text::ValueRetriever> begin,
-        std::shared_ptr<text::ValueRetriever> end,
-        std::shared_ptr<text::ValueRetriever> seed
-    ) : context_(context), begin_(begin), end_(end), seed_(seed) {}
+        std::shared_ptr<text::ValueRetriever> end
+    ) : context_(context), begin_(begin), end_(end) {}
 
     virtual UnknownDataTypeContainer retrieve(InvocationContext& value) const override;
 
@@ -41,7 +40,6 @@ private:
     std::weak_ptr<SIPlusParserContext> context_;
     std::shared_ptr<text::ValueRetriever> begin_;
     std::shared_ptr<text::ValueRetriever> end_;
-    std::shared_ptr<text::ValueRetriever> seed_;
 };
 
 struct rand_str_impl : text::ValueRetriever {
@@ -65,20 +63,20 @@ std::shared_ptr<text::ValueRetriever> rand_func::value(
     std::shared_ptr<text::ValueRetriever> parent, 
     std::vector<std::shared_ptr<text::ValueRetriever>> parameters
 ) const {
-    auto [begin, end, seed] = util::get_parameters_first_parent<0, 3>(parent, parameters);
-    return std::make_shared<rand_impl>(context_, begin, end, seed);
+    auto [begin, end] = util::get_parameters_first_parent<0, 2>(parent, parameters);
+
+    if(begin && !end) {
+        throw std::runtime_error{"Must specify both begin and end, only begin was specified"};
+    }
+
+    return std::make_shared<rand_impl>(context_, begin, end);
 }
 
 UnknownDataTypeContainer 
 rand_impl::retrieve(InvocationContext& container) const {
     auto ctx = context_.lock();
 
-    unsigned long seed;
-    if(seed_) {
-        seed = ctx->convert<types::IntegerType>(seed_->retrieve(container)).as<types::IntegerType>();
-    } else {
-        seed = std::random_device{}();
-    }
+    unsigned long seed = std::random_device{}();
 
     if(!begin_) {
         std::mt19937 engine{seed};

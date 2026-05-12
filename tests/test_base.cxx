@@ -75,12 +75,6 @@ int test_base(int, char** const) {
                     auto a = make_data<std::string>("test");
 
                     return tests(
-                        test_interpolation(R"(John Doe   dee 
-{ 
-	[1, 2, "fuck", "you"] 
-	| map (add 2) 	
-	|  join "," 
-} )", "fu"),
                         test_expression<types::ArrayType, std::vector<long>>(R"([1,2,3])", {1,2,3}),
                         test_expression<types::ArrayType, std::vector<std::string>>(R"(["hello", "test"])", {"hello", "test"}),
                         test_expression<types::StringType>(R"(["hello", "test"] | .[1])", "test")

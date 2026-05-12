@@ -147,7 +147,13 @@ int test_rand() {
             test_expression<types::IntegerType>(
                 "rand 1 3", 
                 [](const long& v) { return v >= 1 && v <= 3; }
-            )
+            ),
+            expect_throw([]() {
+                test_expression<types::IntegerType>(
+                    "rand 1", 
+                    [](const long& v) { return false; }
+                );
+            })
         );
     });
 }
