@@ -6,7 +6,7 @@ option(WITH_STATIC_CRT "(MSVC Visual C++) Enable to statically link CRT, which a
  To disable with: -DWITH_STATIC_CRT=Off" On)
 set(SIPLUS_NAMESPACE SIPlus CACHE STRING "Optionally specify a different root namespace")
 
-project(siplus VERSION 2.0.1)
+project(siplus VERSION 2.0.2)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
