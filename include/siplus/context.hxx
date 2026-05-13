@@ -114,7 +114,7 @@ public:
     template<typename T> requires std::is_base_of_v<TypeInfo, T>
     UnknownDataTypeContainer convert(const UnknownDataTypeContainer& data) const {
         if(data.is<T>()) return data;
-        return convert(data, T{});
+        return convert(data, *std::make_shared<T>());
     }
 
     /**

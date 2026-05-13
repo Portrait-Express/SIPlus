@@ -20,7 +20,7 @@ struct UnknownDataTypeContainer;
 /**
  * @brief Type information in order to properly handle dynamically typed input data.
  */
-class TypeInfo {
+class TypeInfo : public std::enable_shared_from_this<TypeInfo> {
 public:
     /**
      * @brief Returns the name of this type. Type equality is determined by 
@@ -75,6 +75,8 @@ public:
     bool operator==(const TypeInfo& other) const {
         return name() == other.name();
     }
+
+    virtual ~TypeInfo() = default;
 };
 
 template<typename T>
@@ -141,7 +143,7 @@ struct UnknownDataTypeContainer {
      * @param[in] type The type of the object
      * @param[in] ptr The void* to the data
      */
-    UnknownDataTypeContainer(std::shared_ptr<TypeInfo> type, void *ptr);
+    UnknownDataTypeContainer(std::shared_ptr<const TypeInfo> type, void *ptr);
 
     /**
      * @brief Create a container with a type, data, and a deleter. The deleter 
@@ -151,7 +153,7 @@ struct UnknownDataTypeContainer {
      * @param[in] ptr The void* to the data
      * @param[in] deleter The deleter callback to invoke on deletion
      */
-    UnknownDataTypeContainer(std::shared_ptr<TypeInfo> type, void *ptr, deleter deleter);
+    UnknownDataTypeContainer(std::shared_ptr<const TypeInfo> type, void *ptr, deleter deleter);
 
     UnknownDataTypeContainer(const UnknownDataTypeContainer& other);
     UnknownDataTypeContainer(UnknownDataTypeContainer&& other);
@@ -159,7 +161,7 @@ struct UnknownDataTypeContainer {
     /**
      * @type Get the type of this data container. DO NOT ASSIGN TO THIS UNLESS YOU KNOW WHAT YOU ARE DOING.
      */
-    std::shared_ptr<TypeInfo> type = std::make_shared<types::NullType>();
+    std::shared_ptr<const TypeInfo> type = std::make_shared<types::NullType>();
     //This probably should not be an exposed property, but it is. Maybe we should change it to type()
     
 

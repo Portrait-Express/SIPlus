@@ -1,6 +1,7 @@
 #include "siplus/csiplus.h"
 #include "common.hxx"
 #include "siplus/parser.hxx"
+#include "siplus/stl/functions/typed_operator.hxx"
 #include "siplus/text/range_iterator.hxx"
 #include "siplus/types/float.hxx"
 #include "siplus/types/integer.hxx"
@@ -93,10 +94,15 @@ struct LanguageInfo {
 typedef struct LanguageInfo LanguageInfo;
 
 /**
- * struct EmptyInfoType - InfoType data for types that dont need state.
+ * struct Empty - Empty object
  */
-struct EmptyInfoType {};
-typedef struct EmptyInfoType EmptyInfoType;
+struct Empty {};
+typedef struct Empty Empty;
+
+struct LanguageInfoConverter {
+    SIPlusTypeInfo *language_info_type;
+    SIPlusTypeInfo *string_type;
+};
 
 /**
  * struct AddonsIteratorData - Data object for iterating LanguageInfo::addons
@@ -192,12 +198,12 @@ int addon_list_iterate(SIPlusIterator **result, void *data, void *object) {
  */
 SIPlusTypeInfo *addon_list_type_new() {
     SIPlusTypeInfo *info;
-    EmptyInfoType *data = new EmptyInfoType();
+    Empty *data = new Empty();
 
     siplus_type_new(
         &info, reinterpret_cast<void*>(data), "LanguageInfo.addons(std:string[])", 
         addon_list_is_iterable, NULL, addon_list_iterate, [](void* data){
-            delete reinterpret_cast<EmptyInfoType*>(data);
+            delete reinterpret_cast<Empty*>(data);
         });
     return info;
 }
@@ -245,12 +251,59 @@ int language_info_access(SIPlusUnknownDataContainer **result, void *info, void *
  */
 SIPlusTypeInfo *langauge_info_type_new() {
     SIPlusTypeInfo *info;
-    EmptyInfoType *data = new EmptyInfoType();
+    Empty *data = new Empty();
 
     siplus_type_new(&info, reinterpret_cast<void*>(data), "LanguageInfo", language_info_is_iterable, language_info_access, NULL, [](void* data){
-        delete reinterpret_cast<EmptyInfoType*>(data);
+        delete reinterpret_cast<Empty*>(data);
     });
     return info;
+}
+
+/** @brief can_convert converter implementation */
+int language_info_can_convert(int *result, void *data, SIPlusTypeInfo *from, SIPlusTypeInfo *to) {
+    LanguageInfoConverter *converter = reinterpret_cast<LanguageInfoConverter*>(data);
+
+    *result = siplus_type_is(from, converter->language_info_type) && siplus_type_is(from, converter->language_info_type);
+
+    return siplus_error_set(SIPLUS_OK, NULL);
+}
+
+/** @brief Converter implementation */
+int language_info_convert(SIPlusUnknownDataContainer **result, void *data, SIPlusUnknownDataContainer *from, SIPlusTypeInfo *to) {
+    LanguageInfoConverter *converter = reinterpret_cast<LanguageInfoConverter*>(data);
+
+    if(!siplus_data_is(from, converter->language_info_type) || !siplus_type_is(to, converter->string_type)) {
+        //This will never be true, as this is UB according to the API's contract, but it doesnt hurt to check
+        return siplus_error_set(SIPLUS_INVALID_ARG, NULL);
+    }
+
+    void* ptr;
+    siplus_data_ptr(&ptr, from);
+
+    *result = siplus_data_make_string(reinterpret_cast<LanguageInfo*>(ptr)->name.c_str());
+
+    return siplus_error_set(SIPLUS_OK, NULL);
+}
+
+/**
+ * @brief Create a new LanguageInfo to string converter
+ *
+ * @return Converter
+ */
+SIPlusConverter *language_info_converter_new() {
+    SIPlusConverter *converter;
+    LanguageInfoConverter *data = new LanguageInfoConverter{
+        .language_info_type = langauge_info_type_new(),
+        .string_type = siplus_type_string()
+    };
+
+    siplus_converter_new(&converter, reinterpret_cast<void*>(data), language_info_can_convert, language_info_convert, [](void *data) {
+        LanguageInfoConverter *converter = reinterpret_cast<LanguageInfoConverter*>(data);
+        siplus_type_unref(converter->language_info_type);
+        siplus_type_unref(converter->string_type);
+        delete converter;
+    });
+    return converter;
 }
 
 struct TestFunctionRetrieverData { 
@@ -419,6 +472,10 @@ int get_parser(SIPlusParser **parser) {
         return finish(result);
     }
 
+    auto converter = language_info_converter_new();
+    siplus_context_add_converter(context, converter);
+    siplus_converter_unref(converter);
+
     return finish(SIPLUS_OK);
 }
 
@@ -553,6 +610,9 @@ int test_c(int argc, char** const argv) {
         result = test_interpolation(parser,  
             "Hello, from { .name }. Plugins are { .addons | join \" \" }", 
             "Hello, from C. Plugins are Num1 Num2");
+        if(result) { return finish(1); }
+
+        result = test_interpolation(parser, "{.}", "C");
         if(result) { return finish(1); }
 
         result = test_expression(parser, "test 1", 1);

@@ -24,11 +24,11 @@ void langauge_info_free(LanguageInfo *info) {
     free(info);
 }
 
-struct EmptyInfoType {
+struct Empty {
     int dummy;
 };
 
-typedef struct EmptyInfoType LanguageInfoType;
+typedef struct Empty LanguageInfoType;
 
 int language_info_is_iterable(void *data, void *object) {
     return 0;

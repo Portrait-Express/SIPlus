@@ -16,12 +16,12 @@ UnknownDataTypeContainer::UnknownDataTypeContainer() {
     _ref = new size_t(1);
 }
 
-UnknownDataTypeContainer::UnknownDataTypeContainer(std::shared_ptr<TypeInfo> type, void *ptr) : UnknownDataTypeContainer() {
+UnknownDataTypeContainer::UnknownDataTypeContainer(std::shared_ptr<const TypeInfo> type, void *ptr) : UnknownDataTypeContainer() {
     this->type = type;
     this->ptr = ptr;
 }
 
-UnknownDataTypeContainer::UnknownDataTypeContainer(std::shared_ptr<TypeInfo> type, void *ptr, deleter deleter) : UnknownDataTypeContainer(type, ptr) {
+UnknownDataTypeContainer::UnknownDataTypeContainer(std::shared_ptr<const TypeInfo> type, void *ptr, deleter deleter) : UnknownDataTypeContainer(type, ptr) {
     deleter_ = deleter;
 }
 

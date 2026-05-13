@@ -1,4 +1,3 @@
-#include <exception>
 #include <stdexcept>
 
 #include "siplus/data.hxx"
