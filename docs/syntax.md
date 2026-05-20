@@ -2,26 +2,28 @@
 
 
 ## Accessors
-The simplest action that can happen is accessing a field on an object, which is done through the property names.
+The simplest template simply accesses a value on an object. This is done through specifying the property name.
 ```
 Hello, { .first_name } { .last_name }
 //Hello, John Doe
 ```
 
-These can be chained to access nested properties.
+Properties can be chained to access nested values.
 ```
 { .contact.email }
 //example@example.com
 ```
 
-You may also use array indexers to access elements of an array.
-_**NOTE**_: Due to how arrays work (more on this, below), array indexers are linear time up to the index specified.
-Therefore, try to avoid using array indexers on large lists of objects. Iterating over these arrays is explained below.
+You may also use array indexers to access elements of an array. The index must be a constant value. Arbitrary 
+expressions are not allowed.   
 ```
 // Note the '.' before '['
 { .orders.[0].id } { .orders.[1].id } 
 //1 2
 ```
+
+_**NOTE**_: Due to how arrays work (more on this, below), array indexers are linear time up to the index specified.
+Therefore, try to avoid using array indexers on large lists of objects. Iterating over these arrays is explained below.
 
 ## Looping
 In order to handle lists of objects easier, you may iterate over the list with a template invoked for each one.
@@ -33,38 +35,48 @@ In order to handle lists of objects easier, you may iterate over the list with a
 //
 ```
 
-The first opening `{# ... }` expression (No space between `{` and `#`) should yield an iterable list of objects to loop 
-over. We then specify the templated text to be repeated for each object, and end the template with `{//}`. ALL content 
-between `{# ... }` and `{//}` is preserved, including whitespace, therefore we added a newline before `{//}` to make 
-each entry appear on a unique row. This does mean that there will be an extra newline at the end of the text. Unfortunately
-there is no workaround for this at the moment.
+The opening `{# ... }` expression should yield an iterable list of objects to loop over. We then specify the templated 
+text to be repeated for each object, and end the template with `{//}`. ALL content between `{# ... }` and `{//}` is 
+preserved, including whitespace, therefore we added a newline before `{//}` to make each entry appear on a unique row. 
 
 ## Functions
-Sometimes it is useful to modify some of this data in the template to ensure it follows a certain format, or otherwise.
-For that we provide functions which can be used in the templates to modify the data (You can even make your own 
-functions!). 
+Sometimes it is useful to modify data in the template to ensure it fits a certain format. To do this, we provide several 
+functions which can be used in the templates to modify the data (you can include your own custom functions, as well:
+\[[see](example/function/main.cpp)\]). 
+```
+{ add .id 10000 } // 10001
+{ gt .id 10 } // false
+```
+
+We can use the "pipe" operator to send the output of one expression to another expression.
+
+To use functions we can use the pipe operator `|` to "pipe" the output of the last expression into a function.
+
 ```
 { .first_name } // John
 { .first_name | upper } // JOHN
 { .first_name | lower } // john
 { .first_name | substr 2 } // hn
-{ .id } // 1
-{ add .id 10000 } // 10001
-{ gt .id 10 } // false
 ```
 
-To use functions we use the pipe operator `|` to "pipe" the output of the last expression into a function.
-These functions also can take arguments, which are just space-separated lists of sub-expressions. The pipe operator
-is typically simply a shorthand to use the last value as the first argument of the function. Check each functon's 
-documentation to see how the piped value is used, as it may be treated specially to normal parameters, although this 
-is very rare.
+The pipe operator is typically a shorthand to use the value as the first argument of the next function. Check 
+each function's documentation to see how the piped value is used, as it may be treated specially to normal 
+parameters, although this is uncommon and advised against.
 
-You can even use piped expressions as parameters to functions, by wrapping it with parentheses.
+You can also use piped expressions as parameters to functions by wrapping it with parentheses.
 ```
 { substr .first_name ( 0 | add 2 ) } // hn
 ```
 
-You can also use accessors on a piped value.
+_**NOTE:**_ If your parameter expression includes a space, you MUST surround it with parentheses, otherwise 
+parsing may not go as expected.
+```
+add add 2 3 4 //Invalid
+add (add 2 3) 4 //Valid - 9
+```
+
+
+Accessors can also be specified after a piped value.
 ```
 { .contact | .address } is equivalent to { .contact.address }
 ```
@@ -167,8 +179,9 @@ If necessary, you can declare arbitrary arrays of data.
 [1, 2, "3", true]
 ```
 
-These follow all the same rules as normal arrays. Array indexers are not able to be specified immediately after, an 
+These follow all the same rules as normal arrays. Array indexers are not able to be specified immediately after an 
 array, but can be piped on afterwards.
 ```
+[1, 2, ($x.y | upper)].[1] //Invalid
 [1, 2, ($x.y | upper)] | .[1] // 2
 ```

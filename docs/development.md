@@ -56,6 +56,3 @@ int main() {
 
 We break functions into two steps so that we can do parameter validation at time of parsing the expression. This allows
 execution to be (slightly) faster since we dont have to do redundant parameter count checks at invocation. 
-
-This does mean adding variadic arguments later if wanted will be non-trivial.
-

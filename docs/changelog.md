@@ -1,7 +1,18 @@
-# 1.2.0
-_**Note**_: This update contains massive breaking changes, we are not incrementing to 2.0.0 though
-as usage of this library is basically nonexistent.
+# 2.0.2
+- Fixed a SEGV that would occur when specifying only 1 parameter to `rand`
+- Fixed an issue that was causing `siplus_make_bool` to return a data container of type `long`, not `boolean`
+- Changed converting operator functions (`add`|`sub`|etc...) to use proper error messages on invalid parameters
+
+# 2.0.1
+- Added `NullType` and new language keyword `null` for first-class null support
+- Fixed const reassignment error being thrown after the same template is evaluated a second time
+- Added `type` function
+
+# 2.0.0
 - Replaced the old `std::type_index` method of handling types with a new `TypeInfo` that will handle type information centrally.
+- Added a C API for bindings
+- Changed antlr from being included in-tree, to a submodule
+- Added examples
 
 # 1.1.4
 - Fixed errors when using template-defiend function parameters

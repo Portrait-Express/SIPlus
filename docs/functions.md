@@ -354,3 +354,15 @@ Check if the set contains an item.
 set_new | set_add 2 | set_has 3 // false
 set_new | set_add 2 | set_has 2 // true
 ```
+
+## type (2.0.1)
+Get the type of the object (`TypeInfo::name()`)
+
+- `data` The object to get the type of
+
+```
+2 | type // 'long'
+2.3 | type // 'double'
+null | type // 'null'
+"test" | type // 'string'
+```
