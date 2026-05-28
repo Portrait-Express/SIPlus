@@ -1,3 +1,7 @@
+# 2.0.3
+- Added converter functions to the C API
+- Added emscripten build support
+
 # 2.0.2
 - Fixed a SEGV that would occur when specifying only 1 parameter to `rand`
 - Fixed an issue that was causing `siplus_make_bool` to return a data container of type `long`, not `boolean`
