@@ -1,3 +1,8 @@
+if(SIPLUS_BUILD_WASM) 
+    message("WARNING!!! Tests cannot be built when building WASM. Disabling tests.")
+    return()
+endif()
+
 enable_testing()
 
 if(MSVC) 

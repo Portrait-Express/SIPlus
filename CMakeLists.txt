@@ -1,10 +1,18 @@
 cmake_minimum_required(VERSION 3.20)
-option(SIPLUS_INCLUDE_STDLIB "Include standard library base for siplus. Can be disabled to reduce binary size" ON)
+
 option(SIPLUS_SANITIZE_ADDRESS "Set -fsanitize=address for memory leak testing" OFF)
 option(SIPLUS_BUILD_EXAMPLES "Build Examples" On)
 option(WITH_STATIC_CRT "(MSVC Visual C++) Enable to statically link CRT, which avoids requiring users to install the redistribution package.
  To disable with: -DWITH_STATIC_CRT=Off" On)
+option(SIPLUS_BUILD_WASM "Set this if you are building this for WASM" Off)
 set(SIPLUS_NAMESPACE SIPlus CACHE STRING "Optionally specify a different root namespace")
+
+if(SIPLUS_BUILD_EXAMPLES)
+    if(SIPLUS_BUILD_WASM) 
+        message("WARNING!!! Examples cannot be built when building WASM. Disabling examples.")
+        set(SIPLUS_BUILD_EXAMPLES OFF)
+    endif()
+endif()
 
 project(siplus VERSION 2.0.2)
 
@@ -69,11 +77,35 @@ if(SIPLUS_INCLUDE_STDLIB)
     set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/rand.cpp)
 endif()
 
-add_library(siplus ${SIPLUS_SOURCES})
+if(SIPLUS_BUILD_WASM)
+    set(EMSCRIPTEN_LINK_FLAGS "-s WASM=2 -s INVOKE_RUN=0")
+
+    set(WASM_DUMMY_SOURCE ${CMAKE_CURRENT_BINARY_DIR}/dummy.cpp)
+    file(WRITE ${WASM_DUMMY_SOURCE} "int main() { return 0; }\n")
+    set_source_files_properties(${WASM_DUMMY_SOURCE} PROPERTIES GENERATED TRUE)
+
+    add_executable(siplus ${SIPLUS_SOURCES} ${WASM_DUMMY_SOURCE})
+
+    target_link_libraries(siplus exports.js) #This disables export wasm name minification
+
+    execute_process(
+        COMMAND bash -c "cat ${PROJECT_SOURCE_DIR}/include/siplus/csiplus.h | grep -E '^\\s*SIPLUS_EXPORTED.*?[a-zA-Z]+\\(' | perl -pe 's/(^.+?)([a-zA-Z_]*)(\\(.*$)/_\\2/' | jq -R '[inputs]' | tr -d '\n '"
+        OUTPUT_VARIABLE WASM_SIPLUS_EXPORTS)
+    target_link_options(siplus PRIVATE 
+        "-sEXPORTED_FUNCTIONS=${WASM_SIPLUS_EXPORTS}"
+        --bind)
+else()
+    add_library(siplus ${SIPLUS_SOURCES})
+endif()
+
 target_precompile_headers(siplus PRIVATE "${PROJECT_SOURCE_DIR}/include/siplus/pch.hxx")
 
 if(SIPLUS_BUILD_EXAMPLES)
-    add_subdirectory(example)
+    if(SIPLUS_BUILD_WASM) 
+        message("WARNING!!! Examples cannot be built when building WASM. Disabling examples.")
+    else()
+        add_subdirectory(example)
+    endif()
 endif()
 
 if(SIPLUS_SANITIZE_ADDRESS)
@@ -88,6 +120,7 @@ endif()
 if(MSVC)
     target_compile_options(siplus PUBLIC -Zc:preprocessor)
 endif()
+
 
 configure_file(
     "${PROJECT_SOURCE_DIR}/config.h.in"

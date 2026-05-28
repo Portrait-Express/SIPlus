@@ -5,10 +5,13 @@
 #include "siplus/config.h"
 
 #ifdef SIPLUS_BUILD
+#  ifndef SIPLUS_EXPORT_EXTRA
+#    define SIPLUS_EXPORT_EXTRA
+#  endif
 #  if defined(SIPLUS_EXPORTING) && defined(_MSC_VER)
-#    define SIPLUS_EXPORTED __declspec(dllexport)
+#    define SIPLUS_EXPORTED SIPLUS_EXPORT_EXTRA _declspec(dllexport)
 #  else
-#    define SIPLUS_EXPORTED
+#    define SIPLUS_EXPORTED SIPLUS_EXPORT_EXTRA 
 #  endif
 #else
 #  ifdef _MSC_VER
