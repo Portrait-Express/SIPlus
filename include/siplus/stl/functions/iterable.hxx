@@ -31,7 +31,7 @@ namespace stl {
  * // std::vector<double> result = {3, 4, 5};
  * @endcode
  */
-struct map_func : Function  {
+struct SIPLUS_EXPORT map_func : Function  {
     explicit map_func(std::weak_ptr<SIPlusParserContext> context) 
         : context_(context) { }
 
@@ -54,7 +54,7 @@ private:
  * // long result = 3;
  * @endcode
  */
-struct length_func : Function  {
+struct SIPLUS_EXPORT length_func : Function  {
     explicit length_func(std::weak_ptr<SIPlusParserContext> context) 
         : context_(context) { }
 
@@ -77,7 +77,7 @@ private:
  * // std::string result = "1,2,3"
  * @endcode
  */
-struct join_func : Function  {
+struct SIPLUS_EXPORT join_func : Function  {
     explicit join_func(
         std::weak_ptr<SIPlusParserContext> context
     ) : context_(context) { }
@@ -95,7 +95,7 @@ private:
  * struct contains_func - Checks if an iterable contains another value.
  * Uses `eq` to compare values.
  */
-struct contains_func : Function {
+struct SIPLUS_EXPORT contains_func : Function {
     explicit contains_func(
         std::weak_ptr<SIPlusParserContext> context
     ) : context_(context) { }

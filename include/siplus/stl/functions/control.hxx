@@ -18,7 +18,7 @@ namespace stl {
 /**
  * struct if_func - If statement
  */
-struct if_func : Function  {
+struct SIPLUS_EXPORT if_func : Function  {
     explicit if_func(std::weak_ptr<SIPlusParserContext> context) 
         : context_(context) { }
 
@@ -34,7 +34,7 @@ private:
 /**
  * struct while_func - While loop
  */
-struct while_func : Function  {
+struct SIPLUS_EXPORT while_func : Function  {
     explicit while_func(std::weak_ptr<SIPlusParserContext> context) 
         : context_(context) { }
 

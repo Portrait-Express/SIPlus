@@ -18,7 +18,7 @@ namespace stl {
 /**
  * struct operator_impl - Base implementation for a binary operator
  */
-struct operator_impl {
+struct SIPLUS_EXPORT operator_impl {
     virtual UnknownDataTypeContainer invoke(
         std::shared_ptr<SIPlusParserContext>   context,
         UnknownDataTypeContainer         lhs, 
@@ -37,7 +37,7 @@ struct operator_impl {
  * Tries to cast lhs to rhs, then rhs to lhs. If neither works, then tries to find an 
  * operator that can both types as is, if none is found, this fails.
  */
-struct converting_operator_function : Function {
+struct SIPLUS_EXPORT converting_operator_function : Function {
     explicit converting_operator_function(
         std::weak_ptr<SIPlusParserContext> context
     ) : context_(context) { }

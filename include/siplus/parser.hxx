@@ -16,7 +16,7 @@ namespace SIPLUS_NAMESPACE {
 /**
  * struct ParseOpts - Parse options for an expression or interpolation.
  */
-struct ParseOpts {
+struct SIPLUS_EXPORT ParseOpts {
     /**
      * @globals A list of global variables that will be accessible at the root scope with $<name>
      */
@@ -28,7 +28,7 @@ class ParserImpl;
 /**
  * @brief Parser class. This is the entry point to the library.
  */
-class Parser {
+class SIPLUS_EXPORT Parser {
 public:
     /**
      * @brief Create a new parser

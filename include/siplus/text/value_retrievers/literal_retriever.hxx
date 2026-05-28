@@ -13,7 +13,7 @@ namespace text {
 /**
  * @brief Retrieves a literal value determined at construction
  */
-class LiteralValueRetriever : public ValueRetriever {
+class SIPLUS_EXPORT LiteralValueRetriever : public ValueRetriever {
 public:
     /**
      * @brief Create a new LiteralValueRetriever with specified data

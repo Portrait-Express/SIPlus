@@ -12,12 +12,12 @@
 
 namespace SIPLUS_NAMESPACE {
 
-struct VariableOpts {
+struct SIPLUS_EXPORT VariableOpts {
     bool is_persist:1 = false;
     bool is_const:1 = false;
 };
 
-struct VariableRetriever : public text::ValueRetriever {
+struct SIPLUS_EXPORT VariableRetriever : public text::ValueRetriever {
     virtual bool is_persist() const = 0;
     virtual bool is_const() const = 0;
     virtual std::string name() const = 0;
@@ -28,7 +28,7 @@ struct VariableRetriever : public text::ValueRetriever {
 /**
  * struct BuildContext - This is used internally only, it likely should not be in the public headers.
  */
-struct BuildContext : public std::enable_shared_from_this<BuildContext> {
+struct SIPLUS_EXPORT BuildContext : public std::enable_shared_from_this<BuildContext> {
     BuildContext() {}
     explicit BuildContext(std::shared_ptr<BuildContext> parent) : parent_(parent) {}
 
@@ -85,14 +85,14 @@ private:
  *
  * @param opts The parser options
  */
-std::shared_ptr<BuildContext> make_build_context(const ParseOpts opts);
+std::shared_ptr<BuildContext> SIPLUS_EXPORT make_build_context(const ParseOpts opts);
 
 /**
  * @brief Make a scoped build context
  *
  * @param parent The parent build context
  */
-std::shared_ptr<BuildContext> make_build_context(std::shared_ptr<BuildContext> parent);
+std::shared_ptr<BuildContext> SIPLUS_EXPORT make_build_context(std::shared_ptr<BuildContext> parent);
      
 } /* SIPLUS_NAMESPACE */
 

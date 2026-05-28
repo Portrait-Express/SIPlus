@@ -8,7 +8,7 @@
 namespace SIPLUS_NAMESPACE {
 namespace types {
 
-struct StringType : public TypeInfo {
+struct SIPLUS_EXPORT StringType : public TypeInfo {
     using data_type = std::string;
 
     virtual std::string name() const override;

@@ -13,7 +13,7 @@ namespace SIPLUS_NAMESPACE {
 /**
  * @brief Base class for a function's implementation. Override this to implement your own function.
  */
-class Function {
+class SIPLUS_EXPORT Function {
 public:
     /**
      * @brief Get the ValueRetriever for an invocation of a function.

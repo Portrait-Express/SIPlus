@@ -11,7 +11,7 @@ namespace text {
 /**
  * struct LambdaValueRetriever - Generate a value on invocation using a lambda.
  */
-struct LambdaValueRetriever : text::ValueRetriever {
+struct SIPLUS_EXPORT LambdaValueRetriever : text::ValueRetriever {
     using func = std::function<UnknownDataTypeContainer (InvocationContext&)>;
 
     LambdaValueRetriever(func func) : func_(func) {}

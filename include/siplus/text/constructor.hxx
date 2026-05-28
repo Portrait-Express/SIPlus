@@ -16,7 +16,7 @@ namespace text {
 /**
  * @brief An object representing a string template.
  */
-class TextConstructor {
+class SIPLUS_EXPORT TextConstructor {
 public:
     /**
      * @brief Add a step to the constructor.

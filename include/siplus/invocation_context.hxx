@@ -17,7 +17,7 @@ namespace SIPLUS_NAMESPACE {
  * InvocationContexts must not be reused, but you may call build() multiple times on the 
  * builder to get mutliple instances of the same context.
  */
-struct InvocationContext : public std::enable_shared_from_this<InvocationContext> {
+struct SIPLUS_EXPORT InvocationContext : public std::enable_shared_from_this<InvocationContext> {
     /**
      * @brief Get the default data (The data at '.')
      *
@@ -56,7 +56,7 @@ struct InvocationContext : public std::enable_shared_from_this<InvocationContext
 /**
  * struct InvocationContextWrapperBuilder - Builder class for `InvocationContextWrapper`
  */
-struct InvocationContextWrapperBuilder {
+struct SIPLUS_EXPORT InvocationContextWrapperBuilder {
     InvocationContextWrapperBuilder(std::shared_ptr<InvocationContext> context) : parent_(context) { }
 
     InvocationContextWrapperBuilder& use_default(UnknownDataTypeContainer val);
@@ -68,7 +68,7 @@ private:
     std::unordered_map<std::string, UnknownDataTypeContainer> variables_;
 };
 
-InvocationContextWrapperBuilder wrap_scope(std::shared_ptr<InvocationContext> context);
+SIPLUS_EXPORT InvocationContextWrapperBuilder wrap_scope(std::shared_ptr<InvocationContext> context);
 
 /**
  * struct InvocationContextWrapper - Wraps another InvocationContext to hold new data, 
@@ -76,7 +76,7 @@ InvocationContextWrapperBuilder wrap_scope(std::shared_ptr<InvocationContext> co
  *
  * Implementation for scopes. Wrapping an InvocationContext effectively creates a new scope.
  */
-struct InvocationContextWrapper : InvocationContext {
+struct SIPLUS_EXPORT InvocationContextWrapper : InvocationContext {
     friend struct InvocationContextWrapperBuilder;
 
     InvocationContextWrapper(std::shared_ptr<InvocationContext> parent) : parent_(parent) {}

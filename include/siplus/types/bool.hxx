@@ -8,7 +8,7 @@
 namespace SIPLUS_NAMESPACE {
 namespace types {
 
-struct BoolType : public TypeInfo {
+struct SIPLUS_EXPORT BoolType : public TypeInfo {
     using data_type = bool;
 
     virtual std::string name() const override;

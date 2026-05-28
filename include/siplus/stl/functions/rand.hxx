@@ -18,7 +18,7 @@ namespace stl {
 /**
  * struct rand_func - Generate a random number
  */
-struct rand_func : Function  {
+struct SIPLUS_EXPORT rand_func : Function  {
     explicit rand_func(std::weak_ptr<SIPlusParserContext> context) 
         : context_(context) { }
 
@@ -34,7 +34,7 @@ private:
 /**
  * struct rand_str_func - Generate a random string following a template
  */
-struct rand_str_func : Function {
+struct SIPLUS_EXPORT rand_str_func : Function {
     explicit rand_str_func (std::weak_ptr<SIPlusParserContext> context) 
         : context_(context) { }
 

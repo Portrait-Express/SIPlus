@@ -9,7 +9,7 @@
 namespace SIPLUS_NAMESPACE {
 namespace types {
 
-struct ArrayType : public TypeInfo {
+struct SIPLUS_EXPORT ArrayType : public TypeInfo {
     using data_type = std::vector<UnknownDataTypeContainer>;
 
     virtual std::string name() const override;

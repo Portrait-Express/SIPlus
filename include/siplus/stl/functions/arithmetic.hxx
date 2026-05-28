@@ -22,7 +22,7 @@ namespace stl {
  * struct base_numeric_operator_impl - Base class for numeric operator 
  * implementations. Implements `can_handle`.
  */
-struct base_numeric_operator_impl : operator_impl {
+struct SIPLUS_EXPORT base_numeric_operator_impl : operator_impl {
     bool can_handle(const TypeInfo& lhs, const TypeInfo& rhs) const override {
         return (lhs.is<types::IntegerType>() || lhs.is<types::FloatType>()) &&
             (rhs.is<types::IntegerType>() || rhs.is<types::FloatType>());
@@ -32,7 +32,7 @@ struct base_numeric_operator_impl : operator_impl {
 /**
  * struct numeric_adder - Implementation for adding
  */
-struct numeric_adder : base_numeric_operator_impl {
+struct SIPLUS_EXPORT numeric_adder : base_numeric_operator_impl {
     UnknownDataTypeContainer 
     invoke(
         std::shared_ptr<SIPlusParserContext> context,
@@ -44,7 +44,7 @@ struct numeric_adder : base_numeric_operator_impl {
 /**
  * struct numeric_subtractor - Implementation for subtracting
  */
-struct numeric_subtractor : base_numeric_operator_impl {
+struct SIPLUS_EXPORT numeric_subtractor : base_numeric_operator_impl {
     UnknownDataTypeContainer 
     invoke(
         std::shared_ptr<SIPlusParserContext> context,
@@ -56,7 +56,7 @@ struct numeric_subtractor : base_numeric_operator_impl {
 /**
  * struct numeric_multiplier - Implementation for Multiplication
  */
-struct numeric_multiplier : base_numeric_operator_impl {
+struct SIPLUS_EXPORT numeric_multiplier : base_numeric_operator_impl {
     UnknownDataTypeContainer 
     invoke(
         std::shared_ptr<SIPlusParserContext> context,
@@ -68,7 +68,7 @@ struct numeric_multiplier : base_numeric_operator_impl {
 /**
  * struct numeric_divider - Implementation for division
  */
-struct numeric_divider : base_numeric_operator_impl {
+struct SIPLUS_EXPORT numeric_divider : base_numeric_operator_impl {
     UnknownDataTypeContainer 
     invoke(
         std::shared_ptr<SIPlusParserContext> context,
@@ -80,7 +80,7 @@ struct numeric_divider : base_numeric_operator_impl {
 /**
  * struct numeric_comparator - Implementation for comparison
  */
-struct numeric_comparator : base_numeric_operator_impl {
+struct SIPLUS_EXPORT numeric_comparator : base_numeric_operator_impl {
     UnknownDataTypeContainer 
     invoke(
         std::shared_ptr<SIPlusParserContext> context,

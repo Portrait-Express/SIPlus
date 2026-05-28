@@ -19,7 +19,7 @@ namespace stl {
 /**
  * struct str_func - Explicitly convert a value to a string
  */
-struct str_func : Function  {
+struct SIPLUS_EXPORT str_func : Function  {
     explicit str_func(std::weak_ptr<SIPlusParserContext> context) : context_(context) { }
 
     std::shared_ptr<text::ValueRetriever> value(
@@ -34,7 +34,7 @@ struct str_func : Function  {
 /**
  * struct replace_function - Function to replace text in the string with another string
  */
-struct replace_function : Function {
+struct SIPLUS_EXPORT replace_function : Function {
     replace_function(std::weak_ptr<SIPlusParserContext> context) : ctx_(context) {}
 
     std::shared_ptr<text::ValueRetriever> value(
@@ -49,7 +49,7 @@ private:
 /**
  * struct pad_end_function - Function to pad the end of a string to a specified length
  */
-struct pad_end_function : Function {
+struct SIPLUS_EXPORT pad_end_function : Function {
     pad_end_function(std::weak_ptr<SIPlusParserContext> context) : ctx_(context) {}
 
     std::shared_ptr<text::ValueRetriever> value(
@@ -64,7 +64,7 @@ private:
 /**
  * struct pad_start_function - Function to pad the start of a string to a specified length
  */
-struct pad_start_function : Function {
+struct SIPLUS_EXPORT pad_start_function : Function {
     pad_start_function(std::weak_ptr<SIPlusParserContext> context) : ctx_(context) {}
 
     std::shared_ptr<text::ValueRetriever> value(
@@ -79,7 +79,7 @@ private:
 /**
  * struct trim_function - Function to trim the leading and trailing whitespace from the text
  */
-struct trim_function : Function {
+struct SIPLUS_EXPORT trim_function : Function {
     trim_function(std::weak_ptr<SIPlusParserContext> context) : ctx_(context) {}
 
     std::shared_ptr<text::ValueRetriever> value(
@@ -94,7 +94,7 @@ private:
 /**
  * struct upper_function - Function to convert the text to uppercase
  */
-struct upper_function : Function {
+struct SIPLUS_EXPORT upper_function : Function {
     upper_function(std::weak_ptr<SIPlusParserContext> context) : ctx_(context) {}
 
     std::shared_ptr<text::ValueRetriever> value(
@@ -109,7 +109,7 @@ private:
 /**
  * struct lower_function - Function to convert the text to lowercase.
  */
-struct lower_function : Function {
+struct SIPLUS_EXPORT lower_function : Function {
     lower_function(std::weak_ptr<SIPlusParserContext> context) : ctx_(context) {}
 
     std::shared_ptr<text::ValueRetriever> value(
@@ -124,7 +124,7 @@ private:
 /**
  * struct split_function - Split a string on a delimiter
  */
-struct split_function : Function {
+struct SIPLUS_EXPORT split_function : Function {
     split_function(std::weak_ptr<SIPlusParserContext> context) : ctx_(context) {}
 
     std::shared_ptr<text::ValueRetriever> value(
@@ -139,7 +139,7 @@ private:
 /**
  * struct substr_function - Get a substring from a string
  */
-struct substr_function : Function {
+struct SIPLUS_EXPORT substr_function : Function {
     substr_function(std::weak_ptr<SIPlusParserContext> context) : ctx_(context) {}
 
     std::shared_ptr<text::ValueRetriever> value(
@@ -154,7 +154,7 @@ private:
 /**
  * struct string_concatenator - String implementation for add
  */
-struct string_concatenator : operator_impl {
+struct SIPLUS_EXPORT string_concatenator : operator_impl {
     UnknownDataTypeContainer 
     invoke(
         std::shared_ptr<SIPlusParserContext> context,
@@ -168,7 +168,7 @@ struct string_concatenator : operator_impl {
 /**
  * struct string_comparator - String comparer
  */
-struct string_comparator : operator_impl {
+struct SIPLUS_EXPORT string_comparator : operator_impl {
     UnknownDataTypeContainer 
     invoke(
         std::shared_ptr<SIPlusParserContext> context,

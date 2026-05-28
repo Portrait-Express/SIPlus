@@ -12,8 +12,8 @@ namespace text {
  * struct SettableValueRetriever - INTERNAL ONLY Similar to a LiteralValueRetriever
  * but allows changing the value later. This is used to store variables internally.
  */
-struct SettableValueRetriever : text::ValueRetriever {
-    struct clear_binding {
+struct SIPLUS_EXPORT SettableValueRetriever : text::ValueRetriever {
+    struct SIPLUS_EXPORT clear_binding {
         clear_binding(SettableValueRetriever& parent) : parent_(parent) {}
 
         ~clear_binding() {

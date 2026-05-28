@@ -431,14 +431,14 @@ extern "C" {
 
 
 
-SIPLUS_EXPORTED void siplus_string_delete(const char *ptr) {
+void siplus_string_delete(const char *ptr) {
     if(!ptr) { return; }
     delete[] ptr;
 }
 
 
 
-SIPLUS_EXPORTED int siplus_error_get(char **message) {
+int siplus_error_get(char **message) {
     if(message) {
         if(last_message) {
             size_t size = last_message->size();
@@ -454,7 +454,7 @@ SIPLUS_EXPORTED int siplus_error_get(char **message) {
     return last_error;
 }
 
-SIPLUS_EXPORTED int siplus_error_set(int err, const char *message) {
+int siplus_error_set(int err, const char *message) {
     last_error = err;
     if(message) {
         last_message = message;
@@ -466,18 +466,18 @@ SIPLUS_EXPORTED int siplus_error_set(int err, const char *message) {
 
 
 
-SIPLUS_EXPORTED SIPlusParser *siplus_parser_new() {
+SIPlusParser *siplus_parser_new() {
     return new _SIPlusParser();
 }
 
-SIPLUS_EXPORTED int siplus_parser_context(SIPlusContext **context, SIPlusParser *parser) {
+int siplus_parser_context(SIPlusContext **context, SIPlusParser *parser) {
     SIPLUS_NOT_NULL(parser, context);
 
     *context =  new _SIPlusParserContext(parser->parser.context().shared_from_this());
     return siplus_error_set(SIPLUS_OK);
 }
 
-SIPLUS_EXPORTED int siplus_parser_get_interpolation(
+int siplus_parser_get_interpolation(
     SIPlusTextConstructor **constructor, SIPlusParser *parser, const char *text, SIPlusParseOpts *opts) {
     SIPLUS_NOT_NULL(constructor, parser, text);
 
@@ -493,7 +493,7 @@ SIPLUS_EXPORTED int siplus_parser_get_interpolation(
     }
 }
 
-SIPLUS_EXPORTED int siplus_parser_get_expression(
+int siplus_parser_get_expression(
     SIPlusValueRetriever **retriever, SIPlusParser *parser, const char *expr, SIPlusParseOpts *opts) {
     SIPLUS_NOT_NULL(retriever, parser, expr);
 
@@ -508,7 +508,7 @@ SIPLUS_EXPORTED int siplus_parser_get_expression(
     }
 }
 
-SIPLUS_EXPORTED void siplus_parser_delete(SIPlusParser *parser) {
+void siplus_parser_delete(SIPlusParser *parser) {
     if(!parser) return;
     delete parser;
 }
@@ -517,7 +517,7 @@ SIPLUS_EXPORTED void siplus_parser_delete(SIPlusParser *parser) {
 
 
 
-SIPLUS_EXPORTED int siplus_value_create(SIPlusValueRetriever **retriever, void* context, SIPlusRetrieverImpl impl, SIPlusRetrieverDeleter deleter) {
+int siplus_value_create(SIPlusValueRetriever **retriever, void* context, SIPlusRetrieverImpl impl, SIPlusRetrieverDeleter deleter) {
     SIPLUS_NOT_NULL(impl);
 
     *retriever = new _SIPlusValueRetriever();
@@ -526,7 +526,7 @@ SIPLUS_EXPORTED int siplus_value_create(SIPlusValueRetriever **retriever, void* 
     return siplus_error_set(SIPLUS_OK);
 }
 
-SIPLUS_EXPORTED int siplus_value_retrieve(SIPlusUnknownDataContainer **data, SIPlusValueRetriever *value, SIPlusInvocationContext *context) {
+int siplus_value_retrieve(SIPlusUnknownDataContainer **data, SIPlusValueRetriever *value, SIPlusInvocationContext *context) {
     SIPLUS_NOT_NULL(value);
 
     try {
@@ -539,7 +539,7 @@ SIPLUS_EXPORTED int siplus_value_retrieve(SIPlusUnknownDataContainer **data, SIP
     }
 }
 
-SIPLUS_EXPORTED void siplus_value_unref(SIPlusValueRetriever *retriever) {
+void siplus_value_unref(SIPlusValueRetriever *retriever) {
     if(!retriever) return;
     delete retriever;
 }
@@ -547,7 +547,7 @@ SIPLUS_EXPORTED void siplus_value_unref(SIPlusValueRetriever *retriever) {
 
 
 
-SIPLUS_EXPORTED int siplus_text_construct(char **text, SIPlusTextConstructor *constructor, SIPlusInvocationContext *context) {
+int siplus_text_construct(char **text, SIPlusTextConstructor *constructor, SIPlusInvocationContext *context) {
     SIPLUS_NOT_NULL(constructor);
 
     try {
@@ -562,14 +562,14 @@ SIPLUS_EXPORTED int siplus_text_construct(char **text, SIPlusTextConstructor *co
 
 }
 
-SIPLUS_EXPORTED void siplus_text_unref(SIPlusTextConstructor *parser) {
+void siplus_text_unref(SIPlusTextConstructor *parser) {
     if(!parser) return;
     delete parser;
 }
 
 
 
-SIPLUS_EXPORTED int siplus_function_create(SIPlusFunction **function, void *data, SIPlusFunctionValue value, SIPlusFunctionDeleter deleter) {
+int siplus_function_create(SIPlusFunction **function, void *data, SIPlusFunctionValue value, SIPlusFunctionDeleter deleter) {
     SIPLUS_NOT_NULL(function, value, deleter);
 
     auto func = std::make_shared<CFunction>(data, value, deleter);
@@ -577,7 +577,7 @@ SIPLUS_EXPORTED int siplus_function_create(SIPlusFunction **function, void *data
     return SIPLUS_OK;
 }
 
-SIPLUS_EXPORTED int siplus_function_value(SIPlusValueRetriever **retriever, SIPlusFunction *function, SIPlusValueRetriever *parent, int paramc, SIPlusValueRetriever **params) {
+int siplus_function_value(SIPlusValueRetriever **retriever, SIPlusFunction *function, SIPlusValueRetriever *parent, int paramc, SIPlusValueRetriever **params) {
     SIPLUS_NOT_NULL(retriever, function);
 
     if(paramc > 0 && params == nullptr) {
@@ -607,14 +607,14 @@ SIPLUS_EXPORTED int siplus_function_value(SIPlusValueRetriever **retriever, SIPl
     }
 }
 
-SIPLUS_EXPORTED void siplus_function_unref(SIPlusFunction *function) {
+void siplus_function_unref(SIPlusFunction *function) {
     if(!function) return;
     delete function;
 }
 
 
 
-SIPLUS_EXPORTED int siplus_converter_new(SIPlusConverter **converter, void *data, SIPlusConverterCanConvert can, SIPlusConverterImpl impl, SIPlusConverterDeleter deleter) SIPLUS_TRY({
+int siplus_converter_new(SIPlusConverter **converter, void *data, SIPlusConverterCanConvert can, SIPlusConverterImpl impl, SIPlusConverterDeleter deleter) SIPLUS_TRY({
     SIPLUS_NOT_NULL(converter, can, impl);
 
     *converter = new _SIPlusConverter{
@@ -624,7 +624,7 @@ SIPLUS_EXPORTED int siplus_converter_new(SIPlusConverter **converter, void *data
     return siplus_error_set(SIPLUS_OK);
 })
 
-SIPLUS_EXPORTED int siplus_converter_can_convert(int *result, SIPlusConverter *converter, SIPlusTypeInfo *from, SIPlusTypeInfo *to) SIPLUS_TRY ({
+int siplus_converter_can_convert(int *result, SIPlusConverter *converter, SIPlusTypeInfo *from, SIPlusTypeInfo *to) SIPLUS_TRY ({
     SIPLUS_NOT_NULL(result, converter, from, to);
 
     *result = converter->converter->can_convert(*from->info, *to->info) ? 1 : 0;
@@ -632,7 +632,7 @@ SIPLUS_EXPORTED int siplus_converter_can_convert(int *result, SIPlusConverter *c
     return siplus_error_set(SIPLUS_OK);
 })
 
-SIPLUS_EXPORTED int siplus_converter_convert(SIPlusUnknownDataContainer **result, SIPlusConverter *converter, SIPlusUnknownDataContainer *from, SIPlusTypeInfo *to) SIPLUS_TRY({
+int siplus_converter_convert(SIPlusUnknownDataContainer **result, SIPlusConverter *converter, SIPlusUnknownDataContainer *from, SIPlusTypeInfo *to) SIPLUS_TRY({
     SIPLUS_NOT_NULL(result, converter, from, to);
 
     auto converted = converter->converter->convert(*from->container, *to->info);
@@ -641,18 +641,18 @@ SIPLUS_EXPORTED int siplus_converter_convert(SIPlusUnknownDataContainer **result
     return siplus_error_set(SIPLUS_OK);
 })
 
-SIPLUS_EXPORTED void siplus_converter_unref(SIPlusConverter *converter) {
+void siplus_converter_unref(SIPlusConverter *converter) {
     if(!converter) return;
     delete converter;
 }
 
 
 
-SIPLUS_EXPORTED SIPlusParseOpts *siplus_parse_opts_new() {
+SIPlusParseOpts *siplus_parse_opts_new() {
     return new _SIPlusParseOpts();
 }
 
-SIPLUS_EXPORTED int siplus_parse_opts_add_global(SIPlusParseOpts *opts, const char *name) {
+int siplus_parse_opts_add_global(SIPlusParseOpts *opts, const char *name) {
     SIPLUS_NOT_NULL(opts, name);
 
     opts->opts.globals.emplace_back(name);
@@ -660,7 +660,7 @@ SIPLUS_EXPORTED int siplus_parse_opts_add_global(SIPlusParseOpts *opts, const ch
     return siplus_error_set(SIPLUS_OK);
 }
 
-SIPLUS_EXPORTED void siplus_parse_opts_delete(SIPlusParseOpts *opts) {
+void siplus_parse_opts_delete(SIPlusParseOpts *opts) {
     if(!opts) return;
     delete opts;
 }
@@ -668,19 +668,19 @@ SIPLUS_EXPORTED void siplus_parse_opts_delete(SIPlusParseOpts *opts) {
 
 
 
-SIPLUS_EXPORTED int siplus_context_add_function(SIPlusContext *parser, const char *name, SIPlusFunction *function) {
+int siplus_context_add_function(SIPlusContext *parser, const char *name, SIPlusFunction *function) {
     SIPLUS_NOT_NULL(parser, function);
 
     parser->context->emplace_function(name, function->function);
     return siplus_error_set(SIPLUS_OK);
 }
 
-SIPLUS_EXPORTED int siplus_context_add_converter(SIPlusContext *context, SIPlusConverter *converter) {
+int siplus_context_add_converter(SIPlusContext *context, SIPlusConverter *converter) {
     context->context->emplace_converter(converter->converter);
     return siplus_error_set(SIPLUS_OK);
 }
 
-SIPLUS_EXPORTED int siplus_context_use_stl(SIPlusContext *context) {
+int siplus_context_use_stl(SIPlusContext *context) {
     SIPLUS_NOT_NULL(context);
 
     context->context->use_stl();
@@ -688,13 +688,13 @@ SIPLUS_EXPORTED int siplus_context_use_stl(SIPlusContext *context) {
     return siplus_error_set(SIPLUS_OK, NULL);
 }
 
-SIPLUS_EXPORTED int siplus_context_builder(SIPlusInvocationContextBuilder **builder, SIPlusContext *context) {
+int siplus_context_builder(SIPlusInvocationContextBuilder **builder, SIPlusContext *context) {
     SIPLUS_NOT_NULL(context, builder);
     *builder = new _SIPlusInvocationContextBuilder{context->context->builder()};
     return siplus_error_set(SIPLUS_OK);
 }
 
-SIPLUS_EXPORTED void siplus_context_unref(SIPlusContext *context) {
+void siplus_context_unref(SIPlusContext *context) {
     if(!context) return;
     delete context;
 }
@@ -702,27 +702,27 @@ SIPLUS_EXPORTED void siplus_context_unref(SIPlusContext *context) {
 
 
 
-SIPLUS_EXPORTED int siplus_icbuilder_with(SIPlusInvocationContextBuilder *builder, const char *name, SIPlusUnknownDataContainer *container) {
+int siplus_icbuilder_with(SIPlusInvocationContextBuilder *builder, const char *name, SIPlusUnknownDataContainer *container) {
     SIPLUS_NOT_NULL(builder, name, container);
 
     builder->builder.with(name, *container->container);
     return siplus_error_set(SIPLUS_OK);
 }
 
-SIPLUS_EXPORTED int siplus_icbuilder_default(SIPlusInvocationContextBuilder *builder, SIPlusUnknownDataContainer *container) {
+int siplus_icbuilder_default(SIPlusInvocationContextBuilder *builder, SIPlusUnknownDataContainer *container) {
     SIPLUS_NOT_NULL(builder, container);
 
     builder->builder.use_default(*container->container);
     return siplus_error_set(SIPLUS_OK);
 }
 
-SIPLUS_EXPORTED int siplus_icbuilder_build(SIPlusInvocationContext **context, SIPlusInvocationContextBuilder *builder) {
+int siplus_icbuilder_build(SIPlusInvocationContext **context, SIPlusInvocationContextBuilder *builder) {
     SIPLUS_NOT_NULL(context, builder);
     *context = new SIPlusInvocationContext(builder->builder.build());
     return siplus_error_set(SIPLUS_OK);
 }
 
-SIPLUS_EXPORTED void siplus_icbuilder_delete(SIPlusInvocationContextBuilder *builder) {
+void siplus_icbuilder_delete(SIPlusInvocationContextBuilder *builder) {
     if(!builder) return;
     delete builder;
 }
@@ -730,7 +730,7 @@ SIPLUS_EXPORTED void siplus_icbuilder_delete(SIPlusInvocationContextBuilder *bui
 
 
 
-SIPLUS_EXPORTED void siplus_invocation_unref(SIPlusInvocationContext *context) {
+void siplus_invocation_unref(SIPlusInvocationContext *context) {
     if(!context) return;
     delete context;
 }
@@ -738,7 +738,7 @@ SIPLUS_EXPORTED void siplus_invocation_unref(SIPlusInvocationContext *context) {
 
 
 
-SIPLUS_EXPORTED int siplus_type_new(
+int siplus_type_new(
     SIPlusTypeInfo **type,
     void *data, const char *name, 
     SIPlusTypeIsIterable is_iterable, SIPlusTypeAccess access, 
@@ -756,37 +756,37 @@ SIPLUS_EXPORTED int siplus_type_new(
     return siplus_error_set(SIPLUS_OK);
 }
 
-SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_int() {
+SIPlusTypeInfo *siplus_type_int() {
     auto ptr = std::make_shared<types::IntegerType>();
     return new SIPlusTypeInfo{ ptr };
 }
 
-SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_float() {
+SIPlusTypeInfo *siplus_type_float() {
     auto ptr = std::make_shared<types::FloatType>();
     return new SIPlusTypeInfo{ ptr };
 }
 
-SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_string() {
+SIPlusTypeInfo *siplus_type_string() {
     auto ptr = std::make_shared<types::StringType>();
     return new SIPlusTypeInfo{ ptr };
 }
 
-SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_bool() {
+SIPlusTypeInfo *siplus_type_bool() {
     auto ptr = std::make_shared<types::BoolType>();
     return new SIPlusTypeInfo{ ptr };
 }
 
-SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_array() {
+SIPlusTypeInfo *siplus_type_array() {
     auto ptr = std::make_shared<types::ArrayType>();
     return new SIPlusTypeInfo{ ptr };
 }
 
-SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_null() {
+SIPlusTypeInfo *siplus_type_null() {
     auto ptr = std::make_shared<types::NullType>();
     return new SIPlusTypeInfo{ ptr };
 }
 
-SIPLUS_EXPORTED int siplus_type_access(SIPlusUnknownDataContainer **result, SIPlusTypeInfo *type, SIPlusUnknownDataContainer *data, char *property) 
+int siplus_type_access(SIPlusUnknownDataContainer **result, SIPlusTypeInfo *type, SIPlusUnknownDataContainer *data, char *property) 
 SIPLUS_TRY({
     SIPLUS_NOT_NULL(result, type, data, property);
 
@@ -797,7 +797,7 @@ SIPLUS_TRY({
     return SIPLUS_OK;
 })
 
-SIPLUS_EXPORTED int siplus_type_is_iterable(int *result, SIPlusTypeInfo *info, SIPlusUnknownDataContainer *data) 
+int siplus_type_is_iterable(int *result, SIPlusTypeInfo *info, SIPlusUnknownDataContainer *data) 
 SIPLUS_TRY({
     SIPLUS_NOT_NULL(info, data);
 
@@ -805,7 +805,7 @@ SIPLUS_TRY({
     return SIPLUS_OK;
 })
 
-SIPLUS_EXPORTED int siplus_type_iterate(SIPlusIterator **result, SIPlusTypeInfo *typeInfo, SIPlusUnknownDataContainer *container) 
+int siplus_type_iterate(SIPlusIterator **result, SIPlusTypeInfo *typeInfo, SIPlusUnknownDataContainer *container) 
 SIPLUS_TRY({
     SIPLUS_NOT_NULL(result, typeInfo, container);
 
@@ -814,14 +814,14 @@ SIPLUS_TRY({
     return SIPLUS_OK;
 })
 
-SIPLUS_EXPORTED int siplus_type_is(SIPlusTypeInfo *first, SIPlusTypeInfo *second) {
+int siplus_type_is(SIPlusTypeInfo *first, SIPlusTypeInfo *second) {
     if(!first) return 0;
     if(!second) return 0;
 
     return *first->info == *second->info;
 }
 
-SIPLUS_EXPORTED int siplus_type_name(char **name, SIPlusTypeInfo *first) {
+int siplus_type_name(char **name, SIPlusTypeInfo *first) {
     SIPLUS_NOT_NULL(name, first);
 
     auto str = first->info->name();
@@ -832,7 +832,7 @@ SIPLUS_EXPORTED int siplus_type_name(char **name, SIPlusTypeInfo *first) {
     return SIPLUS_OK;
 }
 
-SIPLUS_EXPORTED void siplus_type_unref(SIPlusTypeInfo *type) {
+void siplus_type_unref(SIPlusTypeInfo *type) {
     if(!type) return;
     delete type;
 }
@@ -840,7 +840,7 @@ SIPLUS_EXPORTED void siplus_type_unref(SIPlusTypeInfo *type) {
 
 
 
-SIPLUS_EXPORTED int siplus_iterator_new(
+int siplus_iterator_new(
     SIPlusIterator **iterator, void *data, 
     SIPlusIteratorMore more, SIPlusIteratorNext next, 
     SIPlusIteratorCurrent current, SIPlusIteratorDeleter deleter
@@ -854,21 +854,21 @@ SIPLUS_EXPORTED int siplus_iterator_new(
     return siplus_error_set(SIPLUS_OK);
 }
 
-SIPLUS_EXPORTED int siplus_iterator_next(SIPlusIterator *iterator) SIPLUS_TRY({
+int siplus_iterator_next(SIPlusIterator *iterator) SIPLUS_TRY({
     SIPLUS_NOT_NULL(iterator);
 
     iterator->iterator->next();
     return SIPLUS_OK;
 })
 
-SIPLUS_EXPORTED int siplus_iterator_more(int *result, SIPlusIterator *iterator) SIPLUS_TRY({
+int siplus_iterator_more(int *result, SIPlusIterator *iterator) SIPLUS_TRY({
     SIPLUS_NOT_NULL(result, iterator);
 
     *result = iterator->iterator->more() ? 1 : 0;
     return SIPLUS_OK;
 })
 
-SIPLUS_EXPORTED int siplus_iterator_current(SIPlusUnknownDataContainer **result, SIPlusIterator *iterator) SIPLUS_TRY({
+int siplus_iterator_current(SIPlusUnknownDataContainer **result, SIPlusIterator *iterator) SIPLUS_TRY({
     SIPLUS_NOT_NULL(result, iterator);
 
     *result = new SIPlusUnknownDataContainer{
@@ -877,75 +877,75 @@ SIPLUS_EXPORTED int siplus_iterator_current(SIPlusUnknownDataContainer **result,
     return SIPLUS_OK;
 })
 
-SIPLUS_EXPORTED void siplus_iterator_delete(SIPlusIterator *iterator) {
+void siplus_iterator_delete(SIPlusIterator *iterator) {
     if(!iterator) return;
     delete iterator;
 }
 
 
 
-SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_int(long value) {
+SIPlusUnknownDataContainer *siplus_data_make_int(long value) {
     return new SIPlusUnknownDataContainer{std::make_unique<UnknownDataTypeContainer>(make_data<types::IntegerType>(value))};
 }
 
-SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_float(double value){
+SIPlusUnknownDataContainer *siplus_data_make_float(double value){
     return new SIPlusUnknownDataContainer{std::make_unique<UnknownDataTypeContainer>(make_data<types::FloatType>(value))};
 }
 
-SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_string(const char *text){
+SIPlusUnknownDataContainer *siplus_data_make_string(const char *text){
     return new SIPlusUnknownDataContainer{std::make_unique<UnknownDataTypeContainer>(make_data<types::StringType>(text))};
 }
 
-SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_bool(int value){
+SIPlusUnknownDataContainer *siplus_data_make_bool(int value){
     return new SIPlusUnknownDataContainer{std::make_unique<UnknownDataTypeContainer>(make_data<types::BoolType>(value))};
 }
 
-SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_null() {
+SIPlusUnknownDataContainer *siplus_data_make_null() {
     return new SIPlusUnknownDataContainer{std::make_unique<UnknownDataTypeContainer>()};
 }
 
-SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make(SIPlusTypeInfo *type, void *data, SIPlusUnknownDataContainerDeleter deleter) {
+SIPlusUnknownDataContainer *siplus_data_make(SIPlusTypeInfo *type, void *data, SIPlusUnknownDataContainerDeleter deleter) {
     return new SIPlusUnknownDataContainer{
         std::make_unique<UnknownDataTypeContainer>(type->info, data, deleter)
     };
 }
 
-SIPLUS_EXPORTED int siplus_data_is(SIPlusUnknownDataContainer *container, SIPlusTypeInfo *type) {
+int siplus_data_is(SIPlusUnknownDataContainer *container, SIPlusTypeInfo *type) {
     if(!container || !type) return 0;
     return (*container->container->type == *type->info) ? 1 : 0;
 }
 
-SIPLUS_EXPORTED int siplus_data_is_int(SIPlusUnknownDataContainer *container) {
+int siplus_data_is_int(SIPlusUnknownDataContainer *container) {
     if(!container) return 0;
     return container->container->type->is<types::IntegerType>() ? 1 : 0;
 }
 
-SIPLUS_EXPORTED int siplus_data_is_float(SIPlusUnknownDataContainer *container) {
+int siplus_data_is_float(SIPlusUnknownDataContainer *container) {
     if(!container) return 0;
     return container->container->type->is<types::FloatType>() ? 1 : 0;
 }
 
-SIPLUS_EXPORTED int siplus_data_is_string(SIPlusUnknownDataContainer *container) {
+int siplus_data_is_string(SIPlusUnknownDataContainer *container) {
     if(!container) return 0;
     return container->container->type->is<types::StringType>() ? 1 : 0;
 }
 
-SIPLUS_EXPORTED int siplus_data_is_bool(SIPlusUnknownDataContainer *container) {
+int siplus_data_is_bool(SIPlusUnknownDataContainer *container) {
     if(!container) return 0;
     return container->container->type->is<types::BoolType>() ? 1 : 0;
 }
 
-SIPLUS_EXPORTED int siplus_data_is_array(SIPlusUnknownDataContainer *container) {
+int siplus_data_is_array(SIPlusUnknownDataContainer *container) {
     if(!container) return 0;
     return container->container->type->is<types::ArrayType>() ? 1 : 0;
 }
 
-SIPLUS_EXPORTED int siplus_data_is_null(SIPlusUnknownDataContainer *container) {
+int siplus_data_is_null(SIPlusUnknownDataContainer *container) {
     if(!container) return 0;
     return container->container->type->is<types::NullType>() ? 1 : 0;
 }
 
-SIPLUS_EXPORTED int siplus_data_type(SIPlusTypeInfo **type, SIPlusUnknownDataContainer *container) {
+int siplus_data_type(SIPlusTypeInfo **type, SIPlusUnknownDataContainer *container) {
     SIPLUS_NOT_NULL(container, type);
 
     std::shared_ptr<const TypeInfo> ptr = container->container->type;
@@ -954,26 +954,26 @@ SIPLUS_EXPORTED int siplus_data_type(SIPlusTypeInfo **type, SIPlusUnknownDataCon
     return SIPLUS_OK;
 }
 
-SIPLUS_EXPORTED int siplus_data_ptr(void **data, SIPlusUnknownDataContainer *container) {
+int siplus_data_ptr(void **data, SIPlusUnknownDataContainer *container) {
     SIPLUS_NOT_NULL(data, container);
     
     *data = container->container->ptr;
     return SIPLUS_OK;
 }
 
-SIPLUS_EXPORTED int siplus_data_as_int(long *result, SIPlusUnknownDataContainer *value) {
+int siplus_data_as_int(long *result, SIPlusUnknownDataContainer *value) {
     return siplus_data_as<types::IntegerType>(result, value);
 }
 
-SIPLUS_EXPORTED int siplus_data_as_float(double *result, SIPlusUnknownDataContainer *value) {
+int siplus_data_as_float(double *result, SIPlusUnknownDataContainer *value) {
     return siplus_data_as<types::FloatType>(result, value);
 }
 
-SIPLUS_EXPORTED int siplus_data_as_bool(int *result, SIPlusUnknownDataContainer *value) {
+int siplus_data_as_bool(int *result, SIPlusUnknownDataContainer *value) {
     return siplus_data_as<types::BoolType>(result, value);
 }
 
-SIPLUS_EXPORTED int siplus_data_as_string(char **result, SIPlusUnknownDataContainer *value) {
+int siplus_data_as_string(char **result, SIPlusUnknownDataContainer *value) {
     SIPLUS_NOT_NULL(result, value);
 
     if(!value->container->is<types::StringType>()) {
@@ -988,7 +988,7 @@ SIPLUS_EXPORTED int siplus_data_as_string(char **result, SIPlusUnknownDataContai
     return SIPLUS_OK;
 }
 
-SIPLUS_EXPORTED void siplus_data_delete(SIPlusUnknownDataContainer *container) {
+void siplus_data_delete(SIPlusUnknownDataContainer *container) {
     if(!container) return;
     delete container;
 }

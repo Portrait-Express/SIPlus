@@ -14,7 +14,7 @@ namespace stl {
 /**
  * struct type_function - Function to get the type name of the parameter
  */
-struct type_function : Function {
+struct SIPLUS_EXPORT type_function : Function {
     virtual std::shared_ptr<text::ValueRetriever> value(
         std::shared_ptr<text::ValueRetriever> parent,
         std::vector<std::shared_ptr<text::ValueRetriever>> parameters

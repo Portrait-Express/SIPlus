@@ -6,8 +6,6 @@
 
 #ifdef SIPLUS_INCLUDE_STDLIB
 
-#include <typeindex>
-
 #include "siplus/text/converter.hxx"
 
 namespace SIPLUS_NAMESPACE {
@@ -16,7 +14,7 @@ namespace stl {
 /**
  * struct bool_string_converter - Converts a boolean to a string
  */
-struct bool_string_converter : text::Converter {
+struct SIPLUS_EXPORT bool_string_converter : text::Converter {
 public:
     bool can_convert(const TypeInfo& from, const TypeInfo& to) const override;
 

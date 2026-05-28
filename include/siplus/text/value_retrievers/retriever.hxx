@@ -13,7 +13,7 @@ namespace text {
  * @brief A ValueRetriever is an object that supplies a value on invocation. This is used
  * to represent Expression templates.
  */
-class ValueRetriever {
+class SIPLUS_EXPORT ValueRetriever {
 public:
     /**
      * @brief Override this to provide a value on invocation.

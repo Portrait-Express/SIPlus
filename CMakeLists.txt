@@ -78,25 +78,16 @@ if(SIPLUS_INCLUDE_STDLIB)
     set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/rand.cpp)
 endif()
 
+add_library(siplus ${SIPLUS_SOURCES})
+target_link_options(siplus PUBLIC -Wno-undef)
+
 if(SIPLUS_BUILD_WASM)
-    set(EMSCRIPTEN_LINK_FLAGS "-s WASM=2 -s INVOKE_RUN=0")
-
-    set(WASM_DUMMY_SOURCE ${CMAKE_CURRENT_BINARY_DIR}/dummy.cpp)
-    file(WRITE ${WASM_DUMMY_SOURCE} "int main() { return 0; }\n")
-    set_source_files_properties(${WASM_DUMMY_SOURCE} PROPERTIES GENERATED TRUE)
-
-    add_executable(siplus ${SIPLUS_SOURCES} ${WASM_DUMMY_SOURCE})
-
-    target_link_libraries(siplus exports.js) #This disables export wasm name minification
-
     execute_process(
         COMMAND bash -c "cat ${PROJECT_SOURCE_DIR}/include/siplus/csiplus.h | grep -E '^\\s*SIPLUS_EXPORTED.*?[a-zA-Z]+\\(' | perl -pe 's/(^.+?)([a-zA-Z_]*)(\\(.*$)/_\\2/' | jq -R '[inputs]' | tr -d '\n '"
         OUTPUT_VARIABLE WASM_SIPLUS_EXPORTS)
     target_link_options(siplus PRIVATE 
         "-sEXPORTED_FUNCTIONS=${WASM_SIPLUS_EXPORTS}"
         --bind)
-else()
-    add_library(siplus ${SIPLUS_SOURCES})
 endif()
 
 target_precompile_headers(siplus PRIVATE "${PROJECT_SOURCE_DIR}/include/siplus/pch.hxx")

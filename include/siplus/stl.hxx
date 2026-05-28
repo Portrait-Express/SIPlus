@@ -17,7 +17,7 @@ namespace stl {
  *
  * @param[in] context The context to attach to
  */
-void attach_stl(SIPlusParserContext& context);
+SIPLUS_EXPORT void attach_stl(SIPlusParserContext& context);
 // Should this be implicit? Is there really a case where it wont be called?
     
 } /* stl */

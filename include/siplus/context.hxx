@@ -23,12 +23,12 @@ namespace SIPLUS_NAMESPACE {
  * @brief The context object passed around between SIPlus objects to communicate converters,
  * accesors, iterators, and other data related information.
  */
-class SIPlusParserContext;
+class SIPLUS_EXPORT SIPlusParserContext;
 
 /**
  * struct ContextInvocationContextBuilder - Builder class for a root `InvocationContext`
  */
-struct ContextInvocationContextBuilder {
+struct SIPLUS_EXPORT ContextInvocationContextBuilder {
     friend class SIPlusParserContext;
 
     /**
@@ -59,7 +59,7 @@ private:
     std::unordered_map<std::string, UnknownDataTypeContainer> variables_;
 };
 
-class SIPlusParserContext : public std::enable_shared_from_this<SIPlusParserContext> {
+class SIPLUS_EXPORT SIPlusParserContext : public std::enable_shared_from_this<SIPlusParserContext> {
 public:
     SIPlusParserContext();
 

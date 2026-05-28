@@ -17,7 +17,7 @@ namespace text {
  * the value from the ValueRetriever to a string using any viable converter found in 
  * the context.
  */
-class ValueRetrieverConstructorStep : public TextConstructorStep {
+class SIPLUS_EXPORT ValueRetrieverConstructorStep : public TextConstructorStep {
 public:
     explicit ValueRetrieverConstructorStep(
         std::shared_ptr<SIPlusParserContext> context, std::shared_ptr<ValueRetriever> retriever);

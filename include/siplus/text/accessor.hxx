@@ -13,7 +13,7 @@ namespace text {
 /**
  * @deprecated This was used prior to the TypeInfo change. Needs to be removed.
  */
-class Accessor {
+class SIPLUS_EXPORT Accessor {
 public:
     virtual UnknownDataTypeContainer access(const UnknownDataTypeContainer& value, const std::string& name) = 0;
     virtual bool can_access(const UnknownDataTypeContainer& value) = 0;

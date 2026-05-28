@@ -13,7 +13,7 @@ namespace text {
 /**
  * @brief This is one step in the TextConstructor sequence
  */
-class TextConstructorStep {
+class SIPLUS_EXPORT TextConstructorStep {
 public:
     /**
      * @brief Get the next part of the Template to append to the text
@@ -22,6 +22,8 @@ public:
      * @return The next part of the template
      */
     virtual std::string getPart(InvocationContext& value) = 0;
+
+    virtual ~TextConstructorStep() = default;
 };
     
 } /* text */

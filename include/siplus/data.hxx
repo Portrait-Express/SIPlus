@@ -15,12 +15,12 @@
 namespace SIPLUS_NAMESPACE {
 
 namespace text { struct Iterator; }
-struct UnknownDataTypeContainer; 
+struct SIPLUS_EXPORT UnknownDataTypeContainer; 
 
 /**
  * @brief Type information in order to properly handle dynamically typed input data.
  */
-class TypeInfo : public std::enable_shared_from_this<TypeInfo> {
+class SIPLUS_EXPORT TypeInfo : public std::enable_shared_from_this<TypeInfo> {
 public:
     /**
      * @brief Returns the name of this type. Type equality is determined by 
@@ -105,7 +105,7 @@ namespace types {
  * struct NullType - This is the default type of an UnknownDataTypeContainer. Used to 
  * represent an empty container.
  */
-struct NullType : public TypeInfo {
+struct SIPLUS_EXPORT NullType : public TypeInfo {
     virtual std::string name() const override;
     virtual UnknownDataTypeContainer access(const UnknownDataTypeContainer& data, const std::string& name) const override;
     virtual bool is_iterable(const UnknownDataTypeContainer& data) const override;
@@ -128,7 +128,7 @@ struct NullType : public TypeInfo {
  * The container may be copied and moved at will, but only one copy of the data exists.
  * The container has a reference counter to invoke the deleter.
  */
-struct UnknownDataTypeContainer {
+struct SIPLUS_EXPORT UnknownDataTypeContainer {
     using deleter = std::function<void (void*)>; 
 
     /**

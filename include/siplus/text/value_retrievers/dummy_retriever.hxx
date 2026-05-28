@@ -11,7 +11,7 @@ namespace text {
 /**
  * @brief Simply returns the value of '.'. Used in a few locations internally.
  */
-class DummyValueRetriever : public ValueRetriever {
+class SIPLUS_EXPORT DummyValueRetriever : public ValueRetriever {
 public:
     DummyValueRetriever() {}
 

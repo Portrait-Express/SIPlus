@@ -13,7 +13,7 @@ namespace text {
 /**
  * @brief Provide converter functionality between types.
  */
-class Converter {
+class SIPLUS_EXPORT Converter {
 public:
     /**
      * @brief This will return true if this converter can convert from `from` to `to`.

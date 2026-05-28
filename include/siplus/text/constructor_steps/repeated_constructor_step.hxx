@@ -19,7 +19,7 @@ namespace text {
  * return an object that is iterable. The nested constructor will be called for each item
  * in the iterator, and concatenated, and returned.
  */
-class RepeatedConstructorConstructorStep : public TextConstructorStep {
+class SIPLUS_EXPORT RepeatedConstructorConstructorStep : public TextConstructorStep {
 public:
     /**
      * @brief Create a new RepeatedConstructorConstructorStep

@@ -13,7 +13,7 @@ namespace text {
 /**
  * @brief Returns the same chunk of text every time.
  */
-class LiteralConstructorStep : public TextConstructorStep {
+class SIPLUS_EXPORT LiteralConstructorStep : public TextConstructorStep {
 public:
     /**
      * @brief Create a new LiteralConstructorStep

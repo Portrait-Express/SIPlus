@@ -18,7 +18,7 @@ namespace stl {
 /**
  * struct lt_func - Less than function
  */
-struct lt_func : Function  {
+struct SIPLUS_EXPORT lt_func : Function  {
     explicit lt_func(
         std::weak_ptr<SIPlusParserContext> context,
         std::shared_ptr<Function> cmp_func
@@ -37,7 +37,7 @@ private:
 /**
  * struct gt_func - Greater than function
  */
-struct gt_func : Function  {
+struct SIPLUS_EXPORT gt_func : Function  {
     explicit gt_func(
         std::weak_ptr<SIPlusParserContext> context,
         std::shared_ptr<Function> cmp_func
@@ -56,7 +56,7 @@ private:
 /**
  * struct eq_func - Equality function
  */
-struct eq_func : Function  {
+struct SIPLUS_EXPORT eq_func : Function  {
     explicit eq_func(
         std::weak_ptr<SIPlusParserContext> context,
         std::shared_ptr<Function> cmp_func

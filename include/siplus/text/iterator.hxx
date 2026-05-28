@@ -2,11 +2,12 @@
 #ifndef INCLUDE_SIPLUS_TEXT_ITERATOR_HXX_
 #define INCLUDE_SIPLUS_TEXT_ITERATOR_HXX_
 
+#include "siplus/config.h"
+
 namespace SIPLUS_NAMESPACE::text {
-class Iterator;
+class SIPLUS_EXPORT Iterator;
 } /* SIPLUS_NAMESPACE::text */
 
-#include "siplus/config.h"
 #include "siplus/data.hxx"
 
 namespace SIPLUS_NAMESPACE {
@@ -29,7 +30,7 @@ namespace text {
  * }
  * @endcode
  */
-class Iterator {
+class SIPLUS_EXPORT Iterator {
 public:
     /**
      * @brief Check if the next item is available

@@ -52,7 +52,7 @@ private:
 namespace SIPLUS_NAMESPACE {
 namespace stl {
 
-struct SetType : public TypeInfo {
+struct SIPLUS_EXPORT SetType : public TypeInfo {
     using data_type = std::unordered_set<UnknownDataTypeContainer>;
     virtual std::string name() const override;
     virtual bool is_iterable(const UnknownDataTypeContainer& data) const override;
@@ -63,7 +63,7 @@ struct SetType : public TypeInfo {
 /**
  * struct set_new_func - Function to create a new instance of a set
  */
-struct set_new_func : Function {
+struct SIPLUS_EXPORT set_new_func : Function {
     set_new_func(std::weak_ptr<SIPlusParserContext> context) 
         : context_(context) {}
 
@@ -79,7 +79,7 @@ private:
 /**
  * struct set_has_func - Function to check if a set contains an item
  */
-struct set_has_func : Function {
+struct SIPLUS_EXPORT set_has_func : Function {
     std::shared_ptr<text::ValueRetriever> value(
         std::shared_ptr<text::ValueRetriever> parent,
         std::vector<std::shared_ptr<text::ValueRetriever>> parameters
@@ -89,7 +89,7 @@ struct set_has_func : Function {
 /**
  * struct set_add_func - Function to add an item to a set.
  */
-struct set_add_func : Function {
+struct SIPLUS_EXPORT set_add_func : Function {
     std::shared_ptr<text::ValueRetriever> value(
         std::shared_ptr<text::ValueRetriever> parent,
         std::vector<std::shared_ptr<text::ValueRetriever>> parameters

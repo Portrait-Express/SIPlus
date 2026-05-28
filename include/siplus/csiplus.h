@@ -4,23 +4,6 @@
 
 #include "siplus/config.h"
 
-#ifdef SIPLUS_BUILD
-#  ifndef SIPLUS_EXPORT_EXTRA
-#    define SIPLUS_EXPORT_EXTRA
-#  endif
-#  if defined(SIPLUS_EXPORTING) && defined(_MSC_VER)
-#    define SIPLUS_EXPORTED SIPLUS_EXPORT_EXTRA _declspec(dllexport)
-#  else
-#    define SIPLUS_EXPORTED SIPLUS_EXPORT_EXTRA 
-#  endif
-#else
-#  ifdef _MSC_VER
-#    define SIPLUS_EXPORTED __declspec(dllimport)
-#  else
-#    define SIPLUS_EXPORTED
-#  endif
-#endif
-
 enum SIPlusErrors {
     SIPLUS_OK = 0,
     SIPLUS_ERR,
@@ -218,7 +201,7 @@ typedef void (*SIPlusConverterDeleter)(void *data);
  *
  * @param[in] ptr (Owner) The text pointer returned from another siplus_* function
  */
-SIPLUS_EXPORTED void siplus_string_delete(const char *ptr);
+SIPLUS_EXPORT void siplus_string_delete(const char *ptr);
 
 /**
  * @brief Get the error message. Free the pointer with `siplus_string_delete`.
@@ -226,7 +209,7 @@ SIPLUS_EXPORTED void siplus_string_delete(const char *ptr);
  * @param[out] message (Owner) The message
  * @return The error code stored with the message.
  */
-SIPLUS_EXPORTED int siplus_error_get(char **message);
+SIPLUS_EXPORT int siplus_error_get(char **message);
 
 /**
  * @brief Set an error. If any of your function implementations fail, call this.
@@ -235,7 +218,7 @@ SIPLUS_EXPORTED int siplus_error_get(char **message);
  * @param[in] message (Reference) The error message. This is copied and stored, so you may free your message.
  * @return The value passed into `err`
  */
-SIPLUS_EXPORTED int siplus_error_set(int err, const char *message);
+SIPLUS_EXPORT int siplus_error_set(int err, const char *message);
 
 
 
@@ -244,7 +227,7 @@ SIPLUS_EXPORTED int siplus_error_set(int err, const char *message);
  *
  * @return (Owner) The new parser.
  */
-SIPLUS_EXPORTED SIPlusParser *siplus_parser_new();
+SIPLUS_EXPORT SIPlusParser *siplus_parser_new();
 
 /**
  * @brief Get the parser's context
@@ -253,7 +236,7 @@ SIPLUS_EXPORTED SIPlusParser *siplus_parser_new();
  * @param[in] parser (Reference) The parser
  * @return Error code
  */
-SIPLUS_EXPORTED int siplus_parser_context(SIPlusContext **context,  SIPlusParser *parser);
+SIPLUS_EXPORT int siplus_parser_context(SIPlusContext **context,  SIPlusParser *parser);
 
 /**
  * @brief Get an interpolation from the parser
@@ -264,7 +247,7 @@ SIPLUS_EXPORTED int siplus_parser_context(SIPlusContext **context,  SIPlusParser
  * @param[in] opts (Reference) Parser options. Pass NULL to use default as a shortcut.
  * @return Error code
  */
-SIPLUS_EXPORTED int siplus_parser_get_interpolation(SIPlusTextConstructor **constructor, SIPlusParser *parser, const char *text, SIPlusParseOpts *opts);
+SIPLUS_EXPORT int siplus_parser_get_interpolation(SIPlusTextConstructor **constructor, SIPlusParser *parser, const char *text, SIPlusParseOpts *opts);
 /**
  * @brief Get an expression ValueRetriever
  *
@@ -274,14 +257,14 @@ SIPLUS_EXPORTED int siplus_parser_get_interpolation(SIPlusTextConstructor **cons
  * @param[in] opts (Reference) Parser options. Pass NULL to use default as a shortcut.
  * @return Error code
  */
-SIPLUS_EXPORTED int siplus_parser_get_expression(SIPlusValueRetriever **retriever, SIPlusParser *parser, const char *expr, SIPlusParseOpts *opts);
+SIPLUS_EXPORT int siplus_parser_get_expression(SIPlusValueRetriever **retriever, SIPlusParser *parser, const char *expr, SIPlusParseOpts *opts);
 
 /**
  * @brief Delete a parser. 
  *
  * @param[in] parser (Owner) The parser to delete
  */
-SIPLUS_EXPORTED void siplus_parser_delete(SIPlusParser *parser);
+SIPLUS_EXPORT void siplus_parser_delete(SIPlusParser *parser);
 
 
 
@@ -294,7 +277,7 @@ SIPLUS_EXPORTED void siplus_parser_delete(SIPlusParser *parser);
  * @param[in] deleter Deleter for `data` when this function is deleted
  * @return Error code
  */
-SIPLUS_EXPORTED int siplus_function_create(SIPlusFunction **function, void *data, SIPlusFunctionValue value, SIPlusFunctionDeleter deleter);
+SIPLUS_EXPORT int siplus_function_create(SIPlusFunction **function, void *data, SIPlusFunctionValue value, SIPlusFunctionDeleter deleter);
 
 /**
  * @brief Get the value from a function
@@ -306,7 +289,7 @@ SIPLUS_EXPORTED int siplus_function_create(SIPlusFunction **function, void *data
  * @param[in] params (TODO) Parameter list
  * @return Error code
  */
-SIPLUS_EXPORTED int siplus_function_value(SIPlusValueRetriever **retriever, SIPlusFunction *function, SIPlusValueRetriever *parent, int paramc, SIPlusValueRetriever **params);
+SIPLUS_EXPORT int siplus_function_value(SIPlusValueRetriever **retriever, SIPlusFunction *function, SIPlusValueRetriever *parent, int paramc, SIPlusValueRetriever **params);
 
 /**
  * @brief Dereference a function. These are reference counted, so this will not 
@@ -314,7 +297,7 @@ SIPLUS_EXPORTED int siplus_function_value(SIPlusValueRetriever **retriever, SIPl
  *
  * @param[in] function (Owner) The function
  */
-SIPLUS_EXPORTED void siplus_function_unref(SIPlusFunction *function);
+SIPLUS_EXPORT void siplus_function_unref(SIPlusFunction *function);
 
 
 
@@ -328,7 +311,7 @@ SIPLUS_EXPORTED void siplus_function_unref(SIPlusFunction *function);
  * @param[in] deleter Deleter for `data`
  * @return Error code
  */
-SIPLUS_EXPORTED int siplus_converter_new(SIPlusConverter **converter, void *data, SIPlusConverterCanConvert can, SIPlusConverterImpl impl, SIPlusConverterDeleter deleter);
+SIPLUS_EXPORT int siplus_converter_new(SIPlusConverter **converter, void *data, SIPlusConverterCanConvert can, SIPlusConverterImpl impl, SIPlusConverterDeleter deleter);
 
 /**
  * @brief Check if a converter can convert between two types
@@ -339,7 +322,7 @@ SIPLUS_EXPORTED int siplus_converter_new(SIPlusConverter **converter, void *data
  * @param[in] to (Reference) The type to convert to
  * @return Error code
  */
-SIPLUS_EXPORTED int siplus_converter_can_convert(int *result, SIPlusConverter *converter, SIPlusTypeInfo *from, SIPlusTypeInfo *to);
+SIPLUS_EXPORT int siplus_converter_can_convert(int *result, SIPlusConverter *converter, SIPlusTypeInfo *from, SIPlusTypeInfo *to);
 
 /**
  * @brief Convert a value. Calling this when can_convert is false between the two types is UB.
@@ -350,7 +333,7 @@ SIPLUS_EXPORTED int siplus_converter_can_convert(int *result, SIPlusConverter *c
  * @param[in] to (Reference) The type to convert to
  * @return Error code
  */
-SIPLUS_EXPORTED int siplus_converter_convert(SIPlusUnknownDataContainer **result, SIPlusConverter *converter, SIPlusUnknownDataContainer *from, SIPlusTypeInfo *to);
+SIPLUS_EXPORT int siplus_converter_convert(SIPlusUnknownDataContainer **result, SIPlusConverter *converter, SIPlusUnknownDataContainer *from, SIPlusTypeInfo *to);
 
 /**
  * @brief Dereference a converter. These are reference counted, so this will not 
@@ -358,7 +341,7 @@ SIPLUS_EXPORTED int siplus_converter_convert(SIPlusUnknownDataContainer **result
  *
  * @param[in] converter (Owner) The converter to dereference
  */
-SIPLUS_EXPORTED void siplus_converter_unref(SIPlusConverter *converter);
+SIPLUS_EXPORT void siplus_converter_unref(SIPlusConverter *converter);
 
 
 
@@ -370,14 +353,14 @@ SIPLUS_EXPORTED void siplus_converter_unref(SIPlusConverter *converter);
  * @param[in] context (Reference) The invocation context
  * @return Error code
  */
-SIPLUS_EXPORTED int siplus_text_construct(char **text, SIPlusTextConstructor *value, SIPlusInvocationContext *context);
+SIPLUS_EXPORT int siplus_text_construct(char **text, SIPlusTextConstructor *value, SIPlusInvocationContext *context);
 
 /**
  * @brief Dereference a TextConstructor.
  *
  * @param[in] constructor (Owner) The constructor
  */
-SIPLUS_EXPORTED void siplus_text_unref(SIPlusTextConstructor *constructor);
+SIPLUS_EXPORT void siplus_text_unref(SIPlusTextConstructor *constructor);
 
 
 
@@ -390,7 +373,7 @@ SIPLUS_EXPORTED void siplus_text_unref(SIPlusTextConstructor *constructor);
  * @param[in] deleter Deleter for `data`
  * @return Error Code
  */
-SIPLUS_EXPORTED int siplus_value_create(SIPlusValueRetriever **retriever, void* data, SIPlusRetrieverImpl impl, SIPlusRetrieverDeleter deleter);
+SIPLUS_EXPORT int siplus_value_create(SIPlusValueRetriever **retriever, void* data, SIPlusRetrieverImpl impl, SIPlusRetrieverDeleter deleter);
 
 /**
  * @brief retrieve the value from a ValueRetriever
@@ -400,7 +383,7 @@ SIPLUS_EXPORTED int siplus_value_create(SIPlusValueRetriever **retriever, void* 
  * @param[in] context (Reference) The invocation context
  * @return Error Code
  */
-SIPLUS_EXPORTED int siplus_value_retrieve(SIPlusUnknownDataContainer **data, SIPlusValueRetriever *value, SIPlusInvocationContext *context);
+SIPLUS_EXPORT int siplus_value_retrieve(SIPlusUnknownDataContainer **data, SIPlusValueRetriever *value, SIPlusInvocationContext *context);
 
 /**
  * @brief Dereference a ValueRetriever. These are reference counted, so this will not 
@@ -408,7 +391,7 @@ SIPLUS_EXPORTED int siplus_value_retrieve(SIPlusUnknownDataContainer **data, SIP
  *
  * @param[in] function (Owner) The ValueRetriever
  */
-SIPLUS_EXPORTED void siplus_value_unref(SIPlusValueRetriever *parser);
+SIPLUS_EXPORT void siplus_value_unref(SIPlusValueRetriever *parser);
 
 
 
@@ -417,7 +400,7 @@ SIPLUS_EXPORTED void siplus_value_unref(SIPlusValueRetriever *parser);
  *
  * @return (Owner) New parser options
  */
-SIPLUS_EXPORTED SIPlusParseOpts *siplus_parse_opts_new();
+SIPLUS_EXPORT SIPlusParseOpts *siplus_parse_opts_new();
 /**
  * @brief Add a global to be available in a template.
  *
@@ -425,14 +408,14 @@ SIPLUS_EXPORTED SIPlusParseOpts *siplus_parse_opts_new();
  * @param[in] name (Reference) The name of the global variable
  * @return Error code
  */
-SIPLUS_EXPORTED int siplus_parse_opts_add_global(SIPlusParseOpts *opts, const char *name);
+SIPLUS_EXPORT int siplus_parse_opts_add_global(SIPlusParseOpts *opts, const char *name);
 
 /**
  * @brief Delete parser options
  *
  * @param[in] opts (Owner) The options to free
  */
-SIPLUS_EXPORTED void siplus_parse_opts_delete(SIPlusParseOpts *opts);
+SIPLUS_EXPORT void siplus_parse_opts_delete(SIPlusParseOpts *opts);
 
 
 
@@ -444,7 +427,7 @@ SIPLUS_EXPORTED void siplus_parse_opts_delete(SIPlusParseOpts *opts);
  * @param[in] function (Reference) The function 
  * @return Error Code
  */
-SIPLUS_EXPORTED int siplus_context_add_function(SIPlusContext *context, const char *name, SIPlusFunction *function);
+SIPLUS_EXPORT int siplus_context_add_function(SIPlusContext *context, const char *name, SIPlusFunction *function);
 /**
  * @brief Add a converter to the context
  *
@@ -452,7 +435,7 @@ SIPLUS_EXPORTED int siplus_context_add_function(SIPlusContext *context, const ch
  * @param[in] converter (Reference) The converter to add
  * @return Error code
  */
-SIPLUS_EXPORTED int siplus_context_add_converter(SIPlusContext *context, SIPlusConverter *converter);
+SIPLUS_EXPORT int siplus_context_add_converter(SIPlusContext *context, SIPlusConverter *converter);
 
 /**
  * @brief Attach the STL library of functions and converters.
@@ -460,7 +443,7 @@ SIPLUS_EXPORTED int siplus_context_add_converter(SIPlusContext *context, SIPlusC
  * @param[in] context (Reference) Context
  * @return Error Code
  */
-SIPLUS_EXPORTED int siplus_context_use_stl(SIPlusContext *context);
+SIPLUS_EXPORT int siplus_context_use_stl(SIPlusContext *context);
 
 /**
  * @brief Get a builder for an InvocationContext.
@@ -469,14 +452,14 @@ SIPLUS_EXPORTED int siplus_context_use_stl(SIPlusContext *context);
  * @param[in] context (Reference) The Parser context
  * @return Error Code
  */
-SIPLUS_EXPORTED int siplus_context_builder(SIPlusInvocationContextBuilder **builder, SIPlusContext *context);
+SIPLUS_EXPORT int siplus_context_builder(SIPlusInvocationContextBuilder **builder, SIPlusContext *context);
 
 /**
  * @brief Dereference a ParserContext. Call this for any context received from siplus_parser_context().
  *
  * @param[in] function (Owner) The context
  */
-SIPLUS_EXPORTED void siplus_context_unref(SIPlusContext *context);
+SIPLUS_EXPORT void siplus_context_unref(SIPlusContext *context);
 
 
 
@@ -488,7 +471,7 @@ SIPLUS_EXPORTED void siplus_context_unref(SIPlusContext *context);
  * @param[in] container (Reference) The data
  * @return Error Code
  */
-SIPLUS_EXPORTED int siplus_icbuilder_with(SIPlusInvocationContextBuilder *builder, const char *name, SIPlusUnknownDataContainer *container);
+SIPLUS_EXPORT int siplus_icbuilder_with(SIPlusInvocationContextBuilder *builder, const char *name, SIPlusUnknownDataContainer *container);
 
 /**
  * @brief Set the default data to use
@@ -497,7 +480,7 @@ SIPLUS_EXPORTED int siplus_icbuilder_with(SIPlusInvocationContextBuilder *builde
  * @param[in] container (Reference) The data
  * @return Error code
  */
-SIPLUS_EXPORTED int siplus_icbuilder_default(SIPlusInvocationContextBuilder *builder, SIPlusUnknownDataContainer *container);
+SIPLUS_EXPORT int siplus_icbuilder_default(SIPlusInvocationContextBuilder *builder, SIPlusUnknownDataContainer *container);
 
 /**
  * @brief Get an InvocationContext from the Builder
@@ -506,14 +489,14 @@ SIPLUS_EXPORTED int siplus_icbuilder_default(SIPlusInvocationContextBuilder *bui
  * @param[in] builder (Reference) The builder
  * @return Error code
  */
-SIPLUS_EXPORTED int siplus_icbuilder_build(SIPlusInvocationContext **context, SIPlusInvocationContextBuilder *builder);
+SIPLUS_EXPORT int siplus_icbuilder_build(SIPlusInvocationContext **context, SIPlusInvocationContextBuilder *builder);
 
 /**
  * @brief Free an InvocationContextBuilder
  *
  * @param[in] builder (Owner) The builder
  */
-SIPLUS_EXPORTED void siplus_icbuilder_delete(SIPlusInvocationContextBuilder *builder);
+SIPLUS_EXPORT void siplus_icbuilder_delete(SIPlusInvocationContextBuilder *builder);
 
 
 
@@ -522,7 +505,7 @@ SIPLUS_EXPORTED void siplus_icbuilder_delete(SIPlusInvocationContextBuilder *bui
  *
  * @param[in] context (Owner) The InvocationContext
  */
-SIPLUS_EXPORTED void siplus_invocation_unref(SIPlusInvocationContext *context);
+SIPLUS_EXPORT void siplus_invocation_unref(SIPlusInvocationContext *context);
 
 
 
@@ -538,49 +521,49 @@ SIPLUS_EXPORTED void siplus_invocation_unref(SIPlusInvocationContext *context);
  * @param[in] deleter Deleter for `data`. You may pass NULL.
  * @return Error Code
  */
-SIPLUS_EXPORTED int siplus_type_new(SIPlusTypeInfo **type, void *data, const char *name, SIPlusTypeIsIterable is_iterable, SIPlusTypeAccess access, SIPlusTypeIterate iterate, SIPlusTypeDeleter deleter);
+SIPLUS_EXPORT int siplus_type_new(SIPlusTypeInfo **type, void *data, const char *name, SIPlusTypeIsIterable is_iterable, SIPlusTypeAccess access, SIPlusTypeIterate iterate, SIPlusTypeDeleter deleter);
 
 /**
  * @brief Get the base IntegerType TypeInfo
  *
  * @return (Owner) The TypeInfo
  */
-SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_int();
+SIPLUS_EXPORT SIPlusTypeInfo *siplus_type_int();
 
 /**
  * @brief Get the base FloatType TypeInfo
  *
  * @return (Owner) The TypeInfo
  */
-SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_float();
+SIPLUS_EXPORT SIPlusTypeInfo *siplus_type_float();
 
 /**
  * @brief Get the base StringType TypeInfo
  *
  * @return (Owner) The TypeInfo
  */
-SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_string();
+SIPLUS_EXPORT SIPlusTypeInfo *siplus_type_string();
 
 /**
  * @brief Get the base BoolType TypeInfo
  *
  * @return (Owner) The TypeInfo
  */
-SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_bool();
+SIPLUS_EXPORT SIPlusTypeInfo *siplus_type_bool();
 
 /**
  * @brief Get the base ArrayType TypeInfo
  *
  * @return (Owner) The TypeInfo
  */
-SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_array();
+SIPLUS_EXPORT SIPlusTypeInfo *siplus_type_array();
 
 /**
  * @brief Get the base NullType TypeInfo
  *
  * @return (Owner) The TypeInfo
  */
-SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_null();
+SIPLUS_EXPORT SIPlusTypeInfo *siplus_type_null();
 
 /**
  * @brief Call `access` for a type
@@ -591,7 +574,7 @@ SIPLUS_EXPORTED SIPlusTypeInfo *siplus_type_null();
  * @param[in] property (Reference) The property to access
  * @return Error code
  */
-SIPLUS_EXPORTED int siplus_type_access(SIPlusUnknownDataContainer **result, SIPlusTypeInfo *type, SIPlusUnknownDataContainer *data, char *property);
+SIPLUS_EXPORT int siplus_type_access(SIPlusUnknownDataContainer **result, SIPlusTypeInfo *type, SIPlusUnknownDataContainer *data, char *property);
 
 /**
  * @brief Check if a type is iterable
@@ -601,7 +584,7 @@ SIPLUS_EXPORTED int siplus_type_access(SIPlusUnknownDataContainer **result, SIPl
  * @param[in] data (Reference) The data object
  * @return Error code
  */
-SIPLUS_EXPORTED int siplus_type_is_iterable(int *result, SIPlusTypeInfo *info, SIPlusUnknownDataContainer *data);
+SIPLUS_EXPORT int siplus_type_is_iterable(int *result, SIPlusTypeInfo *info, SIPlusUnknownDataContainer *data);
 
 /**
  * @brief Iterate on a type
@@ -611,7 +594,7 @@ SIPLUS_EXPORTED int siplus_type_is_iterable(int *result, SIPlusTypeInfo *info, S
  * @param[in] container (Reference) The data
  * @return Error code
  */
-SIPLUS_EXPORTED int siplus_type_iterate(SIPlusIterator **result, SIPlusTypeInfo *typeInfo, SIPlusUnknownDataContainer *container);
+SIPLUS_EXPORT int siplus_type_iterate(SIPlusIterator **result, SIPlusTypeInfo *typeInfo, SIPlusUnknownDataContainer *container);
 
 /**
  * @brief Get the name of the type. Delete the result with `siplus_string_delete`.
@@ -620,7 +603,7 @@ SIPLUS_EXPORTED int siplus_type_iterate(SIPlusIterator **result, SIPlusTypeInfo 
  * @param[in] first (Reference) The type
  * @return Error Code
  */
-SIPLUS_EXPORTED int siplus_type_name(char **name, SIPlusTypeInfo *first);
+SIPLUS_EXPORT int siplus_type_name(char **name, SIPlusTypeInfo *first);
 
 /**
  * @brief Checks if types are equal. Wrapper for checking equality of names.
@@ -629,7 +612,7 @@ SIPLUS_EXPORTED int siplus_type_name(char **name, SIPlusTypeInfo *first);
  * @param[in] second (Reference) The other type
  * @return Error Code
  */
-SIPLUS_EXPORTED int siplus_type_is(SIPlusTypeInfo *first, SIPlusTypeInfo *second);
+SIPLUS_EXPORT int siplus_type_is(SIPlusTypeInfo *first, SIPlusTypeInfo *second);
 
 /**
  * @brief Dereference a TypeInfo. These are reference counted, so this will not 
@@ -637,7 +620,7 @@ SIPLUS_EXPORTED int siplus_type_is(SIPlusTypeInfo *first, SIPlusTypeInfo *second
  *
  * @param[in] type (Owner) The TypeInfo
  */
-SIPLUS_EXPORTED void siplus_type_unref(SIPlusTypeInfo *type);
+SIPLUS_EXPORT void siplus_type_unref(SIPlusTypeInfo *type);
 
 
 
@@ -652,7 +635,7 @@ SIPLUS_EXPORTED void siplus_type_unref(SIPlusTypeInfo *type);
  * @param[in] deleter Deleter for `data`
  * @return Error code
  */
-SIPLUS_EXPORTED int siplus_iterator_new(SIPlusIterator **iterator, void *data, SIPlusIteratorMore more, SIPlusIteratorNext next, SIPlusIteratorCurrent current, SIPlusIteratorDeleter deleter);
+SIPLUS_EXPORT int siplus_iterator_new(SIPlusIterator **iterator, void *data, SIPlusIteratorMore more, SIPlusIteratorNext next, SIPlusIteratorCurrent current, SIPlusIteratorDeleter deleter);
 
 /**
  * @brief Move to the next Iterator item.
@@ -660,7 +643,7 @@ SIPLUS_EXPORTED int siplus_iterator_new(SIPlusIterator **iterator, void *data, S
  * @param[in] iterator (Reference) The iterator
  * @return Error code
  */
-SIPLUS_EXPORTED int siplus_iterator_next(SIPlusIterator *iterator);
+SIPLUS_EXPORT int siplus_iterator_next(SIPlusIterator *iterator);
 
 /**
  * @brief Check if there are more items remaining
@@ -669,7 +652,7 @@ SIPLUS_EXPORTED int siplus_iterator_next(SIPlusIterator *iterator);
  * @param[in] iterator (Reference) The iterator
  * @return Error code
  */
-SIPLUS_EXPORTED int siplus_iterator_more(int *result, SIPlusIterator *iterator);
+SIPLUS_EXPORT int siplus_iterator_more(int *result, SIPlusIterator *iterator);
 
 /**
  * @brief Get the current item
@@ -678,7 +661,7 @@ SIPLUS_EXPORTED int siplus_iterator_more(int *result, SIPlusIterator *iterator);
  * @param[in] iterator (Reference) The iterator
  * @return Error code
  */
-SIPLUS_EXPORTED int siplus_iterator_current(SIPlusUnknownDataContainer **result, SIPlusIterator *iterator);
+SIPLUS_EXPORT int siplus_iterator_current(SIPlusUnknownDataContainer **result, SIPlusIterator *iterator);
 
 /**
  * @brief Delete an iterator. Iterators are uniquely referenced, and this WILL lead 
@@ -686,7 +669,7 @@ SIPLUS_EXPORTED int siplus_iterator_current(SIPlusUnknownDataContainer **result,
  *
  * @param[in] iterator (Owner) The iterator
  */
-SIPLUS_EXPORTED void siplus_iterator_delete(SIPlusIterator *iterator);
+SIPLUS_EXPORT void siplus_iterator_delete(SIPlusIterator *iterator);
 
 
 
@@ -696,7 +679,7 @@ SIPLUS_EXPORTED void siplus_iterator_delete(SIPlusIterator *iterator);
  * @param[in] value 
  * @return Data container
  */
-SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_int(long value);
+SIPLUS_EXPORT SIPlusUnknownDataContainer *siplus_data_make_int(long value);
 
 /**
  * @brief Make a data container for a double.
@@ -704,7 +687,7 @@ SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_int(long value);
  * @param[in] value 
  * @return (Owner) Data container
  */
-SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_float(double value);
+SIPLUS_EXPORT SIPlusUnknownDataContainer *siplus_data_make_float(double value);
 
 /**
  * @brief Make a data container for a string.
@@ -712,7 +695,7 @@ SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_float(double value)
  * @param[in] value 
  * @return (Owner) Data container
  */
-SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_string(const char *text);
+SIPLUS_EXPORT SIPlusUnknownDataContainer *siplus_data_make_string(const char *text);
 
 /**
  * @brief Make a data container for a boolean.
@@ -720,7 +703,7 @@ SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_string(const char *
  * @param[in] value 
  * @return (Owner) Data container
  */
-SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_bool(int value);
+SIPLUS_EXPORT SIPlusUnknownDataContainer *siplus_data_make_bool(int value);
 
 /**
  * @brief Make a data container for null.
@@ -728,7 +711,7 @@ SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_bool(int value);
  * @param[in] value 
  * @return (Owner) Data container
  */
-SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_null();
+SIPLUS_EXPORT SIPlusUnknownDataContainer *siplus_data_make_null();
 
 /**
  * @brief Check if a data container holds an IntegerType
@@ -736,7 +719,7 @@ SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make_null();
  * @param[in] container (Reference) Data container
  * @return 1 if container is an IntegerType
  */
-SIPLUS_EXPORTED int siplus_data_is_int(SIPlusUnknownDataContainer *container);
+SIPLUS_EXPORT int siplus_data_is_int(SIPlusUnknownDataContainer *container);
 
 /**
  * @brief Check if a data container holds an FloatType
@@ -744,7 +727,7 @@ SIPLUS_EXPORTED int siplus_data_is_int(SIPlusUnknownDataContainer *container);
  * @param[in] container (Reference) Data container
  * @return 1 if container is a FloatType
  */
-SIPLUS_EXPORTED int siplus_data_is_float(SIPlusUnknownDataContainer *container);
+SIPLUS_EXPORT int siplus_data_is_float(SIPlusUnknownDataContainer *container);
 
 /**
  * @brief Check if a data container holds an StringType
@@ -752,7 +735,7 @@ SIPLUS_EXPORTED int siplus_data_is_float(SIPlusUnknownDataContainer *container);
  * @param[in] container (Reference) Data container
  * @return 1 if container is a StringType
  */
-SIPLUS_EXPORTED int siplus_data_is_string(SIPlusUnknownDataContainer *container);
+SIPLUS_EXPORT int siplus_data_is_string(SIPlusUnknownDataContainer *container);
 
 /**
  * @brief Check if a data container holds an BoolType
@@ -760,7 +743,7 @@ SIPLUS_EXPORTED int siplus_data_is_string(SIPlusUnknownDataContainer *container)
  * @param[in] container (Reference) Data container
  * @return 1 if container is a BoolType
  */
-SIPLUS_EXPORTED int siplus_data_is_bool(SIPlusUnknownDataContainer *container);
+SIPLUS_EXPORT int siplus_data_is_bool(SIPlusUnknownDataContainer *container);
 
 /**
  * @brief Check if a data container holds a NullType
@@ -768,7 +751,7 @@ SIPLUS_EXPORTED int siplus_data_is_bool(SIPlusUnknownDataContainer *container);
  * @param[in] container (Reference) Data container
  * @return 1 if container is a NullType
  */
-SIPLUS_EXPORTED int siplus_data_is_null(SIPlusUnknownDataContainer *container);
+SIPLUS_EXPORT int siplus_data_is_null(SIPlusUnknownDataContainer *container);
 
 /**
  * @brief Check if a data container holds an ArrayType
@@ -776,7 +759,7 @@ SIPLUS_EXPORTED int siplus_data_is_null(SIPlusUnknownDataContainer *container);
  * @param[in] container (Reference) Data container
  * @return 1 if container is an ArrayType
  */
-SIPLUS_EXPORTED int siplus_data_is_array(SIPlusUnknownDataContainer *container);
+SIPLUS_EXPORT int siplus_data_is_array(SIPlusUnknownDataContainer *container);
 
 /**
  * @brief Get this data container as a int.
@@ -785,7 +768,7 @@ SIPLUS_EXPORTED int siplus_data_is_array(SIPlusUnknownDataContainer *container);
  * @param[in] value (Reference) The container to read
  * @return Error code
  */
-SIPLUS_EXPORTED int siplus_data_as_int(long *result, SIPlusUnknownDataContainer *value);
+SIPLUS_EXPORT int siplus_data_as_int(long *result, SIPlusUnknownDataContainer *value);
 
 /**
  * @brief Get this data container as a float.
@@ -794,7 +777,7 @@ SIPLUS_EXPORTED int siplus_data_as_int(long *result, SIPlusUnknownDataContainer 
  * @param[in] value (Reference) The container to read
  * @return Error code
  */
-SIPLUS_EXPORTED int siplus_data_as_float(double *result, SIPlusUnknownDataContainer *value);
+SIPLUS_EXPORT int siplus_data_as_float(double *result, SIPlusUnknownDataContainer *value);
 
 /**
  * @brief Get this data container as a bool.
@@ -803,7 +786,7 @@ SIPLUS_EXPORTED int siplus_data_as_float(double *result, SIPlusUnknownDataContai
  * @param[in] value (Reference) The container to read
  * @return Error code
  */
-SIPLUS_EXPORTED int siplus_data_as_bool(int *result, SIPlusUnknownDataContainer *value);
+SIPLUS_EXPORT int siplus_data_as_bool(int *result, SIPlusUnknownDataContainer *value);
 
 /**
  * @brief Get this data container as a string. The value in `result` after this call,
@@ -813,7 +796,7 @@ SIPLUS_EXPORTED int siplus_data_as_bool(int *result, SIPlusUnknownDataContainer 
  * @param[in] value (Reference) The container to read
  * @return Error code
  */
-SIPLUS_EXPORTED int siplus_data_as_string(char **result, SIPlusUnknownDataContainer *value);
+SIPLUS_EXPORT int siplus_data_as_string(char **result, SIPlusUnknownDataContainer *value);
 
 /**
  * @brief Create a new data container. This call will not fail (outside of low memory scenarios).
@@ -823,7 +806,7 @@ SIPLUS_EXPORTED int siplus_data_as_string(char **result, SIPlusUnknownDataContai
  * @param[in] deleter Logic to delete the void*.
  * @return (Owner) The newly created container.
  */
-SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make(SIPlusTypeInfo *type, void *data, SIPlusUnknownDataContainerDeleter deleter);
+SIPLUS_EXPORT SIPlusUnknownDataContainer *siplus_data_make(SIPlusTypeInfo *type, void *data, SIPlusUnknownDataContainerDeleter deleter);
 
 /**
  * @brief Check if a container is of a certain type.
@@ -832,7 +815,7 @@ SIPLUS_EXPORTED SIPlusUnknownDataContainer *siplus_data_make(SIPlusTypeInfo *typ
  * @param[in] type (Reference) The type to check
  * @return Error code.
  */
-SIPLUS_EXPORTED int siplus_data_is(SIPlusUnknownDataContainer *container, SIPlusTypeInfo *type);
+SIPLUS_EXPORT int siplus_data_is(SIPlusUnknownDataContainer *container, SIPlusTypeInfo *type);
 
 /**
  * @brief Get the type of the container.
@@ -841,7 +824,7 @@ SIPLUS_EXPORTED int siplus_data_is(SIPlusUnknownDataContainer *container, SIPlus
  * @param[in] container (Reference) The container to check
  * @return Error code
  */
-SIPLUS_EXPORTED int siplus_data_type(SIPlusTypeInfo **type, SIPlusUnknownDataContainer *container);
+SIPLUS_EXPORT int siplus_data_type(SIPlusTypeInfo **type, SIPlusUnknownDataContainer *container);
 
 /**
  * @brief Get the void* to the data
@@ -850,14 +833,14 @@ SIPLUS_EXPORTED int siplus_data_type(SIPlusTypeInfo **type, SIPlusUnknownDataCon
  * @param[in] container (Reference) The container
  * @return Error code
  */
-SIPLUS_EXPORTED int siplus_data_ptr(void **data, SIPlusUnknownDataContainer *container);
+SIPLUS_EXPORT int siplus_data_ptr(void **data, SIPlusUnknownDataContainer *container);
 
 /**
  * @brief Delete a reference to a data container.
  *
  * @param[in] container (Owner) The container to delete
  */
-SIPLUS_EXPORTED void siplus_data_delete(SIPlusUnknownDataContainer *container);
+SIPLUS_EXPORT void siplus_data_delete(SIPlusUnknownDataContainer *container);
 
 #ifdef __cplusplus
 }

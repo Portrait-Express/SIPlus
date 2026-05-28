@@ -16,7 +16,7 @@ namespace text {
 /**
  * @brief A ValueRetriever that accesses a property on a container.
  */
-class AccessorValueRetriever : public ValueRetriever {
+class SIPLUS_EXPORT AccessorValueRetriever : public ValueRetriever {
 public:
     /**
      * @brief Make a new AccessorValueRetriever. Uses default_data() as the parent object.
