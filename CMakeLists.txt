@@ -10,9 +10,14 @@ set(SIPLUS_NAMESPACE SIPlus CACHE STRING "Optionally specify a different root na
 
 if(SIPLUS_BUILD_EXAMPLES)
     if(SIPLUS_BUILD_WASM) 
-        message("WARNING!!! Examples cannot be built when building WASM. Disabling examples.")
+        message("WARNING: Examples cannot be built when building WASM. Disabling examples.")
         set(SIPLUS_BUILD_EXAMPLES OFF)
     endif()
+endif()
+
+if(BUILD_SHARED_LIBS AND WITH_STATIC_CRT)
+    message("WARNING: Cannot use static CRT when building shared library. Disabling static CRT")
+    set(WITH_STATIC_CRT OFF)
 endif()
 
 project(siplus VERSION 2.0.3)
@@ -20,26 +25,6 @@ project(siplus VERSION 2.0.3)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-add_compile_definitions(SIPLUS_BUILD)
-
-if(BUILD_SHARED_LIBS) 
-    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-    add_compile_definitions(SIPLUS_EXPORTING)
-endif()
-
-if(MSVC)
-# Needed for some ungodly reason. I blame Microsoft.
-# MSVC CRT includes a constexpr Mutex constructor that breaks ABI compatibility.
-# This is needed to disable it, since antlr uses it.
-    add_compile_definitions(_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR)
-
-    if(WITH_STATIC_CRT)
-      set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-    else()
-      set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
-    endif(WITH_STATIC_CRT)
-endif()
 
 add_subdirectory(dependencies)
 
@@ -79,7 +64,33 @@ if(SIPLUS_INCLUDE_STDLIB)
 endif()
 
 add_library(siplus ${SIPLUS_SOURCES})
-target_link_options(siplus PUBLIC -Wno-undef)
+target_precompile_headers(siplus PRIVATE "${PROJECT_SOURCE_DIR}/include/siplus/pch.hxx")
+add_compile_definitions(SIPLUS_BUILD)
+
+target_include_directories(siplus PUBLIC include)
+target_link_libraries(siplus antlr4_static)
+
+if(BUILD_SHARED_LIBS) 
+    message("Building in shared library mode")
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+    set(SIPLUS_EXPORTING ON)
+endif()
+
+if(MSVC)
+# Needed for some ungodly reason. I blame Microsoft.
+# MSVC CRT includes a constexpr Mutex constructor that breaks ABI compatibility.
+# This is needed to disable it, since antlr uses it.
+    add_compile_definitions(_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR)
+    target_compile_options(siplus PUBLIC -Zc:preprocessor)
+
+    if(WITH_STATIC_CRT)
+      set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    else()
+      set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+    endif(WITH_STATIC_CRT)
+
+    message("-- Using MSVC ${CMAKE_MSVC_RUNTIME_LIBRARY} Runtime")
+endif()
 
 if(SIPLUS_BUILD_WASM)
     execute_process(
@@ -90,11 +101,9 @@ if(SIPLUS_BUILD_WASM)
         --bind)
 endif()
 
-target_precompile_headers(siplus PRIVATE "${PROJECT_SOURCE_DIR}/include/siplus/pch.hxx")
-
 if(SIPLUS_BUILD_EXAMPLES)
     if(SIPLUS_BUILD_WASM) 
-        message("WARNING!!! Examples cannot be built when building WASM. Disabling examples.")
+        message("WARNING: Examples cannot be built when building WASM. Disabling examples.")
     else()
         add_subdirectory(example)
     endif()
@@ -102,24 +111,16 @@ endif()
 
 if(SIPLUS_SANITIZE_ADDRESS)
     if(MSVC)
-        message(FATAL_ERROR "Due to limitations with MSVC, ASAN on Windows is currently not supported")
+        message("WARNING: Due to limitations with MSVC, ASAN on Windows is currently not supported")
+    else()
+        target_compile_options(siplus PUBLIC -fsanitize=address)
+        target_link_options(siplus PUBLIC -fsanitize=address)
     endif()
-
-    target_compile_options(siplus PUBLIC -fsanitize=address)
-    target_link_options(siplus PUBLIC -fsanitize=address)
 endif()
 
-if(MSVC)
-    target_compile_options(siplus PUBLIC -Zc:preprocessor)
-endif()
-
+add_subdirectory(tests)
 
 configure_file(
     "${PROJECT_SOURCE_DIR}/config.h.in"
     "${PROJECT_SOURCE_DIR}/include/siplus/config.h"
 )
-
-target_include_directories(siplus PUBLIC include)
-target_link_libraries(siplus antlr4_static)
-
-add_subdirectory(tests)

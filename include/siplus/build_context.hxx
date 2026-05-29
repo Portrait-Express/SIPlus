@@ -29,8 +29,14 @@ struct SIPLUS_EXPORT VariableRetriever : public text::ValueRetriever {
  * struct BuildContext - This is used internally only, it likely should not be in the public headers.
  */
 struct SIPLUS_EXPORT BuildContext : public std::enable_shared_from_this<BuildContext> {
-    BuildContext() {}
+    BuildContext() = default;
+    BuildContext(const BuildContext& other) = delete;
+    BuildContext(BuildContext&& other) = default;
     explicit BuildContext(std::shared_ptr<BuildContext> parent) : parent_(parent) {}
+    ~BuildContext() = default;
+
+    BuildContext& operator=(const BuildContext& other) = delete;
+    BuildContext& operator=(BuildContext&& other) = default;
 
     /**
      * @brief Returns true if the specified variable is declared in the current scope 

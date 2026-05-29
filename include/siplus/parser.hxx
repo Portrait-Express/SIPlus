@@ -36,7 +36,7 @@ public:
     Parser();
 
     Parser(const Parser&) = delete;
-    Parser(Parser&& other);
+    ~Parser();
 
     Parser& operator=(Parser other) {
         swap(*this, other);
@@ -88,8 +88,6 @@ public:
      * @brief Get the context from this parser.
      */
     const SIPlusParserContext& context() const;
-
-    ~Parser();
 
 private:
     std::unique_ptr<ParserImpl> impl_;

@@ -16,10 +16,10 @@
 #endif
 #cmakedefine SIPLUS_INCLUDE_STDLIB
 
-#ifdef SIPLUS_BUILD
-#undef SIPLUS_BUILD
+#ifdef SIPLUS_EXPORTING
+#undef SIPLUS_EXPORTING
 #endif
-#cmakedefine SIPLUS_BUILD
+#cmakedefine SIPLUS_EXPORTING
 
 #ifdef SIPLUS_BUILD
 #  if defined(SIPLUS_EXPORTING) && defined(_MSC_VER)
@@ -28,7 +28,7 @@
 #    define SIPLUS_EXPORT
 #  endif
 #else
-#  ifdef _MSC_VER
+#  ifdef defined(SIPLUS_EXPORTING) && defined(_MSC_VER)
 #    define SIPLUS_EXPORT __declspec(dllimport)
 #  else
 #    define SIPLUS_EXPORT
