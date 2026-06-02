@@ -52,7 +52,7 @@ bool test_equal(SIPlusUnknownDataContainer *container, T&& val) {
         }
     } else if constexpr(std::is_same_v<type_info_for_t<T>, types::IntegerType>) {
         if(siplus_data_is_int(container)) {
-            long result;
+            int64_t result;
             siplus_data_as_int(&result, container);
             return result == val;
         } else {
@@ -323,7 +323,7 @@ int test_function_retriever_impl(SIPlusUnknownDataContainer **result, void *data
         return siplus_error_set(SIPLUS_INVALID_ARG, "Expected an integer as parameter");
     }
 
-    long val;
+    int64_t val;
     if(auto err = siplus_data_as_int(&val, paramVal); err) {
         siplus_data_delete(paramVal);
         return err;

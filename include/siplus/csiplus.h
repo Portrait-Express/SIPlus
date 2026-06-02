@@ -2,6 +2,8 @@
 #ifndef INCLUDE_SIPLUS_SIPLUS_H_
 #define INCLUDE_SIPLUS_SIPLUS_H_
 
+#include <stdint.h>
+
 #include "siplus/config.h"
 
 enum SIPlusErrors {
@@ -164,6 +166,20 @@ typedef int (*SIPlusTypeAccess)(SIPlusUnknownDataContainer **result, void *data,
  */
 typedef void (*SIPlusTypeDeleter)(void *data);
 
+/**
+ * struct SIPlusTypeInfoData - Collection of data required for implementing SIPlusTypeInfo
+ * iterate may be NULL as long as is_iterable will never be true.
+ */
+struct SIPlusTypeNewParams {
+    void *data;
+    const char *name;
+    SIPlusTypeAccess access;
+    SIPlusTypeIterate iterate;
+    SIPlusTypeIsIterable is_iterable;
+    SIPlusTypeDeleter deleter;
+};
+typedef struct SIPlusTypeNewParams SIPlusTypeNewParams;
+
 
 /**
  * @brief Can convert test implementation
@@ -193,7 +209,6 @@ typedef int (*SIPlusConverterImpl)(SIPlusUnknownDataContainer **result, void *da
  * @param[in] data (Owner) Data ptr passed to siplus_converter_new
  */
 typedef void (*SIPlusConverterDeleter)(void *data);
-
 
 /**
  * @brief Free a string result. Any function that uses char** to return text 
@@ -510,6 +525,17 @@ SIPLUS_EXPORT void siplus_invocation_unref(SIPlusInvocationContext *context);
 
 
 /**
+ * @brief Create a new TypeInfo. This method takes a struct containing the arguments 
+ * to siplus_type_new, in order to reduce the parameter count. Each member of 
+ * `data` follows the same rules as the corresponding parameter in `siplus_type_new`
+ *
+ * @param[out] type (Owner) The created type info
+ * @param[in] data Parameter collection to pass to `siplus_type_new`
+ * @return [TODO:description]
+ */
+SIPLUS_EXPORT int siplus_type_new_s(SIPlusTypeInfo **type, SIPlusTypeNewParams data);
+
+/**
  * @brief Create a new TypeInfo
  *
  * @param[out] type (Owner) The TypeInfo
@@ -679,7 +705,7 @@ SIPLUS_EXPORT void siplus_iterator_delete(SIPlusIterator *iterator);
  * @param[in] value 
  * @return Data container
  */
-SIPLUS_EXPORT SIPlusUnknownDataContainer *siplus_data_make_int(long value);
+SIPLUS_EXPORT SIPlusUnknownDataContainer *siplus_data_make_int(int64_t value);
 
 /**
  * @brief Make a data container for a double.
@@ -768,7 +794,7 @@ SIPLUS_EXPORT int siplus_data_is_array(SIPlusUnknownDataContainer *container);
  * @param[in] value (Reference) The container to read
  * @return Error code
  */
-SIPLUS_EXPORT int siplus_data_as_int(long *result, SIPlusUnknownDataContainer *value);
+SIPLUS_EXPORT int siplus_data_as_int(int64_t *result, SIPlusUnknownDataContainer *value);
 
 /**
  * @brief Get this data container as a float.

@@ -76,7 +76,7 @@ UnknownDataTypeContainer
 rand_impl::retrieve(InvocationContext& container) const {
     auto ctx = context_.lock();
 
-    unsigned long seed = std::random_device{}();
+    std::mt19937::result_type seed = std::random_device{}();
 
     if(!begin_) {
         std::mt19937 engine{seed};
@@ -87,7 +87,7 @@ rand_impl::retrieve(InvocationContext& container) const {
         auto end = ctx->convert<types::IntegerType>(end_->retrieve(container)).as<types::IntegerType>();
 
         std::mt19937 engine{seed};
-        std::uniform_int_distribution<long> dist{begin, end};
+        std::uniform_int_distribution<int64_t> dist{begin, end};
         auto ret = dist(engine);
 
         return make_data<types::IntegerType>(ret);

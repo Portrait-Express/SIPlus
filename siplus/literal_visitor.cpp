@@ -1,12 +1,12 @@
 #include "literal_visitor.hxx"
 #include "Token.h"
 #include "generated/StringInterpolatorLexer.h"
-#include "interpolation_visitor.hxx"
 #include "siplus/data.hxx"
 #include "siplus/types/bool.hxx"
 #include "siplus/types/float.hxx"
 #include "siplus/types/integer.hxx"
 #include "siplus/types/string.hxx"
+#include <cstdint>
 #include <cstdlib>
 #include <string>
 
@@ -29,7 +29,7 @@ std::string get_escape(const std::string& escape) {
 }
 
 //INT: ('0'[xboXBO])?[0-9_]+ ;
-long parse_int(std::string text) {
+int64_t parse_int(std::string text) {
     std::transform(text.begin(), text.end(), text.begin(),
                    [](char c) { return std::tolower(c); });
 

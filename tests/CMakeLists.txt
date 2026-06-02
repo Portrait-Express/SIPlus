@@ -1,4 +1,4 @@
-if(SIPLUS_BUILD_WASM) 
+if(EMSCRIPTEN) 
     message("WARNING!!! Tests cannot be built when building WASM. Disabling tests.")
     return()
 endif()

@@ -11,6 +11,9 @@ was taken for WASM compatibility.
 
 ## Installation \[Recommended] (CMake)(FetchContent)
 ```
+set(SIPLUS_BUILD_EXAMPLES OFF)
+set(SIPLUS_BUILD_TESTS OFF)
+
 FetchContent_Declare(
   siplus
   GIT_REPOSITORY https://github.com/Portrait-Express/siplus

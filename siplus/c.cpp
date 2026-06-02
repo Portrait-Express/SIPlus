@@ -738,6 +738,10 @@ void siplus_invocation_unref(SIPlusInvocationContext *context) {
 
 
 
+int siplus_type_new_s(SIPlusTypeInfo **type, SIPlusTypeNewParams data) {
+    return siplus_type_new(type, data.data, data.name, data.is_iterable, data.access, data.iterate, data.deleter);;
+}
+
 int siplus_type_new(
     SIPlusTypeInfo **type,
     void *data, const char *name, 
@@ -884,7 +888,7 @@ void siplus_iterator_delete(SIPlusIterator *iterator) {
 
 
 
-SIPlusUnknownDataContainer *siplus_data_make_int(long value) {
+SIPlusUnknownDataContainer *siplus_data_make_int(int64_t value) {
     return new SIPlusUnknownDataContainer{std::make_unique<UnknownDataTypeContainer>(make_data<types::IntegerType>(value))};
 }
 
@@ -961,7 +965,7 @@ int siplus_data_ptr(void **data, SIPlusUnknownDataContainer *container) {
     return SIPLUS_OK;
 }
 
-int siplus_data_as_int(long *result, SIPlusUnknownDataContainer *value) {
+int siplus_data_as_int(int64_t *result, SIPlusUnknownDataContainer *value) {
     return siplus_data_as<types::IntegerType>(result, value);
 }
 

@@ -423,7 +423,9 @@ string_comparator::invoke(
     } else if(strl > strr) {
         return make_data<types::IntegerType>(1L);
     } else {
-        return make_data<types::IntegerType>(0L);
+        //static_cast needed because 0 (specifically 0) is convertible to nullptr, 
+        //and therefore a pointer type and causes ambiguity in make_data
+        return make_data<types::IntegerType>(static_cast<int64_t>(0));
     }
 }
 

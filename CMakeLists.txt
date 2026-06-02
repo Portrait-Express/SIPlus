@@ -5,11 +5,10 @@ option(SIPLUS_SANITIZE_ADDRESS "Set -fsanitize=address for memory leak testing" 
 option(SIPLUS_BUILD_EXAMPLES "Build Examples" On)
 option(WITH_STATIC_CRT "(MSVC Visual C++) Enable to statically link CRT, which avoids requiring users to install the redistribution package.
  To disable with: -DWITH_STATIC_CRT=Off" On)
-option(SIPLUS_BUILD_WASM "Set this if you are building this for WASM" Off)
 set(SIPLUS_NAMESPACE SIPlus CACHE STRING "Optionally specify a different root namespace")
 
 if(SIPLUS_BUILD_EXAMPLES)
-    if(SIPLUS_BUILD_WASM) 
+    if(EMSCRIPTEN) 
         message("WARNING: Examples cannot be built when building WASM. Disabling examples.")
         set(SIPLUS_BUILD_EXAMPLES OFF)
     endif()
@@ -25,8 +24,6 @@ project(siplus VERSION 2.0.3)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-add_subdirectory(dependencies)
 
 file(GLOB GENERATED_SOURCES siplus/generated/*.cpp)
 
@@ -63,13 +60,6 @@ if(SIPLUS_INCLUDE_STDLIB)
     set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/rand.cpp)
 endif()
 
-add_library(siplus ${SIPLUS_SOURCES})
-target_precompile_headers(siplus PRIVATE "${PROJECT_SOURCE_DIR}/include/siplus/pch.hxx")
-add_compile_definitions(SIPLUS_BUILD)
-
-target_include_directories(siplus PUBLIC include)
-target_link_libraries(siplus antlr4_static)
-
 if(BUILD_SHARED_LIBS) 
     message("Building in shared library mode")
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -81,7 +71,6 @@ if(MSVC)
 # MSVC CRT includes a constexpr Mutex constructor that breaks ABI compatibility.
 # This is needed to disable it, since antlr uses it.
     add_compile_definitions(_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR)
-    target_compile_options(siplus PUBLIC -Zc:preprocessor)
 
     if(WITH_STATIC_CRT)
       set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
@@ -92,17 +81,26 @@ if(MSVC)
     message("-- Using MSVC ${CMAKE_MSVC_RUNTIME_LIBRARY} Runtime")
 endif()
 
-if(SIPLUS_BUILD_WASM)
-    execute_process(
-        COMMAND bash -c "cat ${PROJECT_SOURCE_DIR}/include/siplus/csiplus.h | grep -E '^\\s*SIPLUS_EXPORTED.*?[a-zA-Z]+\\(' | perl -pe 's/(^.+?)([a-zA-Z_]*)(\\(.*$)/_\\2/' | jq -R '[inputs]' | tr -d '\n '"
-        OUTPUT_VARIABLE WASM_SIPLUS_EXPORTS)
-    target_link_options(siplus PRIVATE 
-        "-sEXPORTED_FUNCTIONS=${WASM_SIPLUS_EXPORTS}"
-        --bind)
+if(EMSCRIPTEN)
+    add_compile_options(-fwasm-exceptions)
+    add_link_options(-fwasm-exceptions)
+endif()
+
+add_subdirectory(dependencies)
+
+add_library(siplus ${SIPLUS_SOURCES})
+target_precompile_headers(siplus PRIVATE "${PROJECT_SOURCE_DIR}/include/siplus/pch.hxx")
+add_compile_definitions(SIPLUS_BUILD)
+
+target_include_directories(siplus PUBLIC include)
+target_link_libraries(siplus antlr4_static)
+
+if(MSVC)
+    target_compile_options(siplus PUBLIC -Zc:preprocessor)
 endif()
 
 if(SIPLUS_BUILD_EXAMPLES)
-    if(SIPLUS_BUILD_WASM) 
+    if(EMSCRIPTEN) 
         message("WARNING: Examples cannot be built when building WASM. Disabling examples.")
     else()
         add_subdirectory(example)
