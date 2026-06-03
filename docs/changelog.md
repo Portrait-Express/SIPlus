@@ -1,6 +1,8 @@
 # 2.0.3
 - Added converter functions to the C API
 - Added emscripten build support
+- Added 32 bit support
+- Added __declspec(dllim/export) to C++ API objects
 
 # 2.0.2
 - Fixed a SEGV that would occur when specifying only 1 parameter to `rand`
