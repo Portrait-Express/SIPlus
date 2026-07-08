@@ -1,6 +1,7 @@
 #include <cstring>
 
 #include "common.hxx"
+#include "siplus/data.hxx"
 #include "siplus/parser.hxx"
 #include "siplus/types/array.hxx"
 #include "siplus/types/float.hxx"
@@ -77,7 +78,8 @@ int test_base(int, char** const) {
                     return tests(
                         test_expression<types::ArrayType, std::vector<long>>(R"([1,2,3])", {1,2,3}),
                         test_expression<types::ArrayType, std::vector<std::string>>(R"(["hello", "test"])", {"hello", "test"}),
-                        test_expression<types::StringType>(R"(["hello", "test"] | .[1])", "test")
+                        test_expression<types::StringType>(R"(["hello", "test"] | .[1])", "test"),
+                        test_expression(R"(var $i = 2; [1, 2, 3] | .[$i])", 3)
                     );
                 })
             );

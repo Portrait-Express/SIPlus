@@ -15,26 +15,6 @@
 class  StringInterpolatorParserBaseVisitor : public StringInterpolatorParserVisitor {
 public:
 
-  virtual std::any visitProperty_name(StringInterpolatorParser::Property_nameContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitProperty_index(StringInterpolatorParser::Property_indexContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitProperty_item(StringInterpolatorParser::Property_itemContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitProperty(StringInterpolatorParser::PropertyContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitVariable_reference(StringInterpolatorParser::Variable_referenceContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual std::any visitString(StringInterpolatorParser::StringContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -55,23 +35,7 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitLiteral(StringInterpolatorParser::LiteralContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitArgument(StringInterpolatorParser::ArgumentContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitArg_list(StringInterpolatorParser::Arg_listContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitFunc(StringInterpolatorParser::FuncContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitArray_item(StringInterpolatorParser::Array_itemContext *ctx) override {
+  virtual std::any visitPrimitive(StringInterpolatorParser::PrimitiveContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -79,19 +43,31 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitExpr_item(StringInterpolatorParser::Expr_itemContext *ctx) override {
+  virtual std::any visitAccessor(StringInterpolatorParser::AccessorContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitPiped_expression(StringInterpolatorParser::Piped_expressionContext *ctx) override {
+  virtual std::any visitIndexer(StringInterpolatorParser::IndexerContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitExpr(StringInterpolatorParser::ExprContext *ctx) override {
+  virtual std::any visitVariable(StringInterpolatorParser::VariableContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitAssign_stmt(StringInterpolatorParser::Assign_stmtContext *ctx) override {
+  virtual std::any visitLiteral(StringInterpolatorParser::LiteralContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitCall(StringInterpolatorParser::CallContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitVariable_declaration(StringInterpolatorParser::Variable_declarationContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitVariable_assignment(StringInterpolatorParser::Variable_assignmentContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -103,55 +79,83 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitFunction_def_stmt(StringInterpolatorParser::Function_def_stmtContext *ctx) override {
+  virtual std::any visitFunction_definition(StringInterpolatorParser::Function_definitionContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitSimple_expr_stmt(StringInterpolatorParser::Simple_expr_stmtContext *ctx) override {
+  virtual std::any visitPiped_suffixable_expr(StringInterpolatorParser::Piped_suffixable_exprContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitExpr_stmt(StringInterpolatorParser::Expr_stmtContext *ctx) override {
+  virtual std::any visitPiped_expr_part(StringInterpolatorParser::Piped_expr_partContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitExpr_block_contents(StringInterpolatorParser::Expr_block_contentsContext *ctx) override {
+  virtual std::any visitPiped_expr(StringInterpolatorParser::Piped_exprContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitExpr_block(StringInterpolatorParser::Expr_blockContext *ctx) override {
+  virtual std::any visitSuffixable_expr(StringInterpolatorParser::Suffixable_exprContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitEval(StringInterpolatorParser::EvalContext *ctx) override {
+  virtual std::any visitExpr_suffix(StringInterpolatorParser::Expr_suffixContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitLoop_start(StringInterpolatorParser::Loop_startContext *ctx) override {
+  virtual std::any visitExpr(StringInterpolatorParser::ExprContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitLoop_end(StringInterpolatorParser::Loop_endContext *ctx) override {
+  virtual std::any visitBlock_stmt(StringInterpolatorParser::Block_stmtContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitLoop(StringInterpolatorParser::LoopContext *ctx) override {
+  virtual std::any visitBlock_expr(StringInterpolatorParser::Block_exprContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitStmt(StringInterpolatorParser::StmtContext *ctx) override {
+  virtual std::any visitBlock_contents(StringInterpolatorParser::Block_contentsContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitNormal(StringInterpolatorParser::NormalContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitInterpolated_str(StringInterpolatorParser::Interpolated_strContext *ctx) override {
+  virtual std::any visitBlock(StringInterpolatorParser::BlockContext *ctx) override {
     return visitChildren(ctx);
   }
 
   virtual std::any visitExpression_program(StringInterpolatorParser::Expression_programContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitInterp_eval(StringInterpolatorParser::Interp_evalContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitInterp_loop_start(StringInterpolatorParser::Interp_loop_startContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitInterp_loop_end(StringInterpolatorParser::Interp_loop_endContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitInterp_loop(StringInterpolatorParser::Interp_loopContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitInterp_stmt(StringInterpolatorParser::Interp_stmtContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitInterp_normal(StringInterpolatorParser::Interp_normalContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitInterp_part(StringInterpolatorParser::Interp_partContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitInterpolated_str(StringInterpolatorParser::Interpolated_strContext *ctx) override {
     return visitChildren(ctx);
   }
 

@@ -6,7 +6,6 @@
 #include <string>
 
 #include "siplus/config.h"
-#include "siplus/context.hxx"
 #include "siplus/invocation_context.hxx"
 #include "siplus/text/value_retrievers/retriever.hxx"
 
@@ -24,7 +23,7 @@ public:
      * @param[in] accessor The ParserContext
      * @param[in] name The name of the property
      */
-    AccessorValueRetriever(std::shared_ptr<SIPlusParserContext> accessor, std::string name);
+    AccessorValueRetriever(std::string name);
 
     /**
      * @brief Make a new AccessorValueRetriever with a dedicated parent.
@@ -33,13 +32,12 @@ public:
      * @param[in] parent The Value retriever to read the property from.
      * @param[in] name The name of the property
      */
-    AccessorValueRetriever(std::shared_ptr<SIPlusParserContext> accessor, std::shared_ptr<ValueRetriever> parent, std::string name);
+    AccessorValueRetriever(std::shared_ptr<ValueRetriever> parent, std::string name);
 
     UnknownDataTypeContainer retrieve(InvocationContext& value) const override;
 
 private:
     std::shared_ptr<ValueRetriever> parent_;
-    std::shared_ptr<SIPlusParserContext> context_;
     std::string name_;
 };
 

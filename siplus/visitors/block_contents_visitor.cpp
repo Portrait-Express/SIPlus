@@ -1,14 +1,15 @@
-#include "expr_stmt_visitor.hxx"
-#include "expr_visitor.hxx"
-#include "generated/StringInterpolatorParser.h"
-#include "siplus/context.hxx"
-#include "siplus/invocation_context.hxx"
+#include <algorithm>
+#include <any>
+#include <iterator>
+#include <vector>
+
+#include "siplus/build_context.hxx"
 #include "siplus/data.hxx"
 #include "siplus/text/value_retrievers/retriever.hxx"
 
-#include <iterator>
-#include <memory>
-#include <vector>
+#include "../util.hxx"
+#include "block_contents_visitor.hxx"
+#include "siplus_visitor.hxx"
 
 namespace SIPLUS_NAMESPACE {
 
@@ -42,38 +43,32 @@ struct FuncDefStmt : Statement {
     }
 };
 
-struct AssignStmt : Statement {
-    AssignStmt(
+struct VariableDeclarationStmt : Statement {
+    VariableDeclarationStmt(
         std::shared_ptr<VariableRetriever> variable,
-        std::shared_ptr<text::ValueRetriever> expression
-    ) : variable_(variable), expression_(expression) { }
+        std::shared_ptr<text::ValueRetriever> value
+    ) : variable_(variable), value_(value) {
+        if(variable->is_const() && !value) 
+            throw std::runtime_error{"Const variable '" + variable->name() + "' not initialized"};
+    }
 
     void invoke(InvocationContext& ctx) override {
         if(variable_->is_persist()) {
-            if(persistInitialized_) return;
-            persistInitialized_ = true;
+            if(!persistInitialized_) {
+                auto value = value_->retrieve(ctx);
+                variable_->set_value(ctx, value);
+                persistInitialized_ = true;
+            }
+        } else {
+            auto value = value_->retrieve(ctx);
+            variable_->set_value(ctx, value);
         }
-
-        variable_->set_value(ctx, expression_->retrieve(ctx));
     }
 
 private:
     std::shared_ptr<VariableRetriever> variable_;
-    std::shared_ptr<text::ValueRetriever> expression_;
-    bool persistInitialized_:1 = false;
-};
-
-struct ExprStmt : Statement {
-    ExprStmt(
-        std::shared_ptr<text::ValueRetriever> expression
-    ) : expression_(expression) { }
-
-    void invoke(InvocationContext& ctx) override {
-        expression_->retrieve(ctx);
-    }
-
-private:
-    std::shared_ptr<text::ValueRetriever> expression_;
+    std::shared_ptr<text::ValueRetriever> value_;
+    bool persistInitialized_ = false;
 };
 
 struct ParameterInfo {
@@ -168,21 +163,49 @@ UnknownDataTypeContainer CustomFuncImpl::retrieve(InvocationContext& context) co
     return expr_->retrieve(*scope);
 }
 
-} /* anonymous */
+struct ExprStmt : Statement {
+    ExprStmt(
+        std::shared_ptr<text::ValueRetriever> expression
+    ) : expression_(expression) { }
 
-ExprStmtVisitor::ExprStmtVisitor(
+    void invoke(InvocationContext& ctx) override {
+        expression_->retrieve(ctx);
+    }
+
+private:
+    std::shared_ptr<text::ValueRetriever> expression_;
+};
+
+
+struct StatementExecutingValueRetriever : public text::ValueRetriever {
+    StatementExecutingValueRetriever(
+        std::vector<std::shared_ptr<Statement>> stmts,
+        std::shared_ptr<text::ValueRetriever> expr
+    ) : statements_(stmts), expr_(expr) {}
+
+    UnknownDataTypeContainer 
+    retrieve(InvocationContext& value) const override {
+        for(auto stmt : statements_) {
+            stmt->invoke(value);
+        }
+
+        return expr_->retrieve(value);
+    }
+
+private:
+    std::vector<std::shared_ptr<Statement>> statements_;
+    std::shared_ptr<text::ValueRetriever> expr_;
+};
+
+}
+
+block_contents_visitor::block_contents_visitor(
     std::shared_ptr<SIPlusParserContext> context, 
     std::shared_ptr<BuildContext> buildContext, 
     const antlr4::BufferedTokenStream& tokens
-) : context_(context), buildContext_(buildContext), tokens_(tokens) { }
+) : context_(context), buildContext_(buildContext), tokens_(tokens) {}
 
-bool ExprStmtVisitor::shouldVisitNextChild(antlr4::tree::ParseTree *node, const std::any& current) {
-    return dynamic_cast<StringInterpolatorParser::Function_def_stmtContext*>(node) == nullptr 
-        && dynamic_cast<StringInterpolatorParser::Assign_stmtContext*>(node) == nullptr 
-        && dynamic_cast<StringInterpolatorParser::ExprContext*>(node) == nullptr;
-}
-
-std::any ExprStmtVisitor::visitFunction_def_stmt(StringInterpolatorParser::Function_def_stmtContext *ctx) {
+std::any block_contents_visitor::visitFunction_definition(StringInterpolatorParser::Function_definitionContext *ctx) {
     std::string name = ctx->ID()->getText();
 
     auto paramContext = ctx->function_parameters();
@@ -193,59 +216,80 @@ std::any ExprStmtVisitor::visitFunction_def_stmt(StringInterpolatorParser::Funct
 
     if(paramContext) {
         bool optionalFound = false;
-        for(auto param : paramContext->function_parameter()) {
-            ParameterInfo& info = params.emplace_back();
-            info.name = param->ID()->getText();
-            info.required = !static_cast<bool>(param->QUESTION());
-            info.variable = 
-                buildCtx->declare_variable(info.name, paramDeclareOpts);
+        auto parameterDefinitions = paramContext->function_parameter();
+        params.reserve(parameterDefinitions.size());
+
+        for(auto param : parameterDefinitions) {
+            const auto name = param->ID()->getText();
+            ParameterInfo& info = params.emplace_back(ParameterInfo{
+                .name = name,
+                .required = !static_cast<bool>(param->QUESTION()),
+                .variable = buildCtx->declare_variable(name, paramDeclareOpts)
+            });
 
             if(optionalFound && info.required) {
                 throw std::runtime_error{"Non-optional parameters cannot appear after an optional parameter."};
             }
 
             optionalFound = optionalFound || !info.required;
-
         }
     }
 
-    ExpressionVisitor visitor{context_, buildCtx, tokens_};
-    auto expr = std::any_cast<std::shared_ptr<text::ValueRetriever>>(ctx->expr_block()->accept(&visitor));
-
+    auto expr = siplus_visitor{context_, buildCtx, tokens_}.visit(ctx->expr());
     buildContext_->emplace_function<CustomFunction>(name, name, params, expr);
-
     return std::static_pointer_cast<Statement>(std::make_shared<FuncDefStmt>(name)); 
 }
 
-std::any ExprStmtVisitor::visitAssign_stmt(StringInterpolatorParser::Assign_stmtContext *ctx) {
-    std::string varName = ctx->ID()->getText();
-
-    ExpressionVisitor visitor{context_, buildContext_, tokens_};
-    auto expression = visitor.visit(ctx->expr());
-
+std::any block_contents_visitor::visitVariable_declaration(StringInterpolatorParser::Variable_declarationContext *ctx) {
     VariableOpts opts;
+    std::shared_ptr<VariableRetriever> variable;
+    std::shared_ptr<text::ValueRetriever> value;
+
     opts.is_const = static_cast<bool>(ctx->CONST());
     opts.is_persist = static_cast<bool>(ctx->PERSIST());
 
-    std::shared_ptr<VariableRetriever> variable;
-    if(ctx->VAR()) {
-        variable = buildContext_->declare_variable(varName, opts);
-    } else {
-        variable = buildContext_->get_variable(varName);
+    variable = buildContext_->declare_variable(ctx->ID()->getText(), opts);
 
-        if(variable->is_const()) {
-            throw std::runtime_error{util::to_string(
-                "Attempted to mutate a const variable '$", varName, "'.")};
-        }
+    if(auto expr = ctx->expr()) {
+        value = siplus_visitor{context_, buildContext_, tokens_}.visit(expr);
     }
 
-    return std::static_pointer_cast<Statement>(std::make_shared<AssignStmt>(variable, expression));
+    return std::static_pointer_cast<Statement>(
+        std::make_shared<VariableDeclarationStmt>(variable, value)
+    );
 }
 
-std::any ExprStmtVisitor::visitSimple_expr_stmt(StringInterpolatorParser::Simple_expr_stmtContext *ctx) {
-    ExpressionVisitor visitor{context_, buildContext_, tokens_};
-    auto retriever = visitor.visit(ctx->expr());
-    return std::static_pointer_cast<Statement>(std::make_shared<ExprStmt>(retriever));
+std::any block_contents_visitor::visitBlock_expr(StringInterpolatorParser::Block_exprContext *ctx) {
+    siplus_visitor visitor{context_, buildContext_, tokens_};
+    return ctx->accept(&visitor);
+}
+
+std::any block_contents_visitor::visitBlock_stmt(StringInterpolatorParser::Block_stmtContext *ctx) {
+    if(auto funcCtx = ctx->function_definition()) {
+        return visitFunction_definition(funcCtx);
+    } else if(auto declCtx = ctx->variable_declaration()) {
+        return visitVariable_declaration(declCtx);
+    } else if(auto exprCtx = ctx->expr()) {
+        siplus_visitor visitor{context_, buildContext_, tokens_};
+        auto expr = visitor.visit(exprCtx);
+
+        return std::static_pointer_cast<Statement>(std::make_shared<ExprStmt>(expr));
+    } else {
+        throw std::runtime_error{"Unknown block_stmt syntax"};
+    }
+}
+
+std::any block_contents_visitor::visitBlock_contents(StringInterpolatorParser::Block_contentsContext *ctx) {
+    auto stmtCtxs = ctx->block_stmt();
+    std::vector<std::shared_ptr<Statement>> stmts;
+    stmts.reserve(stmtCtxs.size());
+
+    //Visit statements first, otherwise dependent variables may not be initialized
+    std::transform(stmtCtxs.begin(), stmtCtxs.end(), std::back_inserter(stmts), [this](auto *ctx) { return visit(ctx); });
+
+    auto expr = visit(ctx->block_expr());
+
+    return detail::make_retriever<StatementExecutingValueRetriever>(stmts, expr);
 }
 
 } /* SIPLUS_NAMESPACE */

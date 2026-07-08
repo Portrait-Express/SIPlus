@@ -89,15 +89,13 @@ UnknownDataTypeContainer LiteralValueRetriever::retrieve(InvocationContext& valu
 }
 
 AccessorValueRetriever::AccessorValueRetriever(
-    std::shared_ptr<SIPlusParserContext> context, 
     std::string name
-) : context_(context), name_(name) {}
+) : name_(name) {}
 
 AccessorValueRetriever::AccessorValueRetriever(
-    std::shared_ptr<SIPlusParserContext> context, 
     std::shared_ptr<ValueRetriever> parent,  
     std::string name
-) : context_(context), parent_(parent), name_(name) {}
+) : parent_(parent), name_(name) {}
 
 UnknownDataTypeContainer AccessorValueRetriever::retrieve(InvocationContext& value) const {
     if(parent_) {

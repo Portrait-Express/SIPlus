@@ -4,59 +4,82 @@ options {
 tokenVocab=StringInterpolatorLexer;
 }
 
-property_name: DOT ID ;
-property_index: DOT OPENB INT CLOSEB ;
-property_item: property_name | property_index;
-property: DOT | property_item+ ;
-
-variable_reference: DOLLAR ID property_item* ;
-
 string: STRING_START ( STRING_TEXT | STRING_ESCAPE )* STRING_END ;
 integer: INT ;
 float: FLOAT ;
 boolean: TRUE | FALSE ;
 null: NULL ;
-literal: string | integer | float | boolean | null ;
+primitive: string | integer | float | boolean | null ;
 
-argument: expr_item | expr_block ;
-arg_list: argument? ( WS+ argument )*;
-func: AT? ID ( WS+ arg_list )? ;
+array: OPENB WS* ( expr ( WS* COMMA WS* expr )* )? WS* CLOSEB ;
 
-array_item: WS* ( expr_item | expr_block ) WS* ;
-array: OPENB (array_item COMMA)* (array_item)? CLOSEB ;
+accessor: DOT WS* ID ;
+indexer: OPENB WS* expr WS* CLOSEB ;
 
-expr_item: literal | property | func | array | variable_reference ;
-piped_expression: expr_item WS* PIPE WS* ( expr_item | piped_expression ) ;
-expr: expr_item | piped_expression | expr_block ;
+variable: DOLLAR ID ;
+literal: primitive | array ;
 
-assign_stmt: ( ( PERSIST WS+ )? ( CONST WS+ )? VAR WS+ )? DOLLAR ID WS* EQUAL WS* expr ;
+call: AT? ID ( WS+ expr )* ;
+
+variable_declaration: ( PERSIST WS+ )? ( CONST WS+ )? VAR WS+ DOLLAR ID ( WS* EQUAL WS* expr )? ;
+variable_assignment: DOLLAR ID WS* EQUAL WS* expr ;
+    
 function_parameter: ID QUESTION? ;
-function_parameters: OPENP WS* ( function_parameter WS* ( COMMA WS* function_parameter WS* )* COMMA? ) WS* CLOSEP ;
-function_def_stmt: AT ID WS* function_parameters? WS* ARROW WS* expr_block ;
-simple_expr_stmt: expr ;
-expr_stmt: ( assign_stmt | function_def_stmt | simple_expr_stmt ) WS* SEMICOLON ;
+function_parameters: OPENP 
+        WS* function_parameter WS*
+        ( COMMA WS* function_parameter WS* )* COMMA? 
+    WS* CLOSEP ;
+function_definition: AT ID WS* function_parameters? WS* ARROW 
+    WS* expr ;
 
-expr_block_contents: ( expr_stmt WS* )* expr ;
-expr_block: OPENP WS* expr_block_contents WS* CLOSEP ;
+piped_suffixable_expr: accessor | DOT indexer ;
+
+piped_expr_part: call | piped_suffixable_expr ( WS* expr_suffix )* ;
+piped_expr: expr ( WS* PIPE WS* piped_expr_part )+ ;
+
+suffixable_expr: literal
+    | variable
+    | block 
+    | piped_suffixable_expr ;
+
+expr_suffix: accessor | indexer ;
+    
+expr: suffixable_expr ( WS* expr_suffix )*
+    | variable_assignment
+    | call 
+    | DOT ;
+
+block_stmt: expr 
+    | piped_expr
+    | variable_declaration
+    | function_definition ;
+
+block_expr: expr | piped_expr ;
+block_contents: ( block_stmt WS* SEMICOLON WS* )* block_expr ;
+block: OPENP WS* block_contents WS* CLOSEP ;
+
+expression_program: WS* block_contents WS* EOF;
 
 //--------------
 // Interpolation
 //--------------
 
-eval: OPEN WS* expr_block_contents WS* CLOSE ;
+interp_eval: OPEN WS* block_contents WS* CLOSE ;
 
-loop_start: OPEN HASH WS* expr_block_contents WS* CLOSE;
-loop_end: OPEN SLASH SLASH WS* CLOSE ;
-loop: loop_start interpolated_str loop_end;
+interp_loop_start: OPEN HASH WS* block_contents WS* CLOSE;
+interp_loop_end: OPEN SLASH SLASH WS* CLOSE ;
+interp_loop: interp_loop_start interpolated_str interp_loop_end;
 
-stmt: eval | loop;
+interp_stmt: interp_eval | interp_loop;
 
-normal: ( NORMAL_TEXT | NORMAL_ESCAPE )+ ;
+interp_normal: ( NORMAL_TEXT | NORMAL_ESCAPE )+ ;
 
-interpolated_str: ( normal | stmt )* ;
+interp_part: interp_normal | interp_stmt ;
 
-expression_program: WS* expr_block_contents WS* EOF;
+interpolated_str: interp_part* ;
+
 program: interpolated_str EOF;
+
 
 
 

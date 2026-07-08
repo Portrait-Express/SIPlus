@@ -1,5 +1,4 @@
 #include <cassert>
-#include <cfloat>
 #include <vector>
 
 #include "siplus/parser.hxx"
@@ -15,7 +14,7 @@ using namespace SIPLUS_NAMESPACE;
 int test_add() {
     return test("add", [](const Parser& parser) {
         return tests(
-            test_expression("add .x .y.b", 3L),
+            test_expression("add (.x) (.y.b)", 3L),
             test_expression("add .x 2.3", 4.3),
             test_expression(R"(add .x "ab")", "2ab"),
             test_expression(R"(add "a" "b")", "ab"),
@@ -176,7 +175,7 @@ int test_rand_str() {
 int test_if() {
     return test("if", [](const Parser& parser) {
         return tests(
-            test_expression<short>(R"(if .x .y "" | .b)", 1)
+            test_expression<short>(R"(if (.x) (.y) "" | .b)", 1)
         );
     });
 }

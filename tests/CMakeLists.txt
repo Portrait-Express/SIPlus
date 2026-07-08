@@ -13,14 +13,11 @@ endif()
 
 option(SIPLUS_RUN_TESTS "Whether or not to run built tests" ON)
 option(SIPLUS_BUILD_TESTS "Whether or not to build tests" ON)
-option(SIPLUS_TESTS_USE_CPPTRACE "Include cpptrace in built tests for stack traces" ON)
 option(SIPLUS_TESTS_USE_ASAN "Sets -fsanitize=address for tests. Separate from SIPLUS_SANITIZE_ADDRESS" ${USE_ASAN_DEFAULT})
 
 if(NOT SIPLUS_BUILD_TESTS)
 return()
 endif()
-
-add_subdirectory(util)
 
 set(TEST_SOURCES test_base.cxx test_c.cxx)
 
@@ -39,7 +36,7 @@ create_test_sourcelist (
 add_executable (runner ${TESTS})
 
 if(SIPLUS_TESTS_USE_CPPTRACE) 
-    set(SIPLUS_TEST_LIBRARIES ${SIPLUS_TEST_LIBRARIES} cpptrace::cpptrace)
+    set(SIPLUS_TEST_LIBRARIES ${SIPLUS_TEST_LIBRARIES})
     target_compile_definitions(runner PUBLIC SIPLUS_HAS_CPPTRACE)
 endif()
 
@@ -52,9 +49,10 @@ if(SIPLUS_TESTS_USE_ASAN)
     endif()
 endif()
 
-target_link_libraries(runner PRIVATE siplus ${SIPLUS_TEST_LIBRARIES})
+target_link_libraries(runner PRIVATE siplus ${SIPLUS_TEST_LIBRARIES} stdc++exp)
 target_include_directories(runner PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
+target_link_options(runner PRIVATE "-Wl,--wrap=__cxa_throw")
 
 # Add all the ADD_TEST for each test
 foreach (test ${TEST_SOURCES})

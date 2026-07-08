@@ -47,20 +47,3 @@ STRING_ESCAPE: '\\' .;
 STRING_END: '"' -> mode(TEMPLATE);
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

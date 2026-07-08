@@ -1,10 +1,10 @@
+#include <array>
 #include <csignal>
+#include <exception>
 #include <iostream>
 #include <signal.h>
-
-#ifdef SIPLUS_HAS_CPPTRACE
-#include <cpptrace/from_current.hpp>
-#endif
+#include <stacktrace>
+#include <typeinfo>
 
 //static void segv_handler(int sig, siginfo_t *info, void *ucontext) {
 //    auto addr = info->si_addr;
@@ -20,9 +20,7 @@
 static void std_segv_handler(int code) {
     std::cerr << "Received SIGSEGV/SIGABRT." << std::endl;
 
-#ifdef SIPLUS_HAS_CPPTRACE
-    cpptrace::stacktrace::current().print();
-#endif
+    std::cout << std::stacktrace::current() << '\n';
 
     std::cout << std::flush; //flush stdout to make sure its all written
 
@@ -38,3 +36,5 @@ static void initialize(int* pargc, char*** pargv) {
     //sigaction(SIGSEGV, &act, NULL);
     //sigaction(SIGABRT, &act, NULL);
 }
+
+

@@ -75,6 +75,8 @@ int tests(TestResults... results) {
 bool nearly_equal(float a, float b, float epsilon = 128 * FLT_EPSILON, float abs_th = FLT_MIN);
 bool nearly_equal(double a, double b, double epsilon = 128 * DBL_EPSILON, double abs_th = DBL_MIN);
 
+void print_stacktrace();
+
 template<typename T1, typename T2>
 struct test_expression_compare {
     static bool compare(const T1& val, const T2& other) {

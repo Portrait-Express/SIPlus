@@ -11,10 +11,10 @@
 #include "siplus/text/constructor.hxx"
 #include "siplus/data.hxx"
 
-#include "block_visitor.hxx"
 #include "generated/StringInterpolatorLexer.h"
 #include "generated/StringInterpolatorParser.h"
-#include "interpolation_visitor.hxx"
+#include "visitors/block_contents_visitor.hxx"
+#include "visitors/siplus_visitor.hxx"
 #include "parser_impl.hxx"
 
 #include <sstream>
@@ -169,12 +169,8 @@ text::TextConstructor ParserImpl::get_interpolation(const std::string& text, con
     lexer.addErrorListener(&errors);
     parser.addErrorListener(&errors);
     
-    antlr4::tree::ParseTree *tree = parser.program();
-    std::shared_ptr<BuildContext> buildContext = std::make_shared<BuildContext>();
-    InterpolationVisitor visitor{context_, make_build_context(opts), tokens};
-    auto val = tree->accept(&visitor);
-
-    return std::any_cast<text::TextConstructor>(val);
+    siplus_visitor visitor{context_, make_build_context(opts), tokens};
+    return visitor.visit(parser.program()->interpolated_str());
 }
 
 std::shared_ptr<text::ValueRetriever> ParserImpl::get_expression(const std::string& text, const ParseOpts& opts) const {
@@ -190,12 +186,13 @@ std::shared_ptr<text::ValueRetriever> ParserImpl::get_expression(const std::stri
     parser.addErrorListener(&errors);
     
     lexer.mode = StringInterpolatorLexer::TEMPLATE;
-    auto tree = parser.expression_program();
-    BlockVisitor visitor{context_, make_build_context(opts), tokens};
-    auto val = tree->accept(&visitor);
 
-    auto retriever = std::any_cast<std::shared_ptr<text::ValueRetriever>>(val);
-    return std::make_shared<NewScopeValueRetriever>(retriever);
+    auto tree = parser.expression_program();
+
+    block_contents_visitor visitor{context_, make_build_context(opts), tokens};
+    return std::make_shared<NewScopeValueRetriever>(
+        visitor.visit(tree->block_contents())
+    );
 }
 
 

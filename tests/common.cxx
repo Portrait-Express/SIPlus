@@ -1,20 +1,11 @@
 #include <chrono>
 #include <iostream> 
 #include <format>
+#include <stacktrace>
 #include <stdexcept>
-
-#ifdef SIPLUS_HAS_CPPTRACE
-
-#include <cpptrace/from_current.hpp>
-#define SIPLUS_TRY CPPTRACE_TRY
-#define SIPLUS_CATCH(args) CPPTRACE_CATCH(args)
-
-#else 
 
 #define SIPLUS_TRY try
 #define SIPLUS_CATCH catch
-
-#endif
 
 #include "siplus/context.hxx"
 #include "siplus/parser.hxx"
@@ -125,10 +116,7 @@ int test(std::string name, std::function<int(const Parser&)> test_impl) {
         std::cout << "Failed with exception " << std::chrono::duration_cast<std::chrono::microseconds>(end - start) << '\n';
 
         std::cout << e.what() << std::endl;
-
-#ifdef SIPLUS_HAS_CPPTRACE
-        cpptrace::from_current_exception().print();
-#endif
+        print_stacktrace();
         
         result = 1;
     }
@@ -185,3 +173,38 @@ bool nearly_equal(double a, double b, double epsilon, double abs_th) {
   auto norm = std::min((std::abs(a) + std::abs(b)), std::numeric_limits<double>::max());
   return diff < std::max(abs_th, epsilon * norm);
 }
+
+//BELOW: Credit to https://werwolv.net/posts/cpp_exception_stacktraces/
+thread_local std::array<std::stacktrace, 5> s_stacktraces;
+
+extern "C" void __real___cxa_throw(
+    void *thrown_object,
+    std::type_info *tinfo,
+    void (*dest)(void *)
+);
+
+extern "C" void __wrap___cxa_throw(
+    void *thrown_object,
+    std::type_info *tinfo,
+    void (*dest)(void *)
+) {
+    auto exception_count = std::uncaught_exceptions();
+
+    if (exception_count < ssize_t(s_stacktraces.size())) {
+        s_stacktraces[exception_count] = std::stacktrace::current(1);
+    }
+
+    __real___cxa_throw(thrown_object, tinfo, dest);
+}
+
+void print_stacktrace() {
+    auto exception_count = std::uncaught_exceptions();
+
+    if (exception_count < 0) {
+        std::cout << "No active exception" << std::endl;
+    } else if (exception_count >= s_stacktraces.size()) {
+        std::cout << "Too many active exceptions" << std::endl;
+    } else {
+        std::cout << "Stacktrace:\n" << s_stacktraces[exception_count];
+    }
+};

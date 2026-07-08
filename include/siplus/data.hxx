@@ -106,6 +106,7 @@ namespace types {
  * represent an empty container.
  */
 struct SIPLUS_EXPORT NullType : public TypeInfo {
+    using data_type = void;
     virtual std::string name() const override;
     virtual UnknownDataTypeContainer access(const UnknownDataTypeContainer& data, const std::string& name) const override;
     virtual bool is_iterable(const UnknownDataTypeContainer& data) const override;

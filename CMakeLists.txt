@@ -29,21 +29,23 @@ file(GLOB GENERATED_SOURCES siplus/generated/*.cpp)
 
 set(SIPLUS_SOURCES 
     ${GENERATED_SOURCES}
-    siplus/block_visitor.cpp
+
+    siplus/retrievers/retrievers.cpp
+
+    siplus/visitors/block_contents_visitor.cpp
+    siplus/visitors/expr_suffix_visitor.cpp
+    siplus/visitors/piped_expr_visitor.cpp
+    siplus/visitors/siplus_visitor.cpp
+    siplus/visitors/visitor.cpp
+
     siplus/build_context.cpp
     siplus/c.cpp
     siplus/context.cpp
     siplus/data.cpp
-    siplus/expr_stmt_visitor.cpp
-    siplus/expr_visitor.cpp
-    siplus/interpolation_visitor.cpp
     siplus/invocation_context.cpp
-    siplus/literal_visitor.cpp
     siplus/parser_impl.cpp
-    siplus/statement_visitor.cpp
     siplus/text.cpp
     siplus/types.cpp
-    siplus/visitor.cpp
 )
 
 if(SIPLUS_INCLUDE_STDLIB)
