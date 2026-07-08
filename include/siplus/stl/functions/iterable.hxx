@@ -19,12 +19,6 @@ namespace stl {
  * struct map_func - Function for mapping an expression over each element 
  * of the iterable. 
  *
- * IMPORTANT:
- * If you include this, and arent using `attach_stl()`, or 
- * `attach_stl_functions()` be sure to add an `IteratorProvider` instance of 
- * `vector_iterator<UnknownDataTypeContainer>`, otherwise the value
- * returned from this function will not be iterable.
- *
  * @code
  * std::vector<int> c = {1, 2, 3}; 
  * parser.get_expression(R"(map . (add . 2))")->retrieve(text::make_data(c));
@@ -99,6 +93,75 @@ struct SIPLUS_EXPORT contains_func : Function {
     explicit contains_func(
         std::weak_ptr<SIPlusParserContext> context
     ) : context_(context) { }
+
+    std::shared_ptr<text::ValueRetriever> value(
+        std::shared_ptr<text::ValueRetriever> parent, 
+        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    ) const override;
+
+private:
+    std::weak_ptr<SIPlusParserContext> context_;
+};
+
+/**
+ * struct each_func - Function for invoking an expression for each element of 
+ * a list.
+ *
+ * @code
+ * std::vector<int> c = {1, 2, 3}; 
+ * parser.get_expression(R"(var $set = set_new; each . (set_add $set .); set_has 2)")->retrieve(text::make_data(c));
+ * // true
+ * @endcode
+ */
+struct SIPLUS_EXPORT each_func : Function  {
+    explicit each_func(std::weak_ptr<SIPlusParserContext> context) 
+        : context_(context) { }
+
+    std::shared_ptr<text::ValueRetriever> value(
+        std::shared_ptr<text::ValueRetriever> parent, 
+        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    ) const override;
+
+private:
+    std::weak_ptr<SIPlusParserContext> context_;
+};
+
+/**
+ * struct all_func - Function that checks if each element in an array matches 
+ * a condition a list.
+ *
+ * @code
+ * std::vector<bool> c = {true, false, true}; 
+ * parser.get_expression(R"(all . (.))")->retrieve(text::make_data(c));
+ * // false
+ * @endcode
+ */
+struct SIPLUS_EXPORT all_func : Function  {
+    explicit all_func(std::weak_ptr<SIPlusParserContext> context) 
+        : context_(context) { }
+
+    std::shared_ptr<text::ValueRetriever> value(
+        std::shared_ptr<text::ValueRetriever> parent, 
+        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    ) const override;
+
+private:
+    std::weak_ptr<SIPlusParserContext> context_;
+};
+
+/**
+ * struct any_func - Function that checks if any element in a list matches a 
+ * condition.
+ *
+ * @code
+ * std::vector<int> c = {1, 2, 3}; 
+ * parser.get_expression(R"(any . (gt . 3))")->retrieve(text::make_data(c));
+ * // false
+ * @endcode
+ */
+struct SIPLUS_EXPORT any_func : Function  {
+    explicit any_func(std::weak_ptr<SIPlusParserContext> context) 
+        : context_(context) { }
 
     std::shared_ptr<text::ValueRetriever> value(
         std::shared_ptr<text::ValueRetriever> parent, 

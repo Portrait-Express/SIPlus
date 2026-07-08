@@ -12,6 +12,7 @@
 
 namespace SIPLUS_NAMESPACE {
 
+SIPLUS_DECLARE_NODE_RESULT(StringInterpolatorParser::Piped_exprContext, std::shared_ptr<text::ValueRetriever>);
 SIPLUS_DECLARE_NODE_RESULT(StringInterpolatorParser::ExprContext, std::shared_ptr<text::ValueRetriever>);
 SIPLUS_DECLARE_NODE_RESULT(StringInterpolatorParser::Suffixable_exprContext, std::shared_ptr<text::ValueRetriever>);
 SIPLUS_DECLARE_NODE_RESULT(StringInterpolatorParser::PrimitiveContext, UnknownDataTypeContainer);

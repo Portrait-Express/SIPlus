@@ -97,6 +97,32 @@ int test_contains() {
     });
 }
 
+int test_each() {
+    return test("each", [](const Parser& parser) {
+        return tests(
+            test_expression(R"(var $set = set_new; [1, 2, 3] | each (set_add $set .); set_has $set 2)", true)
+        );
+    });
+}
+
+int test_all() {
+    return test("all", [](const Parser& parser) {
+        return tests(
+            test_expression(R"([false, true, true] | all .)", false),
+            test_expression(R"([true, true, true] | all .)", true)
+        );
+    });
+}
+
+int test_any() {
+    return test("any", [](const Parser& parser) {
+        return tests(
+            test_expression(R"([false, true, true] | any .)", true),
+            test_expression(R"([false, false, false] | any .)", false)
+        );
+    });
+}
+
 int test_and() {
     return test("and", [](const Parser& parser) {
         return tests(
@@ -420,6 +446,10 @@ int test_functions() {
             test_length(),
             test_join(),
             test_map(),
+            test_contains(),
+            test_each(),
+            test_all(),
+            test_any(),
 
             test_and(),
             test_xor(),

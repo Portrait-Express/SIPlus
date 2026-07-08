@@ -10,7 +10,6 @@
 
 namespace SIPLUS_NAMESPACE {
 
-SIPLUS_DECLARE_NODE_RESULT(StringInterpolatorParser::Piped_exprContext, std::shared_ptr<text::ValueRetriever>);
 SIPLUS_DECLARE_NODE_RESULT(StringInterpolatorParser::Piped_expr_partContext, std::shared_ptr<text::ValueRetriever>);
 
 class piped_expr_parts_visitor : public SIPlusParseTreeVisitor {

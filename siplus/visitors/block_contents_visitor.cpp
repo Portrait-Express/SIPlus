@@ -269,6 +269,11 @@ std::any block_contents_visitor::visitBlock_stmt(StringInterpolatorParser::Block
         return visitFunction_definition(funcCtx);
     } else if(auto declCtx = ctx->variable_declaration()) {
         return visitVariable_declaration(declCtx);
+    } else if(auto pipedCtx = ctx->piped_expr()) {
+        siplus_visitor visitor{context_, buildContext_, tokens_};
+        auto expr = visitor.visit(pipedCtx);
+
+        return std::static_pointer_cast<Statement>(std::make_shared<ExprStmt>(expr));
     } else if(auto exprCtx = ctx->expr()) {
         siplus_visitor visitor{context_, buildContext_, tokens_};
         auto expr = visitor.visit(exprCtx);
