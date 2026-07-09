@@ -366,3 +366,38 @@ Get the type of the object (`TypeInfo::name()`)
 null | type // 'null'
 "test" | type // 'string'
 ```
+
+## each (2.0.4)
+Evaluate an expression for each instance in an array. Returns the result of the final evaluation.
+
+- `list` The list to iterate
+- `expr` The expression to evaluate
+
+```
+var $s = 0; [1, 2, 3] | each ($s = add $s .) // 6
+```
+
+## all (2.0.4)
+Check if each item in a list matches a condition
+
+- `list` The list to iterate
+- `predicate` The condition expression
+
+```
+[true, true] | all // true
+[true, false] | all // false
+[false, false] | all // false
+```
+
+## any (2.0.4)
+Check if any item in a list matches a condition
+
+- `list` The list to iterate
+- `predicate` The condition expression
+
+```
+[true, true] | all // true
+[true, false] | all // true
+[false, false] | all // false
+```
+
