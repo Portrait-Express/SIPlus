@@ -123,6 +123,16 @@ int test_any() {
     });
 }
 
+int test_sort() {
+    return test("sort", [](const Parser& parser) {
+        return tests(
+            test_expression<types::ArrayType>(R"([1, 2, 3] | sort (sub .[0] .[1]))", std::vector<int>{1, 2, 3}),
+            test_expression<types::ArrayType>(R"([2, 4, 1, 6, 3, 7, 5, 2] | sort (sub .[0] .[1]))", 
+                                              std::vector<int>{1, 2, 2, 3, 4, 5, 6, 7})
+        );
+    });
+}
+
 int test_and() {
     return test("and", [](const Parser& parser) {
         return tests(
@@ -450,6 +460,7 @@ int test_functions() {
             test_each(),
             test_all(),
             test_any(),
+            test_sort(),
 
             test_and(),
             test_xor(),

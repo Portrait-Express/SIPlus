@@ -298,6 +298,10 @@ UnknownDataTypeContainer make_data(const T& data) {
     return make_data<type_info_for_t<T>>(data);
 }
 
+constexpr inline UnknownDataTypeContainer make_data(const UnknownDataTypeContainer& data) {
+    return data;
+}
+
 } /* SIPLUS_NAMESPACE */
 
 namespace std {

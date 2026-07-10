@@ -401,3 +401,4 @@ Check if any item in a list matches a condition
 [false, false] | all // false
 ```
 
+## sort (2.0.4)

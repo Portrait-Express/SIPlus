@@ -23,17 +23,22 @@
 namespace SIPLUS_NAMESPACE {
 namespace text {
 
+} /* text */
+} /* SIPLUS_NAMESPACE */
+
+namespace std {
+
 template<typename _OStream>
-_OStream& operator<<(_OStream& out, const UnknownDataTypeContainer& val) {
-    if(val.is<types::IntegerType>()) {
-        out << val.as<types::IntegerType>();
-    } else if(val.is<types::FloatType>()) {
-        out << val.as<types::FloatType>();
-    } else if(val.is<types::StringType>()) {
-        out << val.as<types::StringType>();
-    } else if(val.is<types::ArrayType>()) {
-        out << val.as<types::ArrayType>();
-    } else if(val.is<types::NullType>()) {
+_OStream& operator<<(_OStream& out, const SIPLUS_NAMESPACE::UnknownDataTypeContainer& val) {
+    if(val.is<SIPLUS_NAMESPACE::types::IntegerType>()) {
+        out << val.as<SIPLUS_NAMESPACE::types::IntegerType>();
+    } else if(val.is<SIPLUS_NAMESPACE::types::FloatType>()) {
+        out << val.as<SIPLUS_NAMESPACE::types::FloatType>();
+    } else if(val.is<SIPLUS_NAMESPACE::types::StringType>()) {
+        out << val.as<SIPLUS_NAMESPACE::types::StringType>();
+    } else if(val.is<SIPLUS_NAMESPACE::types::ArrayType>()) {
+        out << val.as<SIPLUS_NAMESPACE::types::ArrayType>();
+    } else if(val.is<SIPLUS_NAMESPACE::types::NullType>()) {
         out << "null";
     } else {
         out << '{' << val.type->name() << ' ' << val.ptr << '}';
@@ -41,11 +46,6 @@ _OStream& operator<<(_OStream& out, const UnknownDataTypeContainer& val) {
 
     return out;
 }
-
-} /* text */
-} /* SIPLUS_NAMESPACE */
-
-namespace std {
 
 template<typename _OStream, typename T>
 _OStream& operator<<(_OStream& stream, std::function<T> func) {
@@ -58,7 +58,7 @@ _OStream& operator<<(_OStream& out, const std::vector<T>& val) {
     out << "std::vector{";
 
     for(int i = 0; i < val.size(); i++) {
-        out << '"' << val << '"';
+        out << val[i];
         
         if(i < val.size() - 1) {
             out << ", ";

@@ -9,6 +9,9 @@
 #include "siplus/types/integer.hxx"
 #include "siplus/types/string.hxx"
 #include "siplus/util.hxx"
+#include <algorithm>
+#include <iostream>
+#include <memory>
 #include <sstream>
 
 namespace SIPLUS_NAMESPACE {
@@ -207,6 +210,39 @@ private:
     std::shared_ptr<text::ValueRetriever> predicate_;
 };
 
+
+struct sort_impl : text::ValueRetriever {
+    sort_impl(
+        std::weak_ptr<SIPlusParserContext> context,
+        std::shared_ptr<text::ValueRetriever> list,
+        std::shared_ptr<text::ValueRetriever> comparator
+    ) : context_(context), list_(list), comparator_(comparator) {}
+
+    UnknownDataTypeContainer 
+    retrieve(InvocationContext &value) const override {
+        auto ctx = context_.lock();
+        auto list = list_->retrieve(value);
+        auto& input = list.as<types::ArrayType>();
+        
+        types::ArrayType::data_type arr = input;
+
+        std::sort(arr.begin(), arr.end(), [this, &value, &ctx](UnknownDataTypeContainer& a, UnknownDataTypeContainer& b) {
+            auto wrapped = wrap_scope(value.shared_from_this())
+                .use_default(make_data(types::ArrayType::data_type{a, b}))
+                .build();
+            auto result = comparator_->retrieve(*wrapped);
+            return ctx->convert<types::IntegerType>(result).as<types::IntegerType>() < 0;
+        });
+
+        return make_data(arr);
+    }
+
+private:
+    std::weak_ptr<SIPlusParserContext> context_;
+    std::shared_ptr<text::ValueRetriever> list_;
+    std::shared_ptr<text::ValueRetriever> comparator_;
+};
+
 }
 
 std::shared_ptr<text::ValueRetriever>
@@ -373,6 +409,15 @@ any_func::value(
 ) const {
     auto [list, pred] = util::get_parameters_first_parent<2>(parent, parameters);
     return std::make_shared<any_impl>(context_, list, pred);
+}
+
+std::shared_ptr<text::ValueRetriever>
+sort_func::value(
+    std::shared_ptr<text::ValueRetriever> parent, 
+    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+) const {
+    auto [list, comparator] = util::get_parameters_first_parent<2>(parent, parameters);
+    return std::make_shared<sort_impl>(context_, list, comparator);
 }
 
 } /* stl */

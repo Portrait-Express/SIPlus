@@ -172,6 +172,29 @@ private:
     std::weak_ptr<SIPlusParserContext> context_;
 };
 
+/**
+ * struct sort_func - Function that checks if any element in a list matches a 
+ * condition.
+ *
+ * @code
+ * std::vector<int> c = {2, 1, 3}; 
+ * parser.get_expression(R"(sort . (sub .[0] .[1]))")->retrieve(text::make_data(c));
+ * // false
+ * @endcode
+ */
+struct SIPLUS_EXPORT sort_func : Function  {
+    explicit sort_func(std::weak_ptr<SIPlusParserContext> context) 
+        : context_(context) { }
+
+    std::shared_ptr<text::ValueRetriever> value(
+        std::shared_ptr<text::ValueRetriever> parent, 
+        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    ) const override;
+
+private:
+    std::weak_ptr<SIPlusParserContext> context_;
+};
+
 } /* stl */
 } /* SIPLUS_NAMESPACE */
 

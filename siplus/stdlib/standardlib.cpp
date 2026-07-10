@@ -48,6 +48,7 @@ void attach_stl(SIPlusParserContext& context) {
     context.emplace_function<each_func>("each", context.shared_from_this());
     context.emplace_function<all_func>("all", context.shared_from_this());
     context.emplace_function<any_func>("any", context.shared_from_this());
+    context.emplace_function<sort_func>("sort", context.shared_from_this());
 
     //Boolean logic
     context.emplace_function<typed_binary_operator_function<types::BoolType, types::BoolType>>(

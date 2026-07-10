@@ -29,6 +29,7 @@ static void std_segv_handler(int code) {
 
 static void initialize(int* pargc, char*** pargv) {
     std::signal(SIGSEGV, std_segv_handler);
+    std::signal(SIGABRT, std_segv_handler);
 
     //struct sigaction act = {0};
     //act.sa_sigaction = segv_handler;
