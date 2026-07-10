@@ -402,3 +402,12 @@ Check if any item in a list matches a condition
 ```
 
 ## sort (2.0.4)
+Create a new version of `list` sorted according to `comp`
+
+- `list` The list to sort
+- `comp` Comparator expression. This will be called with a default data 
+containing a tuple of the first and second items to compare.
+
+```
+[2, 3, 1] | sort (sub .[0] .[1]) // [1, 2, 3]
+```

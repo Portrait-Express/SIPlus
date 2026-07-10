@@ -1,3 +1,8 @@
+# 2.0.4
+- Refactored visitors
+- Allow expressions as array indexers
+- Add `any`, `all`, `each`, `sort` functions
+
 # 2.0.3
 - Added converter functions to the C API
 - Added emscripten build support
