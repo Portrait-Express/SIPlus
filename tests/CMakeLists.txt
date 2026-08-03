@@ -49,7 +49,12 @@ if(SIPLUS_TESTS_USE_ASAN)
     endif()
 endif()
 
-target_link_libraries(runner PRIVATE siplus ${SIPLUS_TEST_LIBRARIES} stdc++exp)
+target_link_libraries(runner PRIVATE siplus ${SIPLUS_TEST_LIBRARIES})
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU") 
+    target_link_libraries(runner PRIVATE stdc++exp)
+endif()
+
 target_include_directories(runner PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_options(runner PRIVATE "-Wl,--wrap=__cxa_throw")
