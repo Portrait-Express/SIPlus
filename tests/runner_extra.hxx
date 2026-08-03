@@ -5,6 +5,7 @@
 
 static bool g_aborted = false;
 
+#ifdef __linux__
 static void posix_segv_handler(int sig, siginfo_t *info, void *ucontext) {
     if(g_aborted) {
         return;
@@ -18,7 +19,7 @@ static void posix_segv_handler(int sig, siginfo_t *info, void *ucontext) {
 
     std::abort();
 }
-
+#else
 static void std_segv_handler(int code) {
     if(g_aborted) {
         return;
@@ -31,6 +32,7 @@ static void std_segv_handler(int code) {
 
     std::abort();
 }
+#endif
 
 static void initialize(int* pargc, char*** pargv) {
 #ifdef __linux__

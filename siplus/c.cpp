@@ -11,7 +11,6 @@
 #include <exception>
 #include <iostream>
 #include <memory>
-#include <strings.h>
 
 #define __STR(x) #x
 #define STR(x) __STR(x)
