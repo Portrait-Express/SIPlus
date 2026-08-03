@@ -1,3 +1,4 @@
+#include <array>
 #include <chrono>
 #include <iostream> 
 #include <format>
@@ -189,7 +190,7 @@ extern "C" void __wrap___cxa_throw(
 ) {
     auto exception_count = std::uncaught_exceptions();
 
-    if (exception_count < ssize_t(s_stacktraces.size())) {
+    if (exception_count < size_t(s_stacktraces.size())) {
         s_stacktraces[exception_count] = std::stacktrace::current(1);
     }
 
