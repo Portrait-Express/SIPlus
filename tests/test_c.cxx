@@ -1,8 +1,5 @@
 #include "siplus/csiplus.h"
 #include "common.hxx"
-#include "siplus/parser.hxx"
-#include "siplus/stl/functions/typed_operator.hxx"
-#include "siplus/range_iterator.hxx"
 #include "siplus/types/float.hxx"
 #include "siplus/types/integer.hxx"
 #include "siplus/types/string.hxx"
@@ -245,6 +242,34 @@ int language_info_access(SIPlusUnknownDataContainer **result, void *info, void *
 }
 
 /**
+ * @brief `index` function for LanguageInfo
+ *
+ * @param[out] result Output ptr
+ * @param[in] info TypeInfo object
+ * @param[in] data Data ptr for object
+ * @param[in] property Property name
+ * @return error code
+ */
+int language_info_index(SIPlusUnknownDataContainer **result, void *thisData, SIPlusContext *context, void *data, SIPlusUnknownDataContainer *indexData) {
+    LanguageInfo *language = reinterpret_cast<LanguageInfo*>(data);
+
+    if(siplus_data_is_int(indexData)) {
+        long index;
+        siplus_data_as_int(&index, indexData);
+        *result = siplus_data_make_int(index);
+        return siplus_error_set(SIPLUS_OK, NULL);
+    } 
+
+    SIPlusTypeInfo *info;
+    char *name;
+    siplus_data_type(&info, indexData);
+    siplus_type_name(&name, info);
+    return siplus_error_set(SIPLUS_ERR, util::to_string(
+        "Unsure how to index 'LanguageInfo' with '", name, "'"
+    ).c_str());
+}
+
+/**
  * @brief Create a new TypeInfo
  *
  * @return New Type Info
@@ -253,9 +278,16 @@ SIPlusTypeInfo *langauge_info_type_new() {
     SIPlusTypeInfo *info;
     Empty *data = new Empty();
 
-    siplus_type_new(&info, reinterpret_cast<void*>(data), "LanguageInfo", language_info_is_iterable, language_info_access, NULL, NULL, [](void* data){
-        delete reinterpret_cast<Empty*>(data);
-    });
+    siplus_type_new(
+        &info, 
+        reinterpret_cast<void*>(data), 
+        "LanguageInfo", 
+        language_info_is_iterable, 
+        language_info_access, 
+        language_info_index, 
+        NULL, 
+        [](void* data){ delete reinterpret_cast<Empty*>(data); }
+    );
     return info;
 }
 
@@ -621,6 +653,8 @@ int test_c(int argc, char** const argv) {
         result = test_expression(parser, "test 2", 2, true);
         if(result) { return finish(1); }
 
+        result = test_expression(parser, ".[4]", 4);
+        if(result) { return finish(1); }
 
         return finish(0);
     });
