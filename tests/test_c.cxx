@@ -254,7 +254,7 @@ int language_info_index(SIPlusUnknownDataContainer **result, void *thisData, SIP
     LanguageInfo *language = reinterpret_cast<LanguageInfo*>(data);
 
     if(siplus_data_is_int(indexData)) {
-        long index;
+        int64_t index;
         siplus_data_as_int(&index, indexData);
         *result = siplus_data_make_int(index);
         return siplus_error_set(SIPLUS_OK, NULL);
