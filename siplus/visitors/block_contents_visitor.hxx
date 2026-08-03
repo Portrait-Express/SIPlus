@@ -1,7 +1,6 @@
 #ifndef INCLUDE_SIPLUS_BLOCK_VISITOR_HXX_
 #define INCLUDE_SIPLUS_BLOCK_VISITOR_HXX_
 
-#include "siplus/build_context.hxx"
 #include "siplus/context.hxx"
 #include "visitor.hxx"
 
@@ -13,9 +12,9 @@ struct Statement {
     virtual ~Statement() = default;
 };
 
-SIPLUS_DECLARE_NODE_RESULT(StringInterpolatorParser::Block_contentsContext, std::shared_ptr<text::ValueRetriever>);
+SIPLUS_DECLARE_NODE_RESULT(StringInterpolatorParser::Block_contentsContext, std::shared_ptr<ValueRetriever>);
 SIPLUS_DECLARE_NODE_RESULT(StringInterpolatorParser::Block_stmtContext, std::shared_ptr<Statement>);
-SIPLUS_DECLARE_NODE_RESULT(StringInterpolatorParser::Block_exprContext, std::shared_ptr<text::ValueRetriever>);
+SIPLUS_DECLARE_NODE_RESULT(StringInterpolatorParser::Block_exprContext, std::shared_ptr<ValueRetriever>);
 
 class block_contents_visitor: public SIPlusParseTreeVisitor {
 public:
@@ -33,7 +32,7 @@ public:
     std::any visitBlock_contents(StringInterpolatorParser::Block_contentsContext *ctx) override;
 
 private:
-    std::shared_ptr<text::ValueRetriever> value_ = 0;
+    std::shared_ptr<ValueRetriever> value_ = 0;
     std::shared_ptr<SIPlusParserContext> context_;
     std::shared_ptr<BuildContext> buildContext_;
     const antlr4::BufferedTokenStream& tokens_;

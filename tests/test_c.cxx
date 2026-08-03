@@ -2,7 +2,7 @@
 #include "common.hxx"
 #include "siplus/parser.hxx"
 #include "siplus/stl/functions/typed_operator.hxx"
-#include "siplus/text/range_iterator.hxx"
+#include "siplus/range_iterator.hxx"
 #include "siplus/types/float.hxx"
 #include "siplus/types/integer.hxx"
 #include "siplus/types/string.hxx"

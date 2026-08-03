@@ -1,9 +1,8 @@
 #pragma once
-#include "siplus/data.hxx"
 #ifndef INCLUDE_TYPES_FLOAT_HXX_
 #define INCLUDE_TYPES_FLOAT_HXX_
 
-#include "siplus/config.h"
+#include "siplus/context.hxx"
 
 namespace SIPLUS_NAMESPACE {
 namespace types {

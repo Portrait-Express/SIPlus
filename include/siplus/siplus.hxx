@@ -2,9 +2,8 @@
 #ifndef INCLUDE_SIPLUS_SIPLUS_HXX_
 #define INCLUDE_SIPLUS_SIPLUS_HXX_
 
-#include "siplus/parser.hxx"
-#include "siplus/function.hxx"
 #include "siplus/context.hxx"
+#include "siplus/parser.hxx"
 #include "siplus/types.hxx"
 #include "siplus/text/text.hxx"
 

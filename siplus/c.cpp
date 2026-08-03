@@ -1,7 +1,6 @@
 #include "siplus/csiplus.h"
-#include "siplus/data.hxx"
 #include "siplus/siplus.hxx"
-#include "siplus/text/converter.hxx"
+#include "siplus/context.hxx"
 #include "siplus/types/array.hxx"
 #include "siplus/types/bool.hxx"
 #include "siplus/types/float.hxx"
@@ -95,7 +94,7 @@ struct _SIPlusTextConstructor {
 };
 
 struct _SIPlusValueRetriever {
-    std::shared_ptr<text::ValueRetriever> retriever;
+    std::shared_ptr<ValueRetriever> retriever;
 };
 
 struct _SIPlusParseOpts {
@@ -111,7 +110,7 @@ struct _SIPlusInvocationContext {
 };
 
 struct _SIPlusIterator {
-    std::unique_ptr<text::Iterator> iterator;
+    std::unique_ptr<Iterator> iterator;
 };
 
 struct _SIPlusFunction {
@@ -119,12 +118,12 @@ struct _SIPlusFunction {
 };
 
 struct _SIPlusConverter {
-    std::shared_ptr<text::Converter> converter;
+    std::shared_ptr<Converter> converter;
 };
 
 namespace {
 
-struct CValueRetriever : text::ValueRetriever {
+struct CValueRetriever : ValueRetriever {
     CValueRetriever(
         void *data, 
         SIPlusRetrieverImpl impl,
@@ -167,9 +166,9 @@ struct CFunction : Function {
         SIPlusFunctionDeleter deleter
     ) : data(data), impl(impl), deleter(deleter) {}
 
-    std::shared_ptr<text::ValueRetriever> value(
-        std::shared_ptr<text::ValueRetriever> parent,
-        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent,
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
 
     ~CFunction() { if(deleter) deleter(data); }
@@ -179,9 +178,9 @@ struct CFunction : Function {
     SIPlusFunctionDeleter deleter;
 };
 
-std::shared_ptr<text::ValueRetriever> CFunction::value(
-    std::shared_ptr<text::ValueRetriever> parent,
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+std::shared_ptr<ValueRetriever> CFunction::value(
+    std::shared_ptr<ValueRetriever> parent,
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     size_t argc = parameters.size();
     SIPlusValueRetriever *retrieverPtr = nullptr;
@@ -228,7 +227,7 @@ struct CType : TypeInfo {
     bool is_iterable(const UnknownDataTypeContainer &data) const override;
 
     UnknownDataTypeContainer access(const UnknownDataTypeContainer &data, const std::string &name) const override;
-    std::unique_ptr<text::Iterator> iterate(const UnknownDataTypeContainer &data) const override;
+    std::unique_ptr<Iterator> iterate(const UnknownDataTypeContainer &data) const override;
 
     ~CType() { if(deleter_) deleter_(data_); }
 
@@ -266,7 +265,7 @@ UnknownDataTypeContainer CType::access(const UnknownDataTypeContainer &data, con
     return ret;
 }
 
-std::unique_ptr<text::Iterator> CType::iterate(const UnknownDataTypeContainer &data) const {
+std::unique_ptr<Iterator> CType::iterate(const UnknownDataTypeContainer &data) const {
     if(!iterate_) TypeInfo::iterate(data);
 
     SIPlusIterator *iterator;
@@ -284,7 +283,7 @@ std::unique_ptr<text::Iterator> CType::iterate(const UnknownDataTypeContainer &d
     return ret;
 }
 
-struct CIterator : text::Iterator {
+struct CIterator : Iterator {
     CIterator(
         void *data,
         SIPlusIteratorMore more,
@@ -336,7 +335,7 @@ UnknownDataTypeContainer CIterator::current() {
     return *ret;
 }
 
-struct CConverter : text::Converter {
+struct CConverter : Converter {
     CConverter(
         void *ptr,
         SIPlusConverterCanConvert can,
@@ -584,8 +583,8 @@ int siplus_function_value(SIPlusValueRetriever **retriever, SIPlusFunction *func
         return siplus_error_set(SIPLUS_INVALID_ARG, "paramc was >0, but params was NULL");
     }
 
-    std::shared_ptr<text::ValueRetriever> parentPtr = nullptr;
-    std::vector<std::shared_ptr<text::ValueRetriever>> paramsPtr(paramc);
+    std::shared_ptr<ValueRetriever> parentPtr = nullptr;
+    std::vector<std::shared_ptr<ValueRetriever>> paramsPtr(paramc);
 
     if(parent) {
         parentPtr = parent->retriever;

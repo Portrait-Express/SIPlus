@@ -5,12 +5,9 @@
 #include <memory>
 #include <string>
 
-#include "siplus/config.h"
-#include "siplus/invocation_context.hxx"
-#include "siplus/text/value_retrievers/retriever.hxx"
+#include "siplus/context.hxx"
 
 namespace SIPLUS_NAMESPACE {
-namespace text {
 
 /**
  * @brief A ValueRetriever that accesses a property on a container.
@@ -41,8 +38,6 @@ private:
     std::string name_;
 };
 
-    
-} /* text */
-}
+} /* SIPLUS_NAMESPACE */
 
 #endif  // INCLUDE_SIPLUS_TEXT_ACCESSOR_RETRIEVER_HXX_

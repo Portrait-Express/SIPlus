@@ -1,13 +1,14 @@
 #include "../util.hxx"
 #include "../retrievers/indexer_value_retriever.hxx"
+#include "siplus/value_retrievers/accessor_retriever.hxx"
 #include "siplus_visitor.hxx"
-#include "siplus/text/value_retrievers/accessor_retriever.hxx"
+#include "siplus/context.hxx"
 #include "expr_suffix_visitor.hxx"
 
 namespace SIPLUS_NAMESPACE {
 
 std::any expr_suffix_visitor::visitAccessor(StringInterpolatorParser::AccessorContext *ctx) {
-    value = detail::make_retriever<text::AccessorValueRetriever>(value, ctx->ID()->getText());
+    value = detail::make_retriever<AccessorValueRetriever>(value, ctx->ID()->getText());
     return value;
 }
 
@@ -15,7 +16,7 @@ std::any expr_suffix_visitor::visitIndexer(StringInterpolatorParser::IndexerCont
     siplus_visitor visitor{context_, buildContext_, tokens_};
     auto index = visitor.visit(ctx->expr());
 
-    value = detail::make_retriever<indexer_value_retriever>(value, index);
+    value = detail::make_retriever<indexer_value_retriever>(context_, value, index);
     return value;
 }
 
@@ -29,7 +30,7 @@ std::any expr_suffix_visitor::visitExpr_suffix(StringInterpolatorParser::Expr_su
     }
 }
 
-std::shared_ptr<text::ValueRetriever> expr_suffix_visitor::visitMultiple(const std::vector<StringInterpolatorParser::Expr_suffixContext*>& ctxs) {
+std::shared_ptr<ValueRetriever> expr_suffix_visitor::visitMultiple(const std::vector<StringInterpolatorParser::Expr_suffixContext*>& ctxs) {
     for(auto ctx : ctxs) {
         visit(ctx);
     }

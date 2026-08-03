@@ -337,7 +337,7 @@ inline int expect_throw(std::function<void ()> func) {
 template<
     typename T, 
     SIPLUS_NAMESPACE::simple_value_retrievable_type To
-> requires std::is_base_of_v<SIPLUS_NAMESPACE::text::Converter, T>
+> requires std::is_base_of_v<SIPLUS_NAMESPACE::Converter, T>
 int test_conversion(
     const T& converter, 
     const SIPLUS_NAMESPACE::UnknownDataTypeContainer& from,
@@ -371,13 +371,13 @@ int test_conversion(
     }
 }
 
-template<typename T, typename V, typename To> requires std::is_base_of_v<SIPLUS_NAMESPACE::text::Converter, T>
+template<typename T, typename V, typename To> requires std::is_base_of_v<SIPLUS_NAMESPACE::Converter, T>
 int test_conversion(const T& converter, const V& val, const To& result) {
     auto container = SIPLUS_NAMESPACE::make_data(val);
     return test_conversion<T, SIPLUS_NAMESPACE::type_info_for_t<To>>(converter, container, result);
 }
 
-template<typename T, typename V, typename To> requires std::is_base_of_v<SIPLUS_NAMESPACE::text::Converter, T>
+template<typename T, typename V, typename To> requires std::is_base_of_v<SIPLUS_NAMESPACE::Converter, T>
 int test_conversion(const V& val, const To& result) {
     T converter;
     return test_conversion<T, V, To>(converter, val, result);

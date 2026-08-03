@@ -1,11 +1,11 @@
-#include "siplus/text/value_retrievers/retriever.hxx"
+#include "siplus/context.hxx"
 
 namespace SIPLUS_NAMESPACE {
 namespace detail {
 
 template<typename T, typename... Ts>
-std::shared_ptr<text::ValueRetriever> make_retriever(Ts&&... args) {
-    return std::static_pointer_cast<text::ValueRetriever>(
+std::shared_ptr<ValueRetriever> make_retriever(Ts&&... args) {
+    return std::static_pointer_cast<ValueRetriever>(
         std::make_shared<T>(std::forward<Ts>(args)...)
     );
 }

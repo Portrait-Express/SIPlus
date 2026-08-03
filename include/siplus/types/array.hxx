@@ -3,8 +3,7 @@
 #ifndef INCLUDE_TYPES_ARRAY_HXX_
 #define INCLUDE_TYPES_ARRAY_HXX_
 
-#include "siplus/config.h"
-#include "siplus/data.hxx"
+#include "siplus/context.hxx"
 
 namespace SIPLUS_NAMESPACE {
 namespace types {
@@ -15,7 +14,7 @@ struct SIPLUS_EXPORT ArrayType : public TypeInfo {
     virtual std::string name() const override;
     virtual bool is_iterable(const UnknownDataTypeContainer& data) const override;
 
-    virtual std::unique_ptr<text::Iterator> iterate(const UnknownDataTypeContainer& data) const override;
+    virtual std::unique_ptr<Iterator> iterate(const UnknownDataTypeContainer& data) const override;
 };
 
 } /* types */

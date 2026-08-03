@@ -1,6 +1,4 @@
 #pragma once
-#include "siplus/data.hxx"
-#include "siplus/text/converter.hxx"
 #ifndef INCLUDE_CONVERTERS_NULL_HXX_
 #define INCLUDE_CONVERTERS_NULL_HXX_
 
@@ -8,13 +6,15 @@
 
 #ifdef SIPLUS_INCLUDE_STDLIB
 
+#include "siplus/context.hxx"
+
 namespace SIPLUS_NAMESPACE {
 namespace stl {
 
 /**
  * struct null_bool_converter - Converts null to a bool. The result is always false.
  */
-struct SIPLUS_EXPORT null_bool_converter : text::Converter {
+struct SIPLUS_EXPORT null_bool_converter : Converter {
     UnknownDataTypeContainer 
     convert(const UnknownDataTypeContainer& from, const TypeInfo& to) const override;
 
@@ -24,7 +24,7 @@ struct SIPLUS_EXPORT null_bool_converter : text::Converter {
 /**
  * struct null_string_converter - Converts null to an empty string.
  */
-struct SIPLUS_EXPORT null_string_converter : text::Converter {
+struct SIPLUS_EXPORT null_string_converter : Converter {
     UnknownDataTypeContainer 
     convert(const UnknownDataTypeContainer& from, const TypeInfo& to) const override;
 

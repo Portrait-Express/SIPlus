@@ -1,7 +1,5 @@
-#include <cstring>
-
 #include "common.hxx"
-#include "siplus/data.hxx"
+#include "siplus/context.hxx"
 #include "siplus/parser.hxx"
 #include "siplus/types/array.hxx"
 #include "siplus/types/float.hxx"
@@ -17,6 +15,12 @@ int test_base(int, char** const) {
                 test("Accessor", [](const Parser& parser) {
                     return tests(
                         test_expression<types::IntegerType>(".x", 2)
+                    );
+                }),
+                test("Indexer", [](const Parser& parser) {
+                    return tests(
+                        test_expression<types::IntegerType>(R"(.["x"])", 2),
+                        test_expression<types::IntegerType>(R"([1, 2] | .[1])", 2)
                     );
                 }),
                 group("Variables", [](const Parser& parser) {

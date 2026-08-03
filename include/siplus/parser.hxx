@@ -1,4 +1,5 @@
 #pragma once
+#include "siplus/text/constructor.hxx"
 #ifndef INCLUDE_SIPLUS_PARSER_HXX_
 #define INCLUDE_SIPLUS_PARSER_HXX_
 
@@ -8,8 +9,6 @@
 #include <vector>
 
 #include "siplus/context.hxx"
-#include "siplus/text/constructor.hxx"
-#include "siplus/config.h"
 
 namespace SIPLUS_NAMESPACE {
 
@@ -68,7 +67,7 @@ public:
      *
      * @param[in] expression The expression 
      */
-    std::shared_ptr<text::ValueRetriever> get_expression(const std::string& expression) const;
+    std::shared_ptr<ValueRetriever> get_expression(const std::string& expression) const;
 
     /**
      * @brief Get an expression value retriever.
@@ -76,7 +75,7 @@ public:
      * @param[in] expression The expression 
      * @param[in] opts The parse options
      */
-    std::shared_ptr<text::ValueRetriever> get_expression(const std::string& expression, const ParseOpts& opts) const;
+    std::shared_ptr<ValueRetriever> get_expression(const std::string& expression, const ParseOpts& opts) const;
 
 
     /**

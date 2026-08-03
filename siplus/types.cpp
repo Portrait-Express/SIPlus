@@ -1,8 +1,7 @@
 #include <stdexcept>
 
-#include "siplus/data.hxx"
-#include "siplus/text/iterator.hxx"
-#include "siplus/text/range_iterator.hxx"
+#include "siplus/context.hxx"
+#include "siplus/range_iterator.hxx"
 #include "siplus/types/bool.hxx"
 #include "siplus/types/string.hxx"
 #include "siplus/types/integer.hxx"
@@ -14,7 +13,7 @@ namespace types {
 
 namespace {
 
-struct string_iterator_impl : text::Iterator {
+struct string_iterator_impl : Iterator {
     string_iterator_impl(std::string value) : value_(value) { }
 
     virtual bool more();
@@ -57,7 +56,7 @@ bool FloatType::is_iterable(const UnknownDataTypeContainer& data) const { return
 
 std::string StringType::name() const { return "string"; }
 bool StringType::is_iterable(const UnknownDataTypeContainer& data) const { return true; }
-std::unique_ptr<text::Iterator> StringType::iterate(const UnknownDataTypeContainer& data) const {
+std::unique_ptr<Iterator> StringType::iterate(const UnknownDataTypeContainer& data) const {
     return std::make_unique<string_iterator_impl>(data.as<StringType>());
 }
 
@@ -67,13 +66,12 @@ UnknownDataTypeContainer make_data(std::string str) {
 
 std::string ArrayType::name() const { return "array"; }
 bool ArrayType::is_iterable(const UnknownDataTypeContainer& data) const { return true; }
-std::unique_ptr<text::Iterator> ArrayType::iterate(const UnknownDataTypeContainer& data) const {
+std::unique_ptr<Iterator> ArrayType::iterate(const UnknownDataTypeContainer& data) const {
     using it_t = ArrayType::data_type::const_iterator;
     return std::make_unique<value_range_iterator<it_t, it_t>>(
         data.as<ArrayType>().begin(), data.as<ArrayType>().end()
     );
 }
-
 
 } /* types */
 } /* SIPLUS_NAMESPACE */

@@ -2,11 +2,9 @@
 #ifndef INCLUDE_SIPLUS_TEXT_DUMMY_RETRIEVER_HXX_
 #define INCLUDE_SIPLUS_TEXT_DUMMY_RETRIEVER_HXX_
 
-#include "siplus/config.h"
-#include "siplus/text/value_retrievers/retriever.hxx"
+#include "siplus/context.hxx"
 
 namespace SIPLUS_NAMESPACE {
-namespace text {
 
 /**
  * @brief Simply returns the value of '.'. Used in a few locations internally.
@@ -21,7 +19,6 @@ public:
 };
 
     
-} /* text */
 }
 
 #endif  // INCLUDE_SIPLUS_TEXT_DUMMY_RETRIEVER_HXX_

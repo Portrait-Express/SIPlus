@@ -1,5 +1,5 @@
 #include "siplus/stl/functions/control.hxx"
-#include "siplus/data.hxx"
+#include "siplus/context.hxx"
 #include "siplus/types/bool.hxx"
 #include "siplus/util.hxx"
 
@@ -8,20 +8,20 @@ namespace stl {
 
 namespace {
 
-struct if_impl : public text::ValueRetriever {
+struct if_impl : public ValueRetriever {
     if_impl(
-        std::shared_ptr<text::ValueRetriever> condition,
-        std::shared_ptr<text::ValueRetriever> tVal,
-        std::shared_ptr<text::ValueRetriever> fVal,
+        std::shared_ptr<ValueRetriever> condition,
+        std::shared_ptr<ValueRetriever> tVal,
+        std::shared_ptr<ValueRetriever> fVal,
         std::weak_ptr<SIPlusParserContext> context
     ) : condition(condition), tVal(tVal), fVal(fVal), context_(context) {}
 
     UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
-    std::shared_ptr<text::ValueRetriever> condition;
-    std::shared_ptr<text::ValueRetriever> tVal;
-    std::shared_ptr<text::ValueRetriever> fVal;
+    std::shared_ptr<ValueRetriever> condition;
+    std::shared_ptr<ValueRetriever> tVal;
+    std::shared_ptr<ValueRetriever> fVal;
 
 private:
     std::weak_ptr<SIPlusParserContext> context_;
@@ -40,10 +40,10 @@ if_impl::retrieve(InvocationContext& value) const {
 }
 
 
-struct while_impl : public text::ValueRetriever {
+struct while_impl : public ValueRetriever {
     while_impl(
-        std::shared_ptr<text::ValueRetriever> condition,
-        std::shared_ptr<text::ValueRetriever> body,
+        std::shared_ptr<ValueRetriever> condition,
+        std::shared_ptr<ValueRetriever> body,
         std::weak_ptr<SIPlusParserContext> context
     ) : condition_(condition), body_(body), context_(context) {}
 
@@ -51,8 +51,8 @@ struct while_impl : public text::ValueRetriever {
     retrieve(InvocationContext& value) const override;
 
 private:
-    std::shared_ptr<text::ValueRetriever> condition_;
-    std::shared_ptr<text::ValueRetriever> body_;
+    std::shared_ptr<ValueRetriever> condition_;
+    std::shared_ptr<ValueRetriever> body_;
     std::weak_ptr<SIPlusParserContext> context_;
 };
 
@@ -72,19 +72,19 @@ while_impl::retrieve(InvocationContext& value) const {
 
 } /* anonymous */
 
-std::shared_ptr<text::ValueRetriever>
+std::shared_ptr<ValueRetriever>
 if_func::value(
-    std::shared_ptr<text::ValueRetriever> parent,
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> parent,
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [cond, t, f] = util::get_parameters_first_parent<3>(parent, parameters);
     return std::make_shared<if_impl>(cond, t, f, context_);
 }
 
-std::shared_ptr<text::ValueRetriever>
+std::shared_ptr<ValueRetriever>
 while_func::value(
-    std::shared_ptr<text::ValueRetriever> parent,
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> parent,
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [cond, body] = util::get_parameters_first_parent<2>(parent, parameters);
     return std::make_shared<while_impl>(cond, body, context_);

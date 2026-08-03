@@ -1,4 +1,3 @@
-#include "siplus/data.hxx"
 #include <siplus/siplus.hxx>
 
 #ifndef SIPLUS_EXAMPLE_DONT_NEED_STDLIB

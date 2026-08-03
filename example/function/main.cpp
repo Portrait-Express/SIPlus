@@ -9,9 +9,9 @@ using namespace SIPLUS_NAMESPACE;
 struct access_func : Function {
     access_func(std::shared_ptr<SIPlusParserContext> context) : context_(context) {}
 
-    std::shared_ptr<text::ValueRetriever> value(
-        std::shared_ptr<text::ValueRetriever> parent, 
-        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent, 
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override {
         auto [ input, fieldName ] = util::get_parameters_first_parent<2>(parent ,parameters);
         return std::make_shared<impl>(context_.lock(), input, fieldName);
@@ -26,11 +26,11 @@ private:
      */
     std::weak_ptr<SIPlusParserContext> context_;
 
-    struct impl : text::ValueRetriever {
+    struct impl : ValueRetriever {
         impl(
             std::shared_ptr<SIPlusParserContext> context,
-            std::shared_ptr<text::ValueRetriever> input,
-            std::shared_ptr<text::ValueRetriever> fieldName
+            std::shared_ptr<ValueRetriever> input,
+            std::shared_ptr<ValueRetriever> fieldName
         ) : context_(context), input_(input), fieldName_(fieldName) {}
 
         UnknownDataTypeContainer retrieve(InvocationContext& value) const override {
@@ -46,8 +46,8 @@ private:
 
     private:
         std::shared_ptr<SIPlusParserContext> context_;
-        std::shared_ptr<text::ValueRetriever> input_;
-        std::shared_ptr<text::ValueRetriever> fieldName_;
+        std::shared_ptr<ValueRetriever> input_;
+        std::shared_ptr<ValueRetriever> fieldName_;
     };
 };
 

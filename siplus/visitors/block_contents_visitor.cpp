@@ -3,9 +3,7 @@
 #include <iterator>
 #include <vector>
 
-#include "siplus/build_context.hxx"
-#include "siplus/data.hxx"
-#include "siplus/text/value_retrievers/retriever.hxx"
+#include "siplus/context.hxx"
 
 #include "../util.hxx"
 #include "block_contents_visitor.hxx"
@@ -46,7 +44,7 @@ struct FuncDefStmt : Statement {
 struct VariableDeclarationStmt : Statement {
     VariableDeclarationStmt(
         std::shared_ptr<VariableRetriever> variable,
-        std::shared_ptr<text::ValueRetriever> value
+        std::shared_ptr<ValueRetriever> value
     ) : variable_(variable), value_(value) {
         if(variable->is_const() && !value) 
             throw std::runtime_error{"Const variable '" + variable->name() + "' not initialized"};
@@ -67,7 +65,7 @@ struct VariableDeclarationStmt : Statement {
 
 private:
     std::shared_ptr<VariableRetriever> variable_;
-    std::shared_ptr<text::ValueRetriever> value_;
+    std::shared_ptr<ValueRetriever> value_;
     bool persistInitialized_ = false;
 };
 
@@ -81,40 +79,40 @@ struct CustomFunction : Function {
     CustomFunction(
         std::string name,
         std::vector<ParameterInfo> parameters,
-        std::shared_ptr<text::ValueRetriever> expr
+        std::shared_ptr<ValueRetriever> expr
     ) : name_(name), parameters_(parameters), expr_(expr) {}
 
-    virtual std::shared_ptr<text::ValueRetriever> value(
-        std::shared_ptr<text::ValueRetriever> parent,
-        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    virtual std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent,
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const;
     
 private:
     std::string name_;
     std::vector<ParameterInfo> parameters_;
-    std::shared_ptr<text::ValueRetriever> expr_;
+    std::shared_ptr<ValueRetriever> expr_;
 };
 
-struct CustomFuncImpl : text::ValueRetriever {
-    using parameter_info = std::pair<std::shared_ptr<VariableRetriever>, std::shared_ptr<text::ValueRetriever>>;
+struct CustomFuncImpl : ValueRetriever {
+    using parameter_info = std::pair<std::shared_ptr<VariableRetriever>, std::shared_ptr<ValueRetriever>>;
 
     CustomFuncImpl(
         std::string name,
         std::vector<parameter_info> parameters,
-        std::shared_ptr<text::ValueRetriever> expr
+        std::shared_ptr<ValueRetriever> expr
     ) : name_(name), parameters_(parameters), expr_(expr) {}
 
     UnknownDataTypeContainer retrieve(InvocationContext &value) const override;
 
 private:
     std::string name_;
-    std::shared_ptr<text::ValueRetriever> expr_;
+    std::shared_ptr<ValueRetriever> expr_;
     std::vector<parameter_info> parameters_;
 };
 
-std::shared_ptr<text::ValueRetriever> CustomFunction::value(
-    std::shared_ptr<text::ValueRetriever> parent,
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+std::shared_ptr<ValueRetriever> CustomFunction::value(
+    std::shared_ptr<ValueRetriever> parent,
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     if(parent) {
         parameters.insert(parameters.begin(), parent);
@@ -165,7 +163,7 @@ UnknownDataTypeContainer CustomFuncImpl::retrieve(InvocationContext& context) co
 
 struct ExprStmt : Statement {
     ExprStmt(
-        std::shared_ptr<text::ValueRetriever> expression
+        std::shared_ptr<ValueRetriever> expression
     ) : expression_(expression) { }
 
     void invoke(InvocationContext& ctx) override {
@@ -173,14 +171,14 @@ struct ExprStmt : Statement {
     }
 
 private:
-    std::shared_ptr<text::ValueRetriever> expression_;
+    std::shared_ptr<ValueRetriever> expression_;
 };
 
 
-struct StatementExecutingValueRetriever : public text::ValueRetriever {
+struct StatementExecutingValueRetriever : public ValueRetriever {
     StatementExecutingValueRetriever(
         std::vector<std::shared_ptr<Statement>> stmts,
-        std::shared_ptr<text::ValueRetriever> expr
+        std::shared_ptr<ValueRetriever> expr
     ) : statements_(stmts), expr_(expr) {}
 
     UnknownDataTypeContainer 
@@ -194,7 +192,7 @@ struct StatementExecutingValueRetriever : public text::ValueRetriever {
 
 private:
     std::vector<std::shared_ptr<Statement>> statements_;
-    std::shared_ptr<text::ValueRetriever> expr_;
+    std::shared_ptr<ValueRetriever> expr_;
 };
 
 }
@@ -243,7 +241,7 @@ std::any block_contents_visitor::visitFunction_definition(StringInterpolatorPars
 std::any block_contents_visitor::visitVariable_declaration(StringInterpolatorParser::Variable_declarationContext *ctx) {
     VariableOpts opts;
     std::shared_ptr<VariableRetriever> variable;
-    std::shared_ptr<text::ValueRetriever> value;
+    std::shared_ptr<ValueRetriever> value;
 
     opts.is_const = static_cast<bool>(ctx->CONST());
     opts.is_persist = static_cast<bool>(ctx->PERSIST());

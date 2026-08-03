@@ -5,15 +5,11 @@
 #include "BufferedTokenStream.h"
 
 #include "block_contents_visitor.hxx"
-#include "siplus/data.hxx"
 #include "siplus/text/constructor_steps/literal_step.hxx"
 #include "siplus/text/constructor_steps/repeated_constructor_step.hxx"
 #include "siplus/text/constructor_steps/retriever_step.hxx"
-#include "siplus/text/value_retrievers/literal_retriever.hxx"
-#include "siplus/text/value_retrievers/retriever.hxx"
 #include "siplus/types.hxx"
 #include "siplus/util.hxx"
-#include "siplus/build_context.hxx"
 #include "siplus/context.hxx"
 #include "siplus/text/constructor.hxx"
 
@@ -26,6 +22,7 @@
 #include "siplus_visitor.hxx"
 #include "expr_suffix_visitor.hxx"
 #include "piped_expr_visitor.hxx"
+#include "siplus/value_retrievers/literal_retriever.hxx"
 
 namespace SIPLUS_NAMESPACE {
 
@@ -131,7 +128,7 @@ std::any siplus_visitor::visitPrimitive(StringInterpolatorParser::PrimitiveConte
 
 std::any siplus_visitor::visitArray(StringInterpolatorParser::ArrayContext *ctx) {
     auto exprCtxs = ctx->expr();
-    std::vector<std::shared_ptr<text::ValueRetriever>> vals;
+    std::vector<std::shared_ptr<ValueRetriever>> vals;
     vals.reserve(exprCtxs.size());
 
     siplus_visitor visitor{context_, buildContext_, tokens_};
@@ -146,7 +143,7 @@ std::any siplus_visitor::visitLiteral(StringInterpolatorParser::LiteralContext *
         return visitArray(ctx->array());
     } else if(ctx->primitive()) {
         auto val = visit(ctx->primitive());
-        return detail::make_retriever<text::LiteralValueRetriever>(val);
+        return detail::make_retriever<LiteralValueRetriever>(val);
     } else {
         throw std::runtime_error{"Unknown literal syntax"};
     }
@@ -156,7 +153,7 @@ std::any siplus_visitor::visitCall(StringInterpolatorParser::CallContext *ctx) {
     auto name = ctx->ID()->getText();
     bool custom = static_cast<bool>(ctx->AT());
     auto exprCtxs = ctx->expr();
-    std::vector<std::shared_ptr<text::ValueRetriever>> args;
+    std::vector<std::shared_ptr<ValueRetriever>> args;
     args.reserve(exprCtxs.size());
 
     std::transform(exprCtxs.begin(), exprCtxs.end(), std::back_inserter(args), [this](auto *ctx) { return visit(ctx); });
@@ -172,7 +169,7 @@ std::any siplus_visitor::visitVariable(StringInterpolatorParser::VariableContext
     const auto name = ctx->ID()->getText();
     const auto variable = buildContext_->get_variable(name);
 
-    return std::static_pointer_cast<text::ValueRetriever>(variable);
+    return std::static_pointer_cast<ValueRetriever>(variable);
 }
 
 std::any siplus_visitor::visitBlock(StringInterpolatorParser::BlockContext *ctx) {

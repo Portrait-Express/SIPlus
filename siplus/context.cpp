@@ -1,9 +1,8 @@
+#include <iostream>
 #include <string>
 
 #include "siplus/context.hxx"
 #include "invocation_context_impl.hxx"
-#include "siplus/data.hxx"
-#include "siplus/function.hxx"
 #include "siplus/text/text.hxx"
 
 #ifdef SIPLUS_INCLUDE_STDLIB
@@ -44,7 +43,7 @@ Function& SIPlusParserContext::function(const std::string& name) const {
     return *it->second;
 }
 
-std::shared_ptr<text::Converter> 
+std::shared_ptr<Converter> 
 SIPlusParserContext::converter(const TypeInfo& from, const TypeInfo& to) const {
     auto ret = try_converter(from, to);
 
@@ -57,7 +56,7 @@ SIPlusParserContext::converter(const TypeInfo& from, const TypeInfo& to) const {
     return ret;
 }
 
-std::shared_ptr<text::Converter> 
+std::shared_ptr<Converter> 
 SIPlusParserContext::try_converter(const TypeInfo& from, const TypeInfo& to) const {
     auto it = converters_.find(from, to);
 
@@ -83,7 +82,7 @@ void SIPlusParserContext::emplace_function(std::string name, std::shared_ptr<Fun
     functions_[name] = function;
 }
 
-void SIPlusParserContext::emplace_converter(std::shared_ptr<text::Converter> converter) {
+void SIPlusParserContext::emplace_converter(std::shared_ptr<Converter> converter) {
     converters_.emplace_item(converter);
 }
 

@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "siplus/context.hxx"
-#include "siplus/function.hxx"
 #include "siplus/stl/functions/converting_operator.hxx"
 
 namespace SIPLUS_NAMESPACE {
@@ -22,9 +21,9 @@ namespace stl {
 struct SIPLUS_EXPORT str_func : Function  {
     explicit str_func(std::weak_ptr<SIPlusParserContext> context) : context_(context) { }
 
-    std::shared_ptr<text::ValueRetriever> value(
-        std::shared_ptr<text::ValueRetriever> parent, 
-        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent, 
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
 
     std::weak_ptr<SIPlusParserContext> context_;
@@ -37,9 +36,9 @@ struct SIPLUS_EXPORT str_func : Function  {
 struct SIPLUS_EXPORT replace_function : Function {
     replace_function(std::weak_ptr<SIPlusParserContext> context) : ctx_(context) {}
 
-    std::shared_ptr<text::ValueRetriever> value(
-        std::shared_ptr<text::ValueRetriever> parent,
-        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent,
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
 
 private:
@@ -52,9 +51,9 @@ private:
 struct SIPLUS_EXPORT pad_end_function : Function {
     pad_end_function(std::weak_ptr<SIPlusParserContext> context) : ctx_(context) {}
 
-    std::shared_ptr<text::ValueRetriever> value(
-        std::shared_ptr<text::ValueRetriever> parent,
-        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent,
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
 
 private:
@@ -67,9 +66,9 @@ private:
 struct SIPLUS_EXPORT pad_start_function : Function {
     pad_start_function(std::weak_ptr<SIPlusParserContext> context) : ctx_(context) {}
 
-    std::shared_ptr<text::ValueRetriever> value(
-        std::shared_ptr<text::ValueRetriever> parent,
-        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent,
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
 
 private:
@@ -82,9 +81,9 @@ private:
 struct SIPLUS_EXPORT trim_function : Function {
     trim_function(std::weak_ptr<SIPlusParserContext> context) : ctx_(context) {}
 
-    std::shared_ptr<text::ValueRetriever> value(
-        std::shared_ptr<text::ValueRetriever> parent,
-        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent,
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
 
 private:
@@ -97,9 +96,9 @@ private:
 struct SIPLUS_EXPORT upper_function : Function {
     upper_function(std::weak_ptr<SIPlusParserContext> context) : ctx_(context) {}
 
-    std::shared_ptr<text::ValueRetriever> value(
-        std::shared_ptr<text::ValueRetriever> parent,
-        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent,
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
 
 private:
@@ -112,9 +111,9 @@ private:
 struct SIPLUS_EXPORT lower_function : Function {
     lower_function(std::weak_ptr<SIPlusParserContext> context) : ctx_(context) {}
 
-    std::shared_ptr<text::ValueRetriever> value(
-        std::shared_ptr<text::ValueRetriever> parent,
-        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent,
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
 
 private:
@@ -127,9 +126,9 @@ private:
 struct SIPLUS_EXPORT split_function : Function {
     split_function(std::weak_ptr<SIPlusParserContext> context) : ctx_(context) {}
 
-    std::shared_ptr<text::ValueRetriever> value(
-        std::shared_ptr<text::ValueRetriever> parent,
-        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent,
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
 
 private:
@@ -142,9 +141,9 @@ private:
 struct SIPLUS_EXPORT substr_function : Function {
     substr_function(std::weak_ptr<SIPlusParserContext> context) : ctx_(context) {}
 
-    std::shared_ptr<text::ValueRetriever> value(
-        std::shared_ptr<text::ValueRetriever> parent,
-        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent,
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
 
 private:

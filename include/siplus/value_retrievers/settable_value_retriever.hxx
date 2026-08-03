@@ -2,8 +2,7 @@
 #ifndef INCLUDE_VALUE_RETRIEVERS_SETTABLE_VALUE_RETRIEVER_HXX_
 #define INCLUDE_VALUE_RETRIEVERS_SETTABLE_VALUE_RETRIEVER_HXX_
 
-#include "siplus/config.h"
-#include "siplus/text/value_retrievers/retriever.hxx"
+#include "siplus/context.hxx"
 
 namespace SIPLUS_NAMESPACE {
 namespace text {
@@ -12,7 +11,7 @@ namespace text {
  * struct SettableValueRetriever - INTERNAL ONLY Similar to a LiteralValueRetriever
  * but allows changing the value later. This is used to store variables internally.
  */
-struct SIPLUS_EXPORT SettableValueRetriever : text::ValueRetriever {
+struct SIPLUS_EXPORT SettableValueRetriever : ValueRetriever {
     struct SIPLUS_EXPORT clear_binding {
         clear_binding(SettableValueRetriever& parent) : parent_(parent) {}
 

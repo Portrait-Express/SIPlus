@@ -2,8 +2,6 @@
 #define INCLUDE_SIPLUS_INVOCATION_CONTEXT_IMPL_HXX_
 
 #include "siplus/context.hxx"
-#include "siplus/invocation_context.hxx"
-#include "siplus/data.hxx"
 #include <memory>
 #include <unordered_map>
 

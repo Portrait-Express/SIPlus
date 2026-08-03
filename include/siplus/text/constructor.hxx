@@ -6,8 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "siplus/config.h"
-#include "siplus/invocation_context.hxx"
+#include "siplus/context.hxx"
 #include "siplus/text/constructor_steps/constructor_step.hxx"
 
 namespace SIPLUS_NAMESPACE {

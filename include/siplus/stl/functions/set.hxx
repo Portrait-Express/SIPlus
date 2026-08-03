@@ -1,7 +1,4 @@
 #pragma once
-#include "siplus/types/float.hxx"
-#include "siplus/types/integer.hxx"
-#include "siplus/types/string.hxx"
 #ifndef INCLUDE_FUNCTIONS_SET_HXX_
 #define INCLUDE_FUNCTIONS_SET_HXX_
 
@@ -9,10 +6,10 @@
 
 #ifdef SIPLUS_INCLUDE_STDLIB
 
-#include "siplus/function.hxx"
 #include "siplus/context.hxx"
-#include "siplus/data.hxx"
-#include "siplus/text/iterator.hxx"
+#include "siplus/types/float.hxx"
+#include "siplus/types/integer.hxx"
+#include "siplus/types/string.hxx"
 
 #include <unordered_set>
 
@@ -34,7 +31,7 @@ template<>
 struct equal_to<SIPLUS_NAMESPACE::UnknownDataTypeContainer> {
     equal_to(
         shared_ptr<SIPLUS_NAMESPACE::SIPlusParserContext> context,
-        shared_ptr<SIPLUS_NAMESPACE::text::ValueRetriever> comparator
+        shared_ptr<SIPLUS_NAMESPACE::ValueRetriever> comparator
     );
 
     bool operator()(
@@ -44,7 +41,7 @@ struct equal_to<SIPLUS_NAMESPACE::UnknownDataTypeContainer> {
 
 private:
     shared_ptr<SIPLUS_NAMESPACE::SIPlusParserContext> context_;
-    shared_ptr<SIPLUS_NAMESPACE::text::ValueRetriever> comparator_;
+    shared_ptr<SIPLUS_NAMESPACE::ValueRetriever> comparator_;
 };
 
 } /* std */
@@ -57,7 +54,7 @@ struct SIPLUS_EXPORT SetType : public TypeInfo {
     virtual std::string name() const override;
     virtual bool is_iterable(const UnknownDataTypeContainer& data) const override;
 
-    virtual std::unique_ptr<text::Iterator> iterate(const UnknownDataTypeContainer& data) const override;
+    virtual std::unique_ptr<Iterator> iterate(const UnknownDataTypeContainer& data) const override;
 };
 
 /**
@@ -67,9 +64,9 @@ struct SIPLUS_EXPORT set_new_func : Function {
     set_new_func(std::weak_ptr<SIPlusParserContext> context) 
         : context_(context) {}
 
-    std::shared_ptr<text::ValueRetriever> value(
-        std::shared_ptr<text::ValueRetriever> parent,
-        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent,
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
 
 private:
@@ -80,9 +77,9 @@ private:
  * struct set_has_func - Function to check if a set contains an item
  */
 struct SIPLUS_EXPORT set_has_func : Function {
-    std::shared_ptr<text::ValueRetriever> value(
-        std::shared_ptr<text::ValueRetriever> parent,
-        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent,
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
 };
 
@@ -90,9 +87,9 @@ struct SIPLUS_EXPORT set_has_func : Function {
  * struct set_add_func - Function to add an item to a set.
  */
 struct SIPLUS_EXPORT set_add_func : Function {
-    std::shared_ptr<text::ValueRetriever> value(
-        std::shared_ptr<text::ValueRetriever> parent,
-        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent,
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
 };
 

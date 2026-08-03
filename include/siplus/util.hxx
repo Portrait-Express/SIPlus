@@ -9,14 +9,13 @@
 #include <utility>
 #include <vector>
 
-#include "siplus/text/value_retrievers/retriever.hxx"
-
 namespace SIPLUS_NAMESPACE {
 namespace util {
 
 namespace detail {
 
 template<
+    typename T,
     size_t N, 
     size_t __TupleStart, 
     size_t __CurrentIndex = 0, 
@@ -24,7 +23,7 @@ template<
 >
 std::tuple<Ts...> constexpr get_parameters_first_parent_set(
     std::tuple<Ts...>& tuple,
-    const std::vector<std::shared_ptr<text::ValueRetriever>>& parameters
+    const std::vector<T>& parameters
 ) {
     if constexpr (__CurrentIndex >= N) {
         return tuple;
@@ -32,21 +31,21 @@ std::tuple<Ts...> constexpr get_parameters_first_parent_set(
         if(__CurrentIndex < parameters.size()) {
             std::get<__TupleStart + __CurrentIndex>(tuple) = parameters[__CurrentIndex];
         }
-        return get_parameters_first_parent_set<N, __TupleStart, __CurrentIndex + 1>(tuple, parameters);
+        return get_parameters_first_parent_set<T, N, __TupleStart, __CurrentIndex + 1>(tuple, parameters);
     }
 }
 
 template<size_t, typename T>
 using T_ = T;
 
-template<size_t N, size_t NO, size_t... I>
-std::tuple<T_<I, std::shared_ptr<text::ValueRetriever>>...> 
+template<size_t N, size_t NO, typename T, size_t... I>
+std::tuple<T_<I, T>...> 
 constexpr get_parameters_first_parent_(
-    const std::shared_ptr<text::ValueRetriever>& parent,
-    const std::vector<std::shared_ptr<text::ValueRetriever>>& parameters,
+    const T& parent,
+    const std::vector<T>& parameters,
     std::index_sequence<I...> p
 ) {
-    std::tuple<T_<I, std::shared_ptr<text::ValueRetriever>>...> tuple;
+    std::tuple<T_<I, T>...> tuple;
     size_t num_params = parameters.size();
 
     if(parent) {
@@ -64,7 +63,7 @@ constexpr get_parameters_first_parent_(
             throw std::runtime_error{ss.str()};
         }
 
-        return get_parameters_first_parent_set<N + NO - 1, 1>(tuple, parameters);
+        return get_parameters_first_parent_set<T, N + NO - 1, 1>(tuple, parameters);
     } else {
         if(num_params < N) {
             std::stringstream ss;
@@ -78,7 +77,7 @@ constexpr get_parameters_first_parent_(
             throw std::runtime_error{ss.str()};
         }
 
-        return get_parameters_first_parent_set<N + NO, 0>(tuple, parameters);
+        return get_parameters_first_parent_set<T, N + NO, 0>(tuple, parameters);
     }
 }
 
@@ -98,10 +97,10 @@ constexpr get_parameters_first_parent_(
  * @param[in] parent The parent passed to Function::value
  * @param[in] parameters The parameters passed to Function::value
  */
-template<size_t N, size_t NO = 0>
+template<size_t N, size_t NO = 0, typename T>
 auto constexpr get_parameters_first_parent(
-    const std::shared_ptr<text::ValueRetriever>& parent,
-    const std::vector<std::shared_ptr<text::ValueRetriever>>& parameters
+    const T& parent,
+    const std::vector<T>& parameters
 ) {
     return detail::get_parameters_first_parent_<N, NO>(parent, parameters, std::make_index_sequence<N+NO>());
 }

@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "siplus/context.hxx"
-#include "siplus/function.hxx"
 
 namespace SIPLUS_NAMESPACE {
 namespace stl {
@@ -24,9 +23,9 @@ struct SIPLUS_EXPORT lt_func : Function  {
         std::shared_ptr<Function> cmp_func
     ) : ctx_(context), cmp_(cmp_func) { }
 
-    std::shared_ptr<text::ValueRetriever> value(
-        std::shared_ptr<text::ValueRetriever> parent, 
-        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent, 
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
 
 private:
@@ -43,9 +42,9 @@ struct SIPLUS_EXPORT gt_func : Function  {
         std::shared_ptr<Function> cmp_func
     ) : ctx_(context), cmp_(cmp_func) { }
 
-    std::shared_ptr<text::ValueRetriever> value(
-        std::shared_ptr<text::ValueRetriever> parent, 
-        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent, 
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
 
 private:
@@ -62,9 +61,9 @@ struct SIPLUS_EXPORT eq_func : Function  {
         std::shared_ptr<Function> cmp_func
     ) : ctx_(context), cmp_(cmp_func) { }
 
-    std::shared_ptr<text::ValueRetriever> value(
-        std::shared_ptr<text::ValueRetriever> parent, 
-        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent, 
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
 
 private:

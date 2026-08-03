@@ -13,7 +13,7 @@ std::any piped_expr_parts_visitor::visitCall(StringInterpolatorParser::CallConte
     const bool custom = ctx->AT();
     const std::string name = ctx->ID()->getText();
     auto exprCtxs = ctx->expr();
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters;
+    std::vector<std::shared_ptr<ValueRetriever>> parameters;
 
     parameters.reserve(exprCtxs.size());
 
@@ -49,7 +49,7 @@ std::any piped_expr_parts_visitor::visitPiped_expr_part(StringInterpolatorParser
     }
 }
 
-std::shared_ptr<text::ValueRetriever> piped_expr_parts_visitor::visitMultiple(const std::vector<StringInterpolatorParser::Piped_expr_partContext*>& ctxs) {
+std::shared_ptr<ValueRetriever> piped_expr_parts_visitor::visitMultiple(const std::vector<StringInterpolatorParser::Piped_expr_partContext*>& ctxs) {
     for(auto ctx : ctxs) {
         visit(ctx);
     }

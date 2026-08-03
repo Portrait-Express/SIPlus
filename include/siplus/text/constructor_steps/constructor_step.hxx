@@ -4,8 +4,7 @@
 
 #include <string>
 
-#include "siplus/config.h"
-#include "siplus/invocation_context.hxx"
+#include "siplus/context.hxx"
 
 namespace SIPLUS_NAMESPACE {
 namespace text {

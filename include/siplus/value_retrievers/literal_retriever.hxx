@@ -2,13 +2,9 @@
 #ifndef INCLUDE_SIPLUS_TEXT_LITERAL_RETRIEVER_HXX_
 #define INCLUDE_SIPLUS_TEXT_LITERAL_RETRIEVER_HXX_
 
-#include "siplus/config.h"
-#include "siplus/invocation_context.hxx"
-#include "siplus/data.hxx"
-#include "siplus/text/value_retrievers/retriever.hxx"
+#include "siplus/context.hxx"
 
 namespace SIPLUS_NAMESPACE {
-namespace text {
 
 /**
  * @brief Retrieves a literal value determined at construction
@@ -29,7 +25,6 @@ private:
 };
 
     
-} /* text */
 }
 
 #endif  // INCLUDE_SIPLUS_TEXT_LITERAL_RETRIEVER_HXX_

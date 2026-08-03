@@ -1,8 +1,5 @@
 #include "siplus/context.hxx"
-#include "siplus/invocation_context.hxx"
-#include "siplus/data.hxx"
-#include "siplus/text/value_retrievers/literal_retriever.hxx"
-#include "siplus/text/value_retrievers/retriever.hxx"
+#include "siplus/value_retrievers/literal_retriever.hxx"
 #include "siplus/stl/functions/iterable.hxx"
 #include "siplus/types/array.hxx"
 #include "siplus/types/bool.hxx"
@@ -19,11 +16,11 @@ namespace stl {
 
 namespace {
 
-struct map_impl : public text::ValueRetriever {
+struct map_impl : public ValueRetriever {
     map_impl(
         std::weak_ptr<SIPlusParserContext> context,
-        std::shared_ptr<text::ValueRetriever> input,
-        std::shared_ptr<text::ValueRetriever> expr
+        std::shared_ptr<ValueRetriever> input,
+        std::shared_ptr<ValueRetriever> expr
     ) : context_(context), input_(input), map_expr_(expr) {}
 
     UnknownDataTypeContainer 
@@ -31,14 +28,14 @@ struct map_impl : public text::ValueRetriever {
 
 private:
     std::weak_ptr<SIPlusParserContext> context_;
-    std::shared_ptr<text::ValueRetriever> input_;
-    std::shared_ptr<text::ValueRetriever> map_expr_;
+    std::shared_ptr<ValueRetriever> input_;
+    std::shared_ptr<ValueRetriever> map_expr_;
 };
 
-struct length_impl : public text::ValueRetriever {
+struct length_impl : public ValueRetriever {
     length_impl(
         std::weak_ptr<SIPlusParserContext> context,
-        std::shared_ptr<text::ValueRetriever> input
+        std::shared_ptr<ValueRetriever> input
     ) : context_(context), input_(input) {}
 
     UnknownDataTypeContainer 
@@ -46,14 +43,14 @@ struct length_impl : public text::ValueRetriever {
 
 private:
     std::weak_ptr<SIPlusParserContext> context_;
-    std::shared_ptr<text::ValueRetriever> input_;
+    std::shared_ptr<ValueRetriever> input_;
 };
 
-struct join_impl : public text::ValueRetriever {
+struct join_impl : public ValueRetriever {
     join_impl(
         std::weak_ptr<SIPlusParserContext> context,
-        std::shared_ptr<text::ValueRetriever> input,
-        std::shared_ptr<text::ValueRetriever> delim
+        std::shared_ptr<ValueRetriever> input,
+        std::shared_ptr<ValueRetriever> delim
     ) : context_(context), input_(input), delimiter_(delim) {}
 
     UnknownDataTypeContainer 
@@ -61,15 +58,15 @@ struct join_impl : public text::ValueRetriever {
 
 private:
     std::weak_ptr<SIPlusParserContext> context_;
-    std::shared_ptr<text::ValueRetriever> input_;
-    std::shared_ptr<text::ValueRetriever> delimiter_;
+    std::shared_ptr<ValueRetriever> input_;
+    std::shared_ptr<ValueRetriever> delimiter_;
 };
 
-struct contains_impl : public text::ValueRetriever {
+struct contains_impl : public ValueRetriever {
     contains_impl (
         std::weak_ptr<SIPlusParserContext> context,
-        std::shared_ptr<text::ValueRetriever> input,
-        std::shared_ptr<text::ValueRetriever> value
+        std::shared_ptr<ValueRetriever> input,
+        std::shared_ptr<ValueRetriever> value
     ) : context_(context), input_(input), value_(value) {
     }
 
@@ -78,17 +75,17 @@ struct contains_impl : public text::ValueRetriever {
 
 private:
     std::weak_ptr<SIPlusParserContext> context_;
-    std::shared_ptr<text::ValueRetriever> input_;
-    std::shared_ptr<text::ValueRetriever> value_;
+    std::shared_ptr<ValueRetriever> input_;
+    std::shared_ptr<ValueRetriever> value_;
 };
 
 /**
  * struct each_impl - ValueRetriever for each_func
  */
-struct each_impl : public text::ValueRetriever {
+struct each_impl : public ValueRetriever {
     each_impl (
-        std::shared_ptr<text::ValueRetriever> input,
-        std::shared_ptr<text::ValueRetriever> expr
+        std::shared_ptr<ValueRetriever> input,
+        std::shared_ptr<ValueRetriever> expr
     ) : input_(input), expr_(expr) { }
 
     UnknownDataTypeContainer 
@@ -120,15 +117,15 @@ struct each_impl : public text::ValueRetriever {
 
 private:
     std::weak_ptr<SIPlusParserContext> context_;
-    std::shared_ptr<text::ValueRetriever> input_;
-    std::shared_ptr<text::ValueRetriever> expr_;
+    std::shared_ptr<ValueRetriever> input_;
+    std::shared_ptr<ValueRetriever> expr_;
 };
 
-struct all_impl : public text::ValueRetriever {
+struct all_impl : public ValueRetriever {
     all_impl (
         std::weak_ptr<SIPlusParserContext> context,
-        std::shared_ptr<text::ValueRetriever> input,
-        std::shared_ptr<text::ValueRetriever> predicate
+        std::shared_ptr<ValueRetriever> input,
+        std::shared_ptr<ValueRetriever> predicate
     ) : context_(context), input_(input), predicate_(predicate) {
     }
 
@@ -163,15 +160,15 @@ struct all_impl : public text::ValueRetriever {
 
 private:
     std::weak_ptr<SIPlusParserContext> context_;
-    std::shared_ptr<text::ValueRetriever> input_;
-    std::shared_ptr<text::ValueRetriever> predicate_;
+    std::shared_ptr<ValueRetriever> input_;
+    std::shared_ptr<ValueRetriever> predicate_;
 };
 
-struct any_impl : public text::ValueRetriever {
+struct any_impl : public ValueRetriever {
     any_impl (
         std::weak_ptr<SIPlusParserContext> context,
-        std::shared_ptr<text::ValueRetriever> input,
-        std::shared_ptr<text::ValueRetriever> predicate
+        std::shared_ptr<ValueRetriever> input,
+        std::shared_ptr<ValueRetriever> predicate
     ) : context_(context), input_(input), predicate_(predicate) {
     }
 
@@ -206,16 +203,16 @@ struct any_impl : public text::ValueRetriever {
 
 private:
     std::weak_ptr<SIPlusParserContext> context_;
-    std::shared_ptr<text::ValueRetriever> input_;
-    std::shared_ptr<text::ValueRetriever> predicate_;
+    std::shared_ptr<ValueRetriever> input_;
+    std::shared_ptr<ValueRetriever> predicate_;
 };
 
 
-struct sort_impl : text::ValueRetriever {
+struct sort_impl : ValueRetriever {
     sort_impl(
         std::weak_ptr<SIPlusParserContext> context,
-        std::shared_ptr<text::ValueRetriever> list,
-        std::shared_ptr<text::ValueRetriever> comparator
+        std::shared_ptr<ValueRetriever> list,
+        std::shared_ptr<ValueRetriever> comparator
     ) : context_(context), list_(list), comparator_(comparator) {}
 
     UnknownDataTypeContainer 
@@ -239,16 +236,16 @@ struct sort_impl : text::ValueRetriever {
 
 private:
     std::weak_ptr<SIPlusParserContext> context_;
-    std::shared_ptr<text::ValueRetriever> list_;
-    std::shared_ptr<text::ValueRetriever> comparator_;
+    std::shared_ptr<ValueRetriever> list_;
+    std::shared_ptr<ValueRetriever> comparator_;
 };
 
 }
 
-std::shared_ptr<text::ValueRetriever>
+std::shared_ptr<ValueRetriever>
 map_func::value(
-    std::shared_ptr<text::ValueRetriever> parent, 
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> parent, 
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [input, expr] = util::get_parameters_first_parent<2>(parent, parameters);
     return std::make_shared<map_impl>(context_, input, expr);
@@ -285,10 +282,10 @@ map_impl::retrieve(InvocationContext& val) const {
     return make_data<types::ArrayType>(ret.release());
 }
 
-std::shared_ptr<text::ValueRetriever>
+std::shared_ptr<ValueRetriever>
 length_func::value(
-    std::shared_ptr<text::ValueRetriever> parent, 
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> parent, 
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [input] = util::get_parameters_first_parent<1>(parent, parameters);
     return std::make_shared<length_impl>(context_, input);
@@ -316,10 +313,10 @@ length_impl::retrieve(InvocationContext& value) const {
     return make_data<types::IntegerType>(size);
 }
 
-std::shared_ptr<text::ValueRetriever>
+std::shared_ptr<ValueRetriever>
 join_func::value(
-    std::shared_ptr<text::ValueRetriever> parent, 
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> parent, 
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [input, delim] = util::get_parameters_first_parent<2>(parent, parameters);
     return std::make_shared<join_impl>(context_, input, delim);
@@ -351,10 +348,10 @@ join_impl::retrieve(InvocationContext& value) const {
     return make_data<types::StringType>(ss.str());
 }
 
-std::shared_ptr<text::ValueRetriever>
+std::shared_ptr<ValueRetriever>
 contains_func::value(
-    std::shared_ptr<text::ValueRetriever> parent, 
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> parent, 
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [input, delim] = util::get_parameters_first_parent<2>(parent, parameters);
     return std::make_shared<contains_impl>(context_, input, delim);
@@ -372,7 +369,7 @@ contains_impl::retrieve(InvocationContext& value) const {
         iterator->next();
         auto current = iterator->current();
 
-        auto retriever = std::make_shared<text::LiteralValueRetriever>(current);
+        auto retriever = std::make_shared<LiteralValueRetriever>(current);
         auto fn = context->function("eq").value(retriever, {value_});
         auto val = fn->retrieve(value);
 
@@ -384,37 +381,37 @@ contains_impl::retrieve(InvocationContext& value) const {
     return make_data<types::BoolType>(false);
 }
 
-std::shared_ptr<text::ValueRetriever>
+std::shared_ptr<ValueRetriever>
 each_func::value(
-    std::shared_ptr<text::ValueRetriever> parent, 
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> parent, 
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [list, expr] = util::get_parameters_first_parent<2>(parent, parameters);
     return std::make_shared<each_impl>(list, expr);
 }
 
-std::shared_ptr<text::ValueRetriever>
+std::shared_ptr<ValueRetriever>
 all_func::value(
-    std::shared_ptr<text::ValueRetriever> parent, 
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> parent, 
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [list, pred] = util::get_parameters_first_parent<2>(parent, parameters);
     return std::make_shared<all_impl>(context_, list, pred);
 }
 
-std::shared_ptr<text::ValueRetriever>
+std::shared_ptr<ValueRetriever>
 any_func::value(
-    std::shared_ptr<text::ValueRetriever> parent, 
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> parent, 
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [list, pred] = util::get_parameters_first_parent<2>(parent, parameters);
     return std::make_shared<any_impl>(context_, list, pred);
 }
 
-std::shared_ptr<text::ValueRetriever>
+std::shared_ptr<ValueRetriever>
 sort_func::value(
-    std::shared_ptr<text::ValueRetriever> parent, 
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> parent, 
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [list, comparator] = util::get_parameters_first_parent<2>(parent, parameters);
     return std::make_shared<sort_impl>(context_, list, comparator);

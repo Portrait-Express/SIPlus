@@ -1,7 +1,5 @@
 #include "siplus/stl/functions/converting_operator.hxx"
-#include "siplus/invocation_context.hxx"
-#include "siplus/data.hxx"
-#include "siplus/text/value_retrievers/retriever.hxx"
+#include "siplus/context.hxx"
 #include "siplus/util.hxx"
 #include <memory>
 #include <stdexcept>
@@ -12,12 +10,12 @@ namespace stl {
 
 namespace {
 
-struct converting_operator_impl : text::ValueRetriever {
+struct converting_operator_impl : ValueRetriever {
     converting_operator_impl(
         const converting_operator_function& parent,
         std::weak_ptr<SIPlusParserContext> ctx,
-        std::shared_ptr<text::ValueRetriever> lhs,
-        std::shared_ptr<text::ValueRetriever> rhs
+        std::shared_ptr<ValueRetriever> lhs,
+        std::shared_ptr<ValueRetriever> rhs
     ) : parent_(parent), ctx_(ctx), lhs_(lhs), rhs_(rhs) { }
 
     UnknownDataTypeContainer 
@@ -25,8 +23,8 @@ struct converting_operator_impl : text::ValueRetriever {
 
 private:
     const converting_operator_function& parent_;
-    std::shared_ptr<text::ValueRetriever> lhs_;
-    std::shared_ptr<text::ValueRetriever> rhs_;
+    std::shared_ptr<ValueRetriever> lhs_;
+    std::shared_ptr<ValueRetriever> rhs_;
     std::weak_ptr<SIPlusParserContext> ctx_;
 };
 
@@ -42,10 +40,10 @@ converting_operator_function::find_impl(const TypeInfo& lhs, const TypeInfo& rhs
     return *cache_.find(lhs, rhs);
 }
 
-std::shared_ptr<text::ValueRetriever>
+std::shared_ptr<ValueRetriever>
 converting_operator_function::value(
-    std::shared_ptr<text::ValueRetriever> parent,
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> parent,
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [lhs, rhs] = util::get_parameters_first_parent<2>(parent, parameters);
     return std::make_shared<converting_operator_impl>(*this, context_, lhs, rhs);

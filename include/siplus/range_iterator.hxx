@@ -1,9 +1,9 @@
 #pragma once
+#include "siplus/context.hxx"
 #ifndef INCLUDE_TEXT_RANGE_ITERATOR_HXX_
 #define INCLUDE_TEXT_RANGE_ITERATOR_HXX_
 
 #include "siplus/config.h"
-#include "siplus/text/iterator.hxx"
 
 #include <utility>
 
@@ -23,7 +23,7 @@ namespace SIPLUS_NAMESPACE {
  * @tparam EIt Type of the end iterator
  */
 template<typename BIt, typename EIt = BIt>
-struct range_iterator : text::Iterator {
+struct range_iterator : Iterator {
     range_iterator(
         BIt begin,
         EIt end
@@ -77,7 +77,7 @@ template<typename It>
 using iterator_value_type = std::remove_cvref_t<decltype(*std::declval<It>())>;
 
 template<typename BIt, typename EIt> requires std::is_copy_assignable_v<iterator_value_type<BIt>>
-struct value_range_iterator : text::Iterator {
+struct value_range_iterator : Iterator {
     using value_type = iterator_value_type<BIt>;
 
     template<typename _BIt, typename _EIt>

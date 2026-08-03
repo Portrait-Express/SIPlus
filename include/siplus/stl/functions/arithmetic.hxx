@@ -10,7 +10,6 @@
 
 #include "siplus/context.hxx"
 #include "siplus/stl/functions/converting_operator.hxx"
-#include "siplus/data.hxx"
 #include "siplus/text/text.hxx"
 
 namespace SIPLUS_NAMESPACE {

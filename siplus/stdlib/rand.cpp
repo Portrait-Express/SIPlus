@@ -1,4 +1,3 @@
-#include "siplus/data.hxx"
 #include "siplus/types/float.hxx"
 #include "siplus/types/integer.hxx"
 #include "siplus/types/string.hxx"
@@ -27,41 +26,41 @@ UInt rand() {
     return dist(engine);
 }
 
-struct rand_impl : text::ValueRetriever {
+struct rand_impl : ValueRetriever {
     rand_impl(
         std::weak_ptr<SIPlusParserContext> context,
-        std::shared_ptr<text::ValueRetriever> begin,
-        std::shared_ptr<text::ValueRetriever> end
+        std::shared_ptr<ValueRetriever> begin,
+        std::shared_ptr<ValueRetriever> end
     ) : context_(context), begin_(begin), end_(end) {}
 
     virtual UnknownDataTypeContainer retrieve(InvocationContext& value) const override;
 
 private:
     std::weak_ptr<SIPlusParserContext> context_;
-    std::shared_ptr<text::ValueRetriever> begin_;
-    std::shared_ptr<text::ValueRetriever> end_;
+    std::shared_ptr<ValueRetriever> begin_;
+    std::shared_ptr<ValueRetriever> end_;
 };
 
-struct rand_str_impl : text::ValueRetriever {
+struct rand_str_impl : ValueRetriever {
     rand_str_impl(
         std::weak_ptr<SIPlusParserContext> context,
-        std::shared_ptr<text::ValueRetriever> characters,
-        std::shared_ptr<text::ValueRetriever> length
+        std::shared_ptr<ValueRetriever> characters,
+        std::shared_ptr<ValueRetriever> length
     ) : context_(context), characters_(characters), length_(length) {}
 
     virtual UnknownDataTypeContainer retrieve(InvocationContext& value) const override;
 
 private:
     std::weak_ptr<SIPlusParserContext> context_;
-    std::shared_ptr<text::ValueRetriever> characters_;
-    std::shared_ptr<text::ValueRetriever> length_;
+    std::shared_ptr<ValueRetriever> characters_;
+    std::shared_ptr<ValueRetriever> length_;
 };
 
 } /* anonymous */
 
-std::shared_ptr<text::ValueRetriever> rand_func::value(
-    std::shared_ptr<text::ValueRetriever> parent, 
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+std::shared_ptr<ValueRetriever> rand_func::value(
+    std::shared_ptr<ValueRetriever> parent, 
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [begin, end] = util::get_parameters_first_parent<0, 2>(parent, parameters);
 
@@ -94,9 +93,9 @@ rand_impl::retrieve(InvocationContext& container) const {
     }
 }
 
-std::shared_ptr<text::ValueRetriever> rand_str_func::value(
-    std::shared_ptr<text::ValueRetriever> parent, 
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+std::shared_ptr<ValueRetriever> rand_str_func::value(
+    std::shared_ptr<ValueRetriever> parent, 
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [ characters, length ] = util::get_parameters_first_parent<2>(parent, parameters);
     return std::make_shared<rand_str_impl>(context_, characters, length);

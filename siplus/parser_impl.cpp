@@ -4,12 +4,9 @@
 #include "DFA.h"
 #include "Recognizer.h"
 
-#include "siplus/build_context.hxx"
 #include "siplus/context.hxx"
-#include "siplus/invocation_context.hxx"
 #include "siplus/parser.hxx"
 #include "siplus/text/constructor.hxx"
-#include "siplus/data.hxx"
 
 #include "generated/StringInterpolatorLexer.h"
 #include "generated/StringInterpolatorParser.h"
@@ -106,8 +103,8 @@ void ErrorListener::reportContextSensitivity(
 /**
  * struct NewScopeValueRetriever - Wraps the passed scope in a new scope to avoid variable propagation.
  */
-struct NewScopeValueRetriever : text::ValueRetriever {
-    NewScopeValueRetriever(std::shared_ptr<text::ValueRetriever> expr) : expr_(expr) {}
+struct NewScopeValueRetriever : ValueRetriever {
+    NewScopeValueRetriever(std::shared_ptr<ValueRetriever> expr) : expr_(expr) {}
 
     UnknownDataTypeContainer retrieve(InvocationContext &value) const override {
         auto wrapped = wrap_scope(value.shared_from_this()).build();
@@ -115,7 +112,7 @@ struct NewScopeValueRetriever : text::ValueRetriever {
     }
 
 private:
-    std::shared_ptr<text::ValueRetriever> expr_;
+    std::shared_ptr<ValueRetriever> expr_;
 };
 
 } /* anonymous */
@@ -137,11 +134,11 @@ text::TextConstructor Parser::get_interpolation(const std::string& text, const P
     return impl_->get_interpolation(text, opts);
 }
 
-std::shared_ptr<text::ValueRetriever> Parser::get_expression(const std::string& text) const {
+std::shared_ptr<ValueRetriever> Parser::get_expression(const std::string& text) const {
     return impl_->get_expression(text, ParseOpts{});
 }
 
-std::shared_ptr<text::ValueRetriever> Parser::get_expression(const std::string& text, const ParseOpts& opts) const {
+std::shared_ptr<ValueRetriever> Parser::get_expression(const std::string& text, const ParseOpts& opts) const {
     return impl_->get_expression(text, opts);
 }
 
@@ -169,11 +166,11 @@ text::TextConstructor ParserImpl::get_interpolation(const std::string& text, con
     lexer.addErrorListener(&errors);
     parser.addErrorListener(&errors);
     
-    siplus_visitor visitor{context_, make_build_context(opts), tokens};
+    siplus_visitor visitor{context_, make_build_context(opts.globals), tokens};
     return visitor.visit(parser.program()->interpolated_str());
 }
 
-std::shared_ptr<text::ValueRetriever> ParserImpl::get_expression(const std::string& text, const ParseOpts& opts) const {
+std::shared_ptr<ValueRetriever> ParserImpl::get_expression(const std::string& text, const ParseOpts& opts) const {
     antlr4::ANTLRInputStream stream{text};
     StringInterpolatorLexer lexer{&stream};
     antlr4::BufferedTokenStream tokens{&lexer};
@@ -189,7 +186,7 @@ std::shared_ptr<text::ValueRetriever> ParserImpl::get_expression(const std::stri
 
     auto tree = parser.expression_program();
 
-    block_contents_visitor visitor{context_, make_build_context(opts), tokens};
+    block_contents_visitor visitor{context_, make_build_context(opts.globals), tokens};
     return std::make_shared<NewScopeValueRetriever>(
         visitor.visit(tree->block_contents())
     );

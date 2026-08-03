@@ -6,8 +6,7 @@
 
 #ifdef SIPLUS_INCLUDE_STDLIB
 
-#include "siplus/stl/converters.hxx"
-#include "siplus/stl/functions.hxx"
+#include "siplus/context.hxx"
 
 namespace SIPLUS_NAMESPACE {
 namespace stl {

@@ -2,8 +2,7 @@
 #ifndef INCLUDE_TYPES_BOOL_HXX_
 #define INCLUDE_TYPES_BOOL_HXX_
 
-#include "siplus/config.h"
-#include "siplus/data.hxx"
+#include "siplus/context.hxx"
 
 namespace SIPLUS_NAMESPACE {
 namespace types {

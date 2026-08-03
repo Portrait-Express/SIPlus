@@ -1,41 +1,46 @@
-#include <array>
 #include <csignal>
-#include <exception>
 #include <iostream>
 #include <signal.h>
 #include <stacktrace>
-#include <typeinfo>
 
-//static void segv_handler(int sig, siginfo_t *info, void *ucontext) {
-//    auto addr = info->si_addr;
-//    std::cerr << "Received SIGSEGV/SIGABRT. Faulting address:" << addr << std::endl;
-//
-//#ifdef SIPLUS_HAS_CPPTRACE
-//    cpptrace::stacktrace::current().print();
-//#endif
-//
-//    std::abort();
-//}
+static bool g_aborted = false;
 
-static void std_segv_handler(int code) {
-    std::cerr << "Received SIGSEGV/SIGABRT." << std::endl;
+static void posix_segv_handler(int sig, siginfo_t *info, void *ucontext) {
+    if(g_aborted) {
+        return;
+    }
+    g_aborted = true;
+
+    auto addr = info->si_addr;
+    std::cerr << "Received SIGSEGV/SIGABRT. Faulting address:" << addr << std::endl;
 
     std::cout << std::stacktrace::current() << '\n';
 
-    std::cout << std::flush; //flush stdout to make sure its all written
+    std::abort();
+}
+
+static void std_segv_handler(int code) {
+    if(g_aborted) {
+        return;
+    }
+    g_aborted = true;
+
+    std::cerr << "Received SIGSEGV/SIGABRT." << std::endl;
+
+    std::cout << std::stacktrace::current() << std::endl;
 
     std::abort();
 }
 
 static void initialize(int* pargc, char*** pargv) {
+#ifdef __linux__
+    struct sigaction act = {0};
+    act.sa_sigaction = posix_segv_handler;
+    act.sa_flags = SA_SIGINFO;
+    sigaction(SIGSEGV, &act, NULL);
+    sigaction(SIGABRT, &act, NULL);
+#else
     std::signal(SIGSEGV, std_segv_handler);
     std::signal(SIGABRT, std_segv_handler);
-
-    //struct sigaction act = {0};
-    //act.sa_sigaction = segv_handler;
-    //act.sa_flags = SA_SIGINFO;
-    //sigaction(SIGSEGV, &act, NULL);
-    //sigaction(SIGABRT, &act, NULL);
+#endif
 }
-
-

@@ -1,5 +1,4 @@
 #include "siplus/stl/functions/arithmetic.hxx"
-#include "siplus/data.hxx"
 #include "siplus/types/float.hxx"
 #include "siplus/types/integer.hxx"
 

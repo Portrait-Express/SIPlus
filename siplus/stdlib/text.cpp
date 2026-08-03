@@ -1,4 +1,3 @@
-#include "siplus/invocation_context.hxx"
 #include "siplus/types/array.hxx"
 #include "siplus/types/integer.hxx"
 #include "siplus/types/string.hxx"
@@ -8,9 +7,7 @@
 #include <cctype>
 #include <cstring>
 
-#include "siplus/config.h"
-#include "siplus/data.hxx"
-#include "siplus/text/value_retrievers/retriever.hxx"
+#include "siplus/context.hxx"
 #include "siplus/stl/functions/text.hxx"
 
 namespace SIPLUS_NAMESPACE {
@@ -18,9 +15,9 @@ namespace stl {
 
 namespace {
 
-struct str_impl : public text::ValueRetriever {
+struct str_impl : public ValueRetriever {
     str_impl(
-        std::shared_ptr<text::ValueRetriever> param,
+        std::shared_ptr<ValueRetriever> param,
         std::weak_ptr<SIPlusParserContext> context
     ) : param_(param), context_(context) {}
 
@@ -29,15 +26,15 @@ struct str_impl : public text::ValueRetriever {
 
 private:
     std::weak_ptr<SIPlusParserContext> context_;
-    std::shared_ptr<text::ValueRetriever> param_;
+    std::shared_ptr<ValueRetriever> param_;
 };
 
-struct replace_function_impl : text::ValueRetriever {
+struct replace_function_impl : ValueRetriever {
     replace_function_impl(
         std::weak_ptr<SIPlusParserContext> ctx,
-        std::shared_ptr<text::ValueRetriever> input,
-        std::shared_ptr<text::ValueRetriever> target,
-        std::shared_ptr<text::ValueRetriever> value
+        std::shared_ptr<ValueRetriever> input,
+        std::shared_ptr<ValueRetriever> target,
+        std::shared_ptr<ValueRetriever> value
     ) : ctx_(ctx), input_(input), target_(target), value_(value) { }
 
     UnknownDataTypeContainer 
@@ -45,17 +42,17 @@ struct replace_function_impl : text::ValueRetriever {
 
 private:
     std::weak_ptr<SIPlusParserContext> ctx_;
-    std::shared_ptr<text::ValueRetriever> input_;
-    std::shared_ptr<text::ValueRetriever> target_;
-    std::shared_ptr<text::ValueRetriever> value_;
+    std::shared_ptr<ValueRetriever> input_;
+    std::shared_ptr<ValueRetriever> target_;
+    std::shared_ptr<ValueRetriever> value_;
 };
 
-struct pad_end_impl : text::ValueRetriever {
+struct pad_end_impl : ValueRetriever {
     pad_end_impl(
         std::weak_ptr<SIPlusParserContext> ctx,
-        std::shared_ptr<text::ValueRetriever> input,
-        std::shared_ptr<text::ValueRetriever> length,
-        std::shared_ptr<text::ValueRetriever> padding
+        std::shared_ptr<ValueRetriever> input,
+        std::shared_ptr<ValueRetriever> length,
+        std::shared_ptr<ValueRetriever> padding
     ) : ctx_(ctx), input_(input), length_(length), padding_(padding) { }
 
     UnknownDataTypeContainer 
@@ -63,17 +60,17 @@ struct pad_end_impl : text::ValueRetriever {
 
 private:
     std::weak_ptr<SIPlusParserContext> ctx_;
-    std::shared_ptr<text::ValueRetriever> input_;
-    std::shared_ptr<text::ValueRetriever> length_;
-    std::shared_ptr<text::ValueRetriever> padding_;
+    std::shared_ptr<ValueRetriever> input_;
+    std::shared_ptr<ValueRetriever> length_;
+    std::shared_ptr<ValueRetriever> padding_;
 };
 
-struct pad_start_impl : text::ValueRetriever {
+struct pad_start_impl : ValueRetriever {
     pad_start_impl(
         std::weak_ptr<SIPlusParserContext> ctx,
-        std::shared_ptr<text::ValueRetriever> input,
-        std::shared_ptr<text::ValueRetriever> length,
-        std::shared_ptr<text::ValueRetriever> padding
+        std::shared_ptr<ValueRetriever> input,
+        std::shared_ptr<ValueRetriever> length,
+        std::shared_ptr<ValueRetriever> padding
     ) : ctx_(ctx), input_(input), length_(length), padding_(padding) { }
 
     UnknownDataTypeContainer 
@@ -81,15 +78,15 @@ struct pad_start_impl : text::ValueRetriever {
 
 private:
     std::weak_ptr<SIPlusParserContext> ctx_;
-    std::shared_ptr<text::ValueRetriever> input_;
-    std::shared_ptr<text::ValueRetriever> length_;
-    std::shared_ptr<text::ValueRetriever> padding_;
+    std::shared_ptr<ValueRetriever> input_;
+    std::shared_ptr<ValueRetriever> length_;
+    std::shared_ptr<ValueRetriever> padding_;
 };
 
-struct trim_impl : text::ValueRetriever {
+struct trim_impl : ValueRetriever {
     trim_impl(
         std::weak_ptr<SIPlusParserContext> ctx,
-        std::shared_ptr<text::ValueRetriever> input
+        std::shared_ptr<ValueRetriever> input
     ) : ctx_(ctx), input_(input) { }
 
     UnknownDataTypeContainer 
@@ -97,13 +94,13 @@ struct trim_impl : text::ValueRetriever {
 
 private:
     std::weak_ptr<SIPlusParserContext> ctx_;
-    std::shared_ptr<text::ValueRetriever> input_;
+    std::shared_ptr<ValueRetriever> input_;
 };
 
-struct upper_impl : text::ValueRetriever {
+struct upper_impl : ValueRetriever {
     upper_impl(
         std::weak_ptr<SIPlusParserContext> ctx,
-        std::shared_ptr<text::ValueRetriever> input
+        std::shared_ptr<ValueRetriever> input
     ) : ctx_(ctx), input_(input) { }
 
     UnknownDataTypeContainer 
@@ -111,13 +108,13 @@ struct upper_impl : text::ValueRetriever {
 
 private:
     std::weak_ptr<SIPlusParserContext> ctx_;
-    std::shared_ptr<text::ValueRetriever> input_;
+    std::shared_ptr<ValueRetriever> input_;
 };
 
-struct lower_impl : text::ValueRetriever {
+struct lower_impl : ValueRetriever {
     lower_impl(
         std::weak_ptr<SIPlusParserContext> ctx,
-        std::shared_ptr<text::ValueRetriever> input
+        std::shared_ptr<ValueRetriever> input
     ) : ctx_(ctx), input_(input) { }
 
     UnknownDataTypeContainer 
@@ -125,14 +122,14 @@ struct lower_impl : text::ValueRetriever {
 
 private:
     std::weak_ptr<SIPlusParserContext> ctx_;
-    std::shared_ptr<text::ValueRetriever> input_;
+    std::shared_ptr<ValueRetriever> input_;
 };
 
-struct split_impl : text::ValueRetriever {
+struct split_impl : ValueRetriever {
     split_impl(
         std::weak_ptr<SIPlusParserContext> ctx,
-        std::shared_ptr<text::ValueRetriever> input,
-        std::shared_ptr<text::ValueRetriever> delim
+        std::shared_ptr<ValueRetriever> input,
+        std::shared_ptr<ValueRetriever> delim
     ) : ctx_(ctx), input_(input), delimiter_(delim) { }
 
     UnknownDataTypeContainer 
@@ -140,16 +137,16 @@ struct split_impl : text::ValueRetriever {
 
 private:
     std::weak_ptr<SIPlusParserContext> ctx_;
-    std::shared_ptr<text::ValueRetriever> input_;
-    std::shared_ptr<text::ValueRetriever> delimiter_;
+    std::shared_ptr<ValueRetriever> input_;
+    std::shared_ptr<ValueRetriever> delimiter_;
 };
 
-struct substr_impl : text::ValueRetriever {
+struct substr_impl : ValueRetriever {
     substr_impl(
         std::weak_ptr<SIPlusParserContext> ctx,
-        std::shared_ptr<text::ValueRetriever> input,
-        std::shared_ptr<text::ValueRetriever> begin,
-        std::shared_ptr<text::ValueRetriever> end
+        std::shared_ptr<ValueRetriever> input,
+        std::shared_ptr<ValueRetriever> begin,
+        std::shared_ptr<ValueRetriever> end
     ) : ctx_(ctx), input_(input), begin_(begin), end_(end) { }
 
     UnknownDataTypeContainer 
@@ -157,17 +154,17 @@ struct substr_impl : text::ValueRetriever {
 
 private:
     std::weak_ptr<SIPlusParserContext> ctx_;
-    std::shared_ptr<text::ValueRetriever> input_;
-    std::shared_ptr<text::ValueRetriever> begin_;
-    std::shared_ptr<text::ValueRetriever> end_;
+    std::shared_ptr<ValueRetriever> input_;
+    std::shared_ptr<ValueRetriever> begin_;
+    std::shared_ptr<ValueRetriever> end_;
 };
 
 } /* anonymous */
 
-std::shared_ptr<text::ValueRetriever> 
+std::shared_ptr<ValueRetriever> 
 str_func::value(
-    std::shared_ptr<text::ValueRetriever> parent, 
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> parent, 
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [input] = util::get_parameters_first_parent<1>(parent, parameters);
     return std::make_shared<str_impl>(input, context_);
@@ -180,9 +177,9 @@ str_impl::retrieve(InvocationContext& value) const {
     return ctx->convert<types::StringType>(val);
 }
 
-std::shared_ptr<text::ValueRetriever> replace_function::value(
-    std::shared_ptr<text::ValueRetriever> parent,
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+std::shared_ptr<ValueRetriever> replace_function::value(
+    std::shared_ptr<ValueRetriever> parent,
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [input, target, value] = util::get_parameters_first_parent<3>(parent, parameters);
     return std::make_shared<replace_function_impl>(ctx_, input, target, value);
@@ -206,9 +203,9 @@ replace_function_impl::retrieve(InvocationContext& value) const {
     return make_data<types::StringType>(input);
 }
 
-std::shared_ptr<text::ValueRetriever> pad_end_function::value(
-    std::shared_ptr<text::ValueRetriever> parent,
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+std::shared_ptr<ValueRetriever> pad_end_function::value(
+    std::shared_ptr<ValueRetriever> parent,
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [input, length, padding] = util::get_parameters_first_parent<3>(parent, parameters);
     return std::make_shared<pad_end_impl>(ctx_, input, length, padding);
@@ -234,9 +231,9 @@ pad_end_impl::retrieve(InvocationContext& value) const {
     return make_data<types::StringType>(val);
 }
 
-std::shared_ptr<text::ValueRetriever> pad_start_function::value(
-    std::shared_ptr<text::ValueRetriever> parent,
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+std::shared_ptr<ValueRetriever> pad_start_function::value(
+    std::shared_ptr<ValueRetriever> parent,
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [input, length, padding] = util::get_parameters_first_parent<3>(parent, parameters);
     return std::make_shared<pad_start_impl>(ctx_, input, length, padding);
@@ -266,9 +263,9 @@ pad_start_impl::retrieve(InvocationContext& value) const {
     return make_data<types::StringType>(out);
 }
 
-std::shared_ptr<text::ValueRetriever> trim_function::value(
-    std::shared_ptr<text::ValueRetriever> parent,
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+std::shared_ptr<ValueRetriever> trim_function::value(
+    std::shared_ptr<ValueRetriever> parent,
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [input] = util::get_parameters_first_parent<1>(parent, parameters);
     return std::make_shared<trim_impl>(ctx_, input);
@@ -290,9 +287,9 @@ trim_impl::retrieve(InvocationContext& value) const {
     return make_data<types::StringType>(str);
 }
 
-std::shared_ptr<text::ValueRetriever> upper_function::value(
-    std::shared_ptr<text::ValueRetriever> parent,
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+std::shared_ptr<ValueRetriever> upper_function::value(
+    std::shared_ptr<ValueRetriever> parent,
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [input] = util::get_parameters_first_parent<1>(parent, parameters); 
     return std::make_shared<upper_impl>(ctx_, input);
@@ -310,9 +307,9 @@ upper_impl::retrieve(InvocationContext& value) const {
     return make_data<types::StringType>(str);
 }
 
-std::shared_ptr<text::ValueRetriever> lower_function::value(
-    std::shared_ptr<text::ValueRetriever> parent,
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+std::shared_ptr<ValueRetriever> lower_function::value(
+    std::shared_ptr<ValueRetriever> parent,
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [input] = util::get_parameters_first_parent<1>(parent, parameters);
     return std::make_shared<lower_impl>(ctx_, input);
@@ -330,10 +327,10 @@ lower_impl::retrieve(InvocationContext& value) const {
     return make_data<types::StringType>(str);
 }
 
-std::shared_ptr<text::ValueRetriever>
+std::shared_ptr<ValueRetriever>
 split_function::value(
-    std::shared_ptr<text::ValueRetriever> parent,
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> parent,
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [input, delim] = util::get_parameters_first_parent<2>(parent, parameters);
     return std::make_shared<split_impl>(ctx_, input, delim);
@@ -368,10 +365,10 @@ split_impl::retrieve(InvocationContext& value) const {
     return make_data<types::ArrayType>(ret);
 }
 
-std::shared_ptr<text::ValueRetriever>
+std::shared_ptr<ValueRetriever>
 substr_function::value(
-    std::shared_ptr<text::ValueRetriever> parent,
-    std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    std::shared_ptr<ValueRetriever> parent,
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [input, begin, end] = util::get_parameters_first_parent<2, 1>(parent, parameters);
     return std::make_shared<substr_impl>(ctx_, input, begin, end);

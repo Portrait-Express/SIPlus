@@ -1,5 +1,4 @@
-#include "siplus/build_context.hxx"
-#include "siplus/data.hxx"
+#include "siplus/context.hxx"
 
 namespace SIPLUS_NAMESPACE {
 
@@ -163,10 +162,10 @@ Function& BuildContext::function(const std::string& name) {
     }
 }
 
-std::shared_ptr<BuildContext> make_build_context(const ParseOpts opts) {
+std::shared_ptr<BuildContext> make_build_context(const std::vector<std::string>& globals) {
     auto res = std::make_shared<BuildContext>();
 
-    for(auto global : opts.globals) {
+    for(auto global : globals) {
         VariableOpts varOpts;
         varOpts.is_const = true;
         res->declare_variable(global, varOpts);

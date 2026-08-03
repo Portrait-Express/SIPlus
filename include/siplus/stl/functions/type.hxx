@@ -6,7 +6,7 @@
 
 #ifdef SIPLUS_INCLUDE_STDLIB
 
-#include "siplus/function.hxx"
+#include "siplus/context.hxx"
 
 namespace SIPLUS_NAMESPACE {
 namespace stl {
@@ -15,9 +15,9 @@ namespace stl {
  * struct type_function - Function to get the type name of the parameter
  */
 struct SIPLUS_EXPORT type_function : Function {
-    virtual std::shared_ptr<text::ValueRetriever> value(
-        std::shared_ptr<text::ValueRetriever> parent,
-        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+    virtual std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent,
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
 };
     

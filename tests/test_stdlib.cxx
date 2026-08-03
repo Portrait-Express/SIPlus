@@ -4,6 +4,9 @@
 #include "siplus/parser.hxx"
 
 #include "common.hxx"
+#include "siplus/stl/converters/bool_string.hxx"
+#include "siplus/stl/converters/numeric.hxx"
+#include "siplus/stl/converters/string_bool.hxx"
 #include "siplus/types/array.hxx"
 #include "siplus/types/float.hxx"
 #include "siplus/types/integer.hxx"

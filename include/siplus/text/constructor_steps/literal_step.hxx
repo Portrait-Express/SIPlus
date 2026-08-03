@@ -4,7 +4,7 @@
 
 #include <string>
 
-#include "siplus/invocation_context.hxx"
+#include "siplus/context.hxx"
 #include "siplus/text/constructor_steps/constructor_step.hxx"
 
 namespace SIPLUS_NAMESPACE {

@@ -9,11 +9,8 @@
 #include <memory>
 #include <vector>
 
-#include "siplus/data.hxx"
-#include "siplus/invocation_context.hxx"
 #include "siplus/util.hxx"
 #include "siplus/context.hxx"
-#include "siplus/function.hxx"
 
 namespace SIPLUS_NAMESPACE {
 namespace stl {
@@ -34,21 +31,21 @@ struct typed_binary_operator_function : Function {
         operator_function operate
     ) : context_(context), operator_(operate) {}
 
-    std::shared_ptr<text::ValueRetriever> 
+    std::shared_ptr<ValueRetriever> 
     value(
-        std::shared_ptr<text::ValueRetriever> parent, 
-        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+        std::shared_ptr<ValueRetriever> parent, 
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override {
         auto [a, b] = util::get_parameters_first_parent<2>(parent, parameters);
         return std::make_shared<impl>(context_, operator_, a, b);
     }
 
-    struct impl : text::ValueRetriever {
+    struct impl : ValueRetriever {
         impl(
             std::weak_ptr<SIPlusParserContext> context,
             operator_function operate,
-            std::shared_ptr<text::ValueRetriever> a,
-            std::shared_ptr<text::ValueRetriever> b
+            std::shared_ptr<ValueRetriever> a,
+            std::shared_ptr<ValueRetriever> b
         ) : context_(context), operator_(operate), a_(a), b_(b) {}
 
         UnknownDataTypeContainer
@@ -63,8 +60,8 @@ struct typed_binary_operator_function : Function {
 
     private:
         std::weak_ptr<SIPlusParserContext> context_;
-        std::shared_ptr<text::ValueRetriever> a_;
-        std::shared_ptr<text::ValueRetriever> b_;
+        std::shared_ptr<ValueRetriever> a_;
+        std::shared_ptr<ValueRetriever> b_;
         operator_function operator_;
     };
 
@@ -89,20 +86,20 @@ struct typed_unary_operator_function : Function {
         operator_function operate
     ) : context_(context), operator_(operate) {}
 
-    std::shared_ptr<text::ValueRetriever> 
+    std::shared_ptr<ValueRetriever> 
     value(
-        std::shared_ptr<text::ValueRetriever> parent, 
-        std::vector<std::shared_ptr<text::ValueRetriever>> parameters
+        std::shared_ptr<ValueRetriever> parent, 
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override {
         auto [input] = util::get_parameters_first_parent<1>(parent, parameters);
         return std::make_shared<impl>(context_, operator_, input);
     }
 
-    struct impl : text::ValueRetriever {
+    struct impl : ValueRetriever {
         impl(
             std::weak_ptr<SIPlusParserContext> context,
             operator_function operate,
-            std::shared_ptr<text::ValueRetriever> a
+            std::shared_ptr<ValueRetriever> a
         ) : context_(context), operator_(operate), a_(a) {}
 
         UnknownDataTypeContainer
@@ -114,7 +111,7 @@ struct typed_unary_operator_function : Function {
 
     private:
         std::weak_ptr<SIPlusParserContext> context_;
-        std::shared_ptr<text::ValueRetriever> a_;
+        std::shared_ptr<ValueRetriever> a_;
         operator_function operator_;
     };
 

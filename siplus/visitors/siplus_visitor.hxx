@@ -3,18 +3,16 @@
 
 #include "BufferedTokenStream.h"
 
-#include "siplus/build_context.hxx"
-#include "siplus/config.h"
 #include "siplus/context.hxx"
-#include "siplus/data.hxx"
-#include "siplus/text/value_retrievers/retriever.hxx"
+#include "siplus/text/constructor.hxx"
+#include "siplus/text/constructor_steps/constructor_step.hxx"
 #include "visitor.hxx"
 
 namespace SIPLUS_NAMESPACE {
 
-SIPLUS_DECLARE_NODE_RESULT(StringInterpolatorParser::Piped_exprContext, std::shared_ptr<text::ValueRetriever>);
-SIPLUS_DECLARE_NODE_RESULT(StringInterpolatorParser::ExprContext, std::shared_ptr<text::ValueRetriever>);
-SIPLUS_DECLARE_NODE_RESULT(StringInterpolatorParser::Suffixable_exprContext, std::shared_ptr<text::ValueRetriever>);
+SIPLUS_DECLARE_NODE_RESULT(StringInterpolatorParser::Piped_exprContext, std::shared_ptr<ValueRetriever>);
+SIPLUS_DECLARE_NODE_RESULT(StringInterpolatorParser::ExprContext, std::shared_ptr<ValueRetriever>);
+SIPLUS_DECLARE_NODE_RESULT(StringInterpolatorParser::Suffixable_exprContext, std::shared_ptr<ValueRetriever>);
 SIPLUS_DECLARE_NODE_RESULT(StringInterpolatorParser::PrimitiveContext, UnknownDataTypeContainer);
 SIPLUS_DECLARE_NODE_RESULT(StringInterpolatorParser::Interpolated_strContext, text::TextConstructor);
 SIPLUS_DECLARE_NODE_RESULT(StringInterpolatorParser::Interp_stmtContext, std::shared_ptr<text::TextConstructorStep>);

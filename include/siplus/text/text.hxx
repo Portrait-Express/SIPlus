@@ -2,14 +2,11 @@
 #ifndef INCLUDE_SIPLUS_TEXT_TEXT_HXX_
 #define INCLUDE_SIPLUS_TEXT_TEXT_HXX_
 
-#include <memory>
-#include <string>
-#include <typeindex>
+#include <functional>
 #include <vector>
 
 #include "siplus/config.h"
 #include "siplus/context.hxx"
-#include "siplus/data.hxx"
 #include "siplus/types/array.hxx"
 #include "siplus/types/float.hxx"
 #include "siplus/types/integer.hxx"
