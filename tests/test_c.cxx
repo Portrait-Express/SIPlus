@@ -202,7 +202,7 @@ SIPlusTypeInfo *addon_list_type_new() {
 
     siplus_type_new(
         &info, reinterpret_cast<void*>(data), "LanguageInfo.addons(std:string[])", 
-        addon_list_is_iterable, NULL, addon_list_iterate, [](void* data){
+        addon_list_is_iterable, NULL, NULL, addon_list_iterate, [](void* data){
             delete reinterpret_cast<Empty*>(data);
         });
     return info;
@@ -253,7 +253,7 @@ SIPlusTypeInfo *langauge_info_type_new() {
     SIPlusTypeInfo *info;
     Empty *data = new Empty();
 
-    siplus_type_new(&info, reinterpret_cast<void*>(data), "LanguageInfo", language_info_is_iterable, language_info_access, NULL, [](void* data){
+    siplus_type_new(&info, reinterpret_cast<void*>(data), "LanguageInfo", language_info_is_iterable, language_info_access, NULL, NULL, [](void* data){
         delete reinterpret_cast<Empty*>(data);
     });
     return info;

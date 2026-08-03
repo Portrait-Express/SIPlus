@@ -11,6 +11,7 @@
 #include <exception>
 #include <iostream>
 #include <memory>
+#include <strings.h>
 
 #define __STR(x) #x
 #define STR(x) __STR(x)
@@ -219,14 +220,17 @@ struct CType : TypeInfo {
         std::string name,
         SIPlusTypeIsIterable is_iterable,
         SIPlusTypeAccess access,
+        SIPlusTypeIndex index,
         SIPlusTypeIterate iterate,
         SIPlusTypeDeleter deleter
-    ) : data_(data), name_(name), is_iterable_(is_iterable), iterate_(iterate), access_(access), deleter_(deleter) { }
+    ) : data_(data), name_(name), is_iterable_(is_iterable), iterate_(iterate), access_(access), index_(index), deleter_(deleter) { }
 
     std::string name() const override;
     bool is_iterable(const UnknownDataTypeContainer &data) const override;
 
     UnknownDataTypeContainer access(const UnknownDataTypeContainer &data, const std::string &name) const override;
+    UnknownDataTypeContainer index(std::shared_ptr<SIPlusParserContext> context, 
+          UnknownDataTypeContainer& value, UnknownDataTypeContainer& index) const override;
     std::unique_ptr<Iterator> iterate(const UnknownDataTypeContainer &data) const override;
 
     ~CType() { if(deleter_) deleter_(data_); }
@@ -236,6 +240,7 @@ struct CType : TypeInfo {
     SIPlusTypeIsIterable is_iterable_;
     SIPlusTypeIterate iterate_;
     SIPlusTypeAccess access_;
+    SIPlusTypeIndex index_;
     SIPlusTypeDeleter deleter_;
 };
 
@@ -263,6 +268,34 @@ UnknownDataTypeContainer CType::access(const UnknownDataTypeContainer &data, con
     UnknownDataTypeContainer ret = *container->container;
     siplus_data_delete(container);
     return ret;
+}
+
+UnknownDataTypeContainer CType::index(
+    std::shared_ptr<SIPlusParserContext> context, 
+    UnknownDataTypeContainer& value, 
+    UnknownDataTypeContainer& index
+) const {
+    if(index_) {
+        SIPlusContext cContext{context};
+        SIPlusUnknownDataContainer cIndex{std::make_unique<UnknownDataTypeContainer>(index)};
+
+        SIPlusUnknownDataContainer *result;
+        if(index_(&result, data_, &cContext, value.ptr, &cIndex)) {
+            throw std::runtime_error{last_message.value_or(
+                util::to_string(
+                    "Indexing object of type '", value.type->name(), 
+                    "' with value of type '", index.type->name(), 
+                    "' failed with ", error_name(last_error)
+                ))
+            };
+        }
+
+        UnknownDataTypeContainer ret = *result->container;
+        siplus_data_delete(result);
+        return ret;
+    } else {
+        return TypeInfo::index(context, value, index);
+    }
 }
 
 std::unique_ptr<Iterator> CType::iterate(const UnknownDataTypeContainer &data) const {
@@ -738,20 +771,23 @@ void siplus_invocation_unref(SIPlusInvocationContext *context) {
 
 
 int siplus_type_new_s(SIPlusTypeInfo **type, SIPlusTypeNewParams data) {
-    return siplus_type_new(type, data.data, data.name, data.is_iterable, data.access, data.iterate, data.deleter);;
+    return siplus_type_new(type, data.data, data.name, data.is_iterable, data.access, data.index, data.iterate, data.deleter);;
 }
 
 int siplus_type_new(
     SIPlusTypeInfo **type,
     void *data, const char *name, 
-    SIPlusTypeIsIterable is_iterable, SIPlusTypeAccess access, 
-    SIPlusTypeIterate iterate, SIPlusTypeDeleter deleter
+    SIPlusTypeIsIterable is_iterable, 
+    SIPlusTypeAccess access, 
+    SIPlusTypeIndex index, 
+    SIPlusTypeIterate iterate, 
+    SIPlusTypeDeleter deleter
 ) {
     SIPLUS_NOT_NULL(type, name, is_iterable);
 
 
     auto ptr = std::make_shared<CType>(
-        data, name, is_iterable, access, iterate, deleter
+        data, name, is_iterable, access, index, iterate, deleter
     );
 
     *type = new SIPlusTypeInfo{ ptr };

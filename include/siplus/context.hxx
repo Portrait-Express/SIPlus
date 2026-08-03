@@ -111,7 +111,7 @@ public:
      * @return The data at that index. Throws if property does not exist.
      */
     UnknownDataTypeContainer 
-    index(std::shared_ptr<SIPlusParserContext> context, 
+    virtual index(std::shared_ptr<SIPlusParserContext> context, 
           UnknownDataTypeContainer& value,
           UnknownDataTypeContainer& index) const;
 

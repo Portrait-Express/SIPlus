@@ -49,7 +49,7 @@ SIPlusTypeInfo *langauge_info_type_new() {
     SIPlusTypeInfo *info;
     LanguageInfoType *data = malloc(sizeof(LanguageInfoType));
 
-    siplus_type_new(&info, data, "LanguageInfo", language_info_is_iterable, language_info_access, NULL, free);
+    siplus_type_new(&info, data, "LanguageInfo", language_info_is_iterable, language_info_access, NULL, NULL, free);
     return info;
 }
 

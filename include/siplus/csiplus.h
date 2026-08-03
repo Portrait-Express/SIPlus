@@ -152,12 +152,26 @@ typedef int (*SIPlusTypeIterate)(SIPlusIterator **result, void *data, void *cont
 /**
  * @brief Access a property on an object
  *
+ * @param[out] data (Owner) The result
  * @param[in] data (Reference) The data void* passed to siplus_type_new
  * @param[in] container (Reference) The data object to access
  * @param[in] name (Reference) The property name
  * @return Error code
  */
 typedef int (*SIPlusTypeAccess)(SIPlusUnknownDataContainer **result, void *data, void *container, const char *name);
+
+/**
+ * @brief Index a property on an object
+ *
+ * @param[out] data (Owner) The result
+ * @param[in] data (Reference) The data void* passed to siplus_type_new
+ * @param[in] context (Reference) Context object
+ * @param[in] value (Reference) The data object to access
+ * @param[in] index (Reference) The property name
+ * @return Error code
+ */
+typedef int (*SIPlusTypeIndex)(SIPlusUnknownDataContainer **result, void *data, SIPlusContext *context,
+                               void *value, SIPlusUnknownDataContainer *index);
 
 /**
  * @brief Deleter for SIPlusTypeInfo
@@ -174,6 +188,7 @@ struct SIPlusTypeNewParams {
     void *data;
     const char *name;
     SIPlusTypeAccess access;
+    SIPlusTypeIndex index;
     SIPlusTypeIterate iterate;
     SIPlusTypeIsIterable is_iterable;
     SIPlusTypeDeleter deleter;
@@ -543,11 +558,12 @@ SIPLUS_EXPORT int siplus_type_new_s(SIPlusTypeInfo **type, SIPlusTypeNewParams d
  * @param[in] name (Reference) The name of your type
  * @param[in] is_iterable `is_iterable()` implementation. REQUIRED
  * @param[in] access `access()` implementation. You may pass NULL of there are no accessible properties.
+ * @param[in] index `index()` implementation. You may pass NULL to use the default indexer behavior.
  * @param[in] iterate iterate() implementation. You may pass NULL if your type is not iterable.
  * @param[in] deleter Deleter for `data`. You may pass NULL.
  * @return Error Code
  */
-SIPLUS_EXPORT int siplus_type_new(SIPlusTypeInfo **type, void *data, const char *name, SIPlusTypeIsIterable is_iterable, SIPlusTypeAccess access, SIPlusTypeIterate iterate, SIPlusTypeDeleter deleter);
+SIPLUS_EXPORT int siplus_type_new(SIPlusTypeInfo **type, void *data, const char *name, SIPlusTypeIsIterable is_iterable, SIPlusTypeAccess access, SIPlusTypeIndex index, SIPlusTypeIterate iterate, SIPlusTypeDeleter deleter);
 
 /**
  * @brief Get the base IntegerType TypeInfo
