@@ -382,3 +382,5 @@ int test_conversion(const V& val, const To& result) {
     T converter;
     return test_conversion<T, V, To>(converter, val, result);
 }
+
+void common_initialize();

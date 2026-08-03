@@ -177,6 +177,16 @@ bool nearly_equal(double a, double b, double epsilon, double abs_th) {
 //BELOW: Credit to https://werwolv.net/posts/cpp_exception_stacktraces/
 thread_local std::array<std::stacktrace, 5> s_stacktraces;
 
+void capture_stacktrace() {
+    auto exception_count = std::uncaught_exceptions();
+
+    if (exception_count < size_t(s_stacktraces.size())) {
+        s_stacktraces[exception_count] = std::stacktrace::current(1);
+    }
+}
+
+#ifdef __linux__
+
 extern "C" void __real___cxa_throw(
     void *thrown_object,
     std::type_info *tinfo,
@@ -188,14 +198,24 @@ extern "C" void __wrap___cxa_throw(
     std::type_info *tinfo,
     void (*dest)(void *)
 ) {
-    auto exception_count = std::uncaught_exceptions();
-
-    if (exception_count < size_t(s_stacktraces.size())) {
-        s_stacktraces[exception_count] = std::stacktrace::current(1);
-    }
+    capture_stacktrace();
 
     __real___cxa_throw(thrown_object, tinfo, dest);
 }
+
+#elifdef _MSC_VER
+
+#include <windows.h>
+
+LONG CALLBACK VectoredHandler(PEXCEPTION_POINTERS ExceptionInfo) {
+    if (ExceptionInfo->ExceptionRecord->ExceptionCode == 0xE06D7363) {
+        capture_stacktrace();
+    }
+
+    return EXCEPTION_CONTINUE_SEARCH;
+}
+
+#endif
 
 void print_stacktrace() {
     auto exception_count = std::uncaught_exceptions();
@@ -208,3 +228,9 @@ void print_stacktrace() {
         std::cout << "Stacktrace:\n" << s_stacktraces[exception_count];
     }
 };
+
+void common_initialize() {
+#ifdef _MSC_VER
+    AddVectoredExceptionHandler(1, VectoredHandler);
+#endif
+}
