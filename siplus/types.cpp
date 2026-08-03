@@ -7,6 +7,7 @@
 #include "siplus/types/integer.hxx"
 #include "siplus/types/float.hxx"
 #include "siplus/types/array.hxx"
+#include "siplus/util.hxx"
 
 namespace SIPLUS_NAMESPACE {
 namespace types {
@@ -71,6 +72,26 @@ std::unique_ptr<Iterator> ArrayType::iterate(const UnknownDataTypeContainer& dat
     return std::make_unique<value_range_iterator<it_t, it_t>>(
         data.as<ArrayType>().begin(), data.as<ArrayType>().end()
     );
+}
+UnknownDataTypeContainer ArrayType::index(
+    std::shared_ptr<SIPlusParserContext> context, 
+    UnknownDataTypeContainer &value, 
+    UnknownDataTypeContainer &index
+) const {
+    if(index.is<IntegerType>() || context->can_convert<IntegerType>(*index.type)) {
+        auto indexVal = context->convert<IntegerType>(index).as<IntegerType>();
+        auto& arr = value.as<ArrayType>();
+
+        if(indexVal < 0 || indexVal >= arr.size()) {
+            throw std::runtime_error{util::to_string(
+                "Index ", indexVal, " out of range for array (size: ", arr.size(), ")"
+            )};
+        }
+
+        return value.as<ArrayType>()[indexVal];
+    }
+
+    return TypeInfo::index(context, value, index);
 }
 
 } /* types */

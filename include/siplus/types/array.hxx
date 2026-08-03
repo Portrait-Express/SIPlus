@@ -14,6 +14,12 @@ struct SIPLUS_EXPORT ArrayType : public TypeInfo {
     virtual std::string name() const override;
     virtual bool is_iterable(const UnknownDataTypeContainer& data) const override;
 
+    virtual UnknownDataTypeContainer index(
+        std::shared_ptr<SIPlusParserContext> context, 
+        UnknownDataTypeContainer &value, 
+        UnknownDataTypeContainer &index
+    ) const override;
+
     virtual std::unique_ptr<Iterator> iterate(const UnknownDataTypeContainer& data) const override;
 };
 
