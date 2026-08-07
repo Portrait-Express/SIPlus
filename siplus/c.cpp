@@ -222,7 +222,7 @@ struct CType : TypeInfo {
         SIPlusTypeIndex index,
         SIPlusTypeIterate iterate,
         SIPlusTypeDeleter deleter
-    ) : data_(data), name_(name), is_iterable_(is_iterable), iterate_(iterate), access_(access), index_(index), deleter_(deleter) { }
+    ) : data(data), name_(name), is_iterable_(is_iterable), iterate_(iterate), access_(access), index_(index), deleter_(deleter) { }
 
     std::string name() const override;
     bool is_iterable(const UnknownDataTypeContainer &data) const override;
@@ -232,9 +232,11 @@ struct CType : TypeInfo {
           UnknownDataTypeContainer& value, UnknownDataTypeContainer& index) const override;
     std::unique_ptr<Iterator> iterate(const UnknownDataTypeContainer &data) const override;
 
-    ~CType() { if(deleter_) deleter_(data_); }
+    ~CType() { if(deleter_) deleter_(data); }
 
-    void *data_;
+    void *data;
+
+private:
     std::string name_;
     SIPlusTypeIsIterable is_iterable_;
     SIPlusTypeIterate iterate_;
@@ -247,15 +249,15 @@ std::string CType::name() const {
     return name_;
 }
 
-bool CType::is_iterable(const UnknownDataTypeContainer &data) const {
-    return is_iterable_(data_, data.ptr);
+bool CType::is_iterable(const UnknownDataTypeContainer &value) const {
+    return is_iterable_(data, value.ptr);
 }
 
-UnknownDataTypeContainer CType::access(const UnknownDataTypeContainer &data, const std::string &name) const {
-    if(!access_) TypeInfo::access(data, name);
+UnknownDataTypeContainer CType::access(const UnknownDataTypeContainer &value, const std::string &name) const {
+    if(!access_) TypeInfo::access(value, name);
 
     SIPlusUnknownDataContainer *container;
-    if(access_(&container, data_, data.ptr, name.c_str())) {
+    if(access_(&container, data, value.ptr, name.c_str())) {
         throw std::runtime_error{
             last_message.value_or(
                 util::to_string(
@@ -279,7 +281,7 @@ UnknownDataTypeContainer CType::index(
         SIPlusUnknownDataContainer cIndex{std::make_unique<UnknownDataTypeContainer>(index)};
 
         SIPlusUnknownDataContainer *result;
-        if(index_(&result, data_, &cContext, value.ptr, &cIndex)) {
+        if(index_(&result, data, &cContext, value.ptr, &cIndex)) {
             throw std::runtime_error{last_message.value_or(
                 util::to_string(
                     "Indexing object of type '", value.type->name(), 
@@ -297,11 +299,11 @@ UnknownDataTypeContainer CType::index(
     }
 }
 
-std::unique_ptr<Iterator> CType::iterate(const UnknownDataTypeContainer &data) const {
-    if(!iterate_) TypeInfo::iterate(data);
+std::unique_ptr<Iterator> CType::iterate(const UnknownDataTypeContainer &value) const {
+    if(!iterate_) TypeInfo::iterate(value);
 
     SIPlusIterator *iterator;
-    if(iterate_(&iterator, data_, data.ptr)) {
+    if(iterate_(&iterator, data, value.ptr)) {
         throw std::runtime_error{
             last_message.value_or(
                 util::to_string(
@@ -322,15 +324,17 @@ struct CIterator : Iterator {
         SIPlusIteratorNext next,
         SIPlusIteratorCurrent current,
         SIPlusIteratorDeleter deleter
-    ) : data_(data), more_(more), next_(next), current_(current), deleter_(deleter) {}
+    ) : data(data), more_(more), next_(next), current_(current), deleter_(deleter) {}
 
     bool more() override;
     void next() override;
     UnknownDataTypeContainer current() override;
 
-    ~CIterator() { if(deleter_) deleter_(data_); }
+    ~CIterator() { if(deleter_) deleter_(data); }
 
-    void *data_;
+    void *data;
+
+private:
     SIPlusIteratorMore more_;
     SIPlusIteratorNext next_;
     SIPlusIteratorCurrent current_;
@@ -339,11 +343,11 @@ struct CIterator : Iterator {
 
 
 bool CIterator::more() {
-    return more_(data_);
+    return more_(data);
 }
 
 void CIterator::next() {
-    if(auto err = next_(data_); err) {
+    if(auto err = next_(data); err) {
         throw std::runtime_error{
             last_message.value_or(
                 util::to_string(
@@ -354,7 +358,7 @@ void CIterator::next() {
 
 UnknownDataTypeContainer CIterator::current() {
     SIPlusUnknownDataContainer *container;
-    if(auto err = current_(&container, data_); err) {
+    if(auto err = current_(&container, data); err) {
         throw std::runtime_error{
             last_message.value_or(
                 util::to_string(
@@ -373,7 +377,7 @@ struct CConverter : Converter {
         SIPlusConverterCanConvert can,
         SIPlusConverterImpl impl,
         SIPlusConverterDeleter deleter
-    ) : ptr_(ptr), can_convert_(can), impl_(impl), deleter_(deleter) {}
+    ) : data(ptr), can_convert_(can), impl_(impl), deleter_(deleter) {}
 
     CConverter(const CConverter &other) = delete;
     CConverter(CConverter &&other) = default;
@@ -396,11 +400,11 @@ struct CConverter : Converter {
     ) const override;
 
     ~CConverter() override {
-        if(deleter_) deleter_(ptr_);
+        if(deleter_) deleter_(data);
     }
 
+    void *data;
 private:
-    void *ptr_;
     SIPlusConverterCanConvert can_convert_;
     SIPlusConverterImpl impl_;
     SIPlusConverterDeleter deleter_;
@@ -412,7 +416,7 @@ bool CConverter::can_convert(const TypeInfo& from, const TypeInfo& to) const {
     int can;
     int result;
 
-    result = can_convert_(&can, ptr_, &ifrom, &ito);
+    result = can_convert_(&can, data, &ifrom, &ito);
     if(result) {
         throw std::runtime_error{
           last_message.value_or(util::to_string("can_convert returned error ", error_name(result)))
@@ -423,22 +427,22 @@ bool CConverter::can_convert(const TypeInfo& from, const TypeInfo& to) const {
 }
 
 UnknownDataTypeContainer CConverter::convert(const UnknownDataTypeContainer& from, const TypeInfo& to) const {
-    _SIPlusUnknownDataContainer data{std::make_unique<UnknownDataTypeContainer>(from)};
+    _SIPlusUnknownDataContainer value{std::make_unique<UnknownDataTypeContainer>(from)};
     _SIPlusTypeInfo ito{ to.shared_from_this() };
     SIPlusUnknownDataContainer *out;
-    int result;
+    int resultCode;
 
-    result = impl_(&out, ptr_, &data, &ito);
-    if(result) {
+    resultCode = impl_(&out, data, &value, &ito);
+    if(resultCode) {
         throw std::runtime_error{
-          last_message.value_or(util::to_string("can_convert returned error ", result))
+          last_message.value_or(util::to_string("can_convert returned error ", resultCode))
         };
     }
 
-    auto value = *out->container;
+    auto result = *out->container;
     siplus_data_delete(out);
 
-    return value;
+    return result;
 }
 
 template<simple_value_retrievable_type T, typename Out>
@@ -557,6 +561,17 @@ int siplus_value_create(SIPlusValueRetriever **retriever, void* context, SIPlusR
     return siplus_error_set(SIPLUS_OK);
 }
 
+void *siplus_value_data_ptr(SIPlusValueRetriever *value) {
+    if(!value) return nullptr;
+
+    auto ptr = dynamic_cast<CValueRetriever*>(value->retriever.get());
+    if(ptr != nullptr) {
+        return ptr->data;
+    } else {
+        return nullptr;
+    }
+}
+
 int siplus_value_retrieve(SIPlusUnknownDataContainer **data, SIPlusValueRetriever *value, SIPlusInvocationContext *context) {
     SIPLUS_NOT_NULL(value);
 
@@ -601,11 +616,22 @@ void siplus_text_unref(SIPlusTextConstructor *parser) {
 
 
 int siplus_function_create(SIPlusFunction **function, void *data, SIPlusFunctionValue value, SIPlusFunctionDeleter deleter) {
-    SIPLUS_NOT_NULL(function, value, deleter);
+    SIPLUS_NOT_NULL(function, value);
 
     auto func = std::make_shared<CFunction>(data, value, deleter);
     *function = new _SIPlusFunction { .function = func };
     return SIPLUS_OK;
+}
+
+void *siplus_function_data_ptr(SIPlusFunction *function) {
+    if(!function) return nullptr;
+
+    auto ptr = dynamic_cast<CFunction*>(function->function.get());
+    if(ptr != nullptr) {
+        return ptr->data;
+    } else {
+        return nullptr;
+    }
 }
 
 int siplus_function_value(SIPlusValueRetriever **retriever, SIPlusFunction *function, SIPlusValueRetriever *parent, int paramc, SIPlusValueRetriever **params) {
@@ -654,6 +680,17 @@ int siplus_converter_new(SIPlusConverter **converter, void *data, SIPlusConverte
 
     return siplus_error_set(SIPLUS_OK);
 })
+
+void *siplus_converter_data_ptr(SIPlusConverter *converter) {
+    if(!converter) return nullptr;
+
+    auto ptr = dynamic_cast<CConverter*>(converter->converter.get());
+    if(ptr != nullptr) {
+        return ptr->data;
+    } else {
+        return nullptr;
+    }
+}
 
 int siplus_converter_can_convert(int *result, SIPlusConverter *converter, SIPlusTypeInfo *from, SIPlusTypeInfo *to) SIPLUS_TRY ({
     SIPLUS_NOT_NULL(result, converter, from, to);
@@ -794,6 +831,17 @@ int siplus_type_new(
     return siplus_error_set(SIPLUS_OK);
 }
 
+void *siplus_type_data_ptr(SIPlusTypeInfo *type) {
+    if(!type) return nullptr;
+
+    auto ptr = dynamic_cast<const CType*>(type->info.get());
+    if(ptr != nullptr) {
+        return ptr->data;
+    } else {
+        return nullptr;
+    }
+}
+
 SIPlusTypeInfo *siplus_type_int() {
     auto ptr = std::make_shared<types::IntegerType>();
     return new SIPlusTypeInfo{ ptr };
@@ -890,6 +938,17 @@ int siplus_iterator_new(
     };
 
     return siplus_error_set(SIPLUS_OK);
+}
+
+void *siplus_iterator_data_ptr(SIPlusIterator *iterator) {
+    if(!iterator) return nullptr;
+
+    auto ptr = dynamic_cast<CIterator*>(iterator->iterator.get());
+    if(ptr != nullptr) {
+        return ptr->data;
+    } else {
+        return nullptr;
+    }
 }
 
 int siplus_iterator_next(SIPlusIterator *iterator) SIPLUS_TRY({

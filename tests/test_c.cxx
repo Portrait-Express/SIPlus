@@ -8,6 +8,16 @@
 
 using namespace SIPLUS_NAMESPACE;
 
+struct raii_clean {
+    raii_clean(std::function<void()> cb) : cb(cb) {}
+    raii_clean(const raii_clean& other) = delete;
+    raii_clean(raii_clean&& other) = delete;
+    raii_clean& operator=(const raii_clean& other) = delete;
+    raii_clean& operator=(raii_clean&& other) = delete;
+    ~raii_clean() { cb(); }
+    std::function<void()> cb;
+};
+
 template<typename T1, typename T2>
 struct test_match {
     static bool match(const T1&& a, const T2&& b) {
@@ -621,41 +631,98 @@ bool test_expression(SIPlusParser *parser, std::string text, T&& expected, bool 
 }
 
 int test_c(int argc, char** const argv) {
-    return test("C API", []() {
-        int result = 0;
-        SIPlusParser *parser = nullptr;
-        char *textResult = nullptr;
+    return tests(
+        test("C API", []() {
+            int result = 0;
+            SIPlusParser *parser = nullptr;
+            char *textResult = nullptr;
 
-        auto finish = [&](int err) {
-            siplus_string_delete(textResult);
-            siplus_parser_delete(parser);
+            auto finish = [&](int err) {
+                siplus_string_delete(textResult);
+                siplus_parser_delete(parser);
 
-            return err;
-        };
+                return err;
+            };
 
-        if(auto result = get_parser(&parser); result) {
-            siplus_error_get(&textResult);
-            if(textResult != NULL) printf("%s\n", textResult);
-            return finish(result);
-        }
+            if(auto result = get_parser(&parser); result) {
+                siplus_error_get(&textResult);
+                if(textResult != NULL) printf("%s\n", textResult);
+                return finish(result);
+            }
+            result = test_interpolation(parser,  
+                "Hello, from { .name }. Plugins are { .addons | join \" \" }", 
+                "Hello, from C. Plugins are Num1 Num2");
+            if(result) { return finish(1); }
 
-        result = test_interpolation(parser,  
-            "Hello, from { .name }. Plugins are { .addons | join \" \" }", 
-            "Hello, from C. Plugins are Num1 Num2");
-        if(result) { return finish(1); }
+            result = test_interpolation(parser, "{.}", "C");
+            if(result) { return finish(1); }
 
-        result = test_interpolation(parser, "{.}", "C");
-        if(result) { return finish(1); }
+            result = test_expression(parser, "test 1", 1);
+            if(result) { return finish(1); }
 
-        result = test_expression(parser, "test 1", 1);
-        if(result) { return finish(1); }
+            result = test_expression(parser, "test 2", 2, true);
+            if(result) { return finish(1); }
 
-        result = test_expression(parser, "test 2", 2, true);
-        if(result) { return finish(1); }
+            result = test_expression(parser, ".[4]", 4);
+            if(result) { return finish(1); }
 
-        result = test_expression(parser, ".[4]", 4);
-        if(result) { return finish(1); }
+            return finish(0);
 
-        return finish(0);
-    });
+        }),
+
+        test("siplus_value_data_ptr", []() {
+            SIPlusValueRetriever *value;
+            siplus_value_create(&value, (void*)123, test_function_retriever_impl, NULL);
+            raii_clean a{[value]() { siplus_value_unref(value); }};
+
+            return (
+                siplus_value_data_ptr(value) == (void*)123 &&
+                siplus_value_data_ptr(nullptr) == nullptr
+            ) ? 0 : 1;
+        }),
+
+        test("siplus_function_data_ptr", []() {
+            SIPlusFunction *function;
+            siplus_function_create(&function, (void*)123, test_function_value, NULL);
+            raii_clean a{[function]() { siplus_function_unref(function); }};
+
+            return (
+                siplus_function_data_ptr(function) == (void*)123 &&
+                siplus_function_data_ptr(nullptr) == nullptr
+            ) ? 0 : 1;
+        }),
+
+        test("siplus_type_data_ptr", []() {
+            SIPlusTypeInfo *type;
+            siplus_type_new(&type, (void*)123, "", addon_list_is_iterable, NULL, NULL, NULL, NULL);
+            raii_clean a{[type]() { siplus_type_unref(type); }};
+
+            return (
+                siplus_type_data_ptr(type) == (void*)123 &&
+                siplus_type_data_ptr(nullptr) == nullptr
+            ) ? 0 : 1;
+        }),
+
+        test("siplus_iterator_data_ptr", []() {
+            SIPlusIterator *iterator;
+            siplus_iterator_new(&iterator, (void*)123, addon_iterator_more, addon_iterator_next, addon_iterator_current, NULL);
+            raii_clean a{[iterator]() { siplus_iterator_delete(iterator); }};
+
+            return (
+                siplus_iterator_data_ptr(iterator) == (void*)123 &&
+                siplus_iterator_data_ptr(nullptr) == nullptr
+            ) ? 0 : 1;
+        }),
+
+        test("siplus_converter_data_ptr", []() {
+            SIPlusConverter *converter;
+            siplus_converter_new(&converter, (void*)123, language_info_can_convert, language_info_convert, NULL);
+            raii_clean a{[converter]() { siplus_converter_unref(converter); }};
+
+            return (
+                siplus_converter_data_ptr(converter) == (void*)123 &&
+                siplus_converter_data_ptr(nullptr) == nullptr
+            ) ? 0 : 1;
+        })
+    );
 }

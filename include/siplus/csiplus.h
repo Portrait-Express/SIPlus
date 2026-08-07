@@ -310,6 +310,15 @@ SIPLUS_EXPORT void siplus_parser_delete(SIPlusParser *parser);
 SIPLUS_EXPORT int siplus_function_create(SIPlusFunction **function, void *data, SIPlusFunctionValue value, SIPlusFunctionDeleter deleter);
 
 /**
+ * @brief Get the void *data passed into siplus_function_create.
+ *
+ * @param[in] function (Reference) Pointer to the object
+ * @return The void *passed to siplus_function_create, or NULL if function is 
+ * not valid, or not a function created with siplus_function_create
+ */
+SIPLUS_EXPORT void *siplus_function_data_ptr(SIPlusFunction *function);
+
+/**
  * @brief Get the value from a function
  *
  * @param[out] retriever (Owner) The result of `value`. You will need to `unref` this when you are finished.
@@ -342,6 +351,15 @@ SIPLUS_EXPORT void siplus_function_unref(SIPlusFunction *function);
  * @return Error code
  */
 SIPLUS_EXPORT int siplus_converter_new(SIPlusConverter **converter, void *data, SIPlusConverterCanConvert can, SIPlusConverterImpl impl, SIPlusConverterDeleter deleter);
+
+/**
+ * @brief Get the void *data passed into siplus_converter_new.
+ *
+ * @param[in] converter (Reference) Pointer to the object
+ * @return The void *passed to siplus_converter_new, or NULL if converter is 
+ * not valid, or not a converter created with siplus_converter_new
+ */
+SIPLUS_EXPORT void *siplus_converter_data_ptr(SIPlusConverter *converter);
 
 /**
  * @brief Check if a converter can convert between two types
@@ -404,6 +422,15 @@ SIPLUS_EXPORT void siplus_text_unref(SIPlusTextConstructor *constructor);
  * @return Error Code
  */
 SIPLUS_EXPORT int siplus_value_create(SIPlusValueRetriever **retriever, void* data, SIPlusRetrieverImpl impl, SIPlusRetrieverDeleter deleter);
+
+/**
+ * @brief Get the void *data passed into siplus_value_create
+ *
+ * @param[in] value (Reference) Pointer to the object
+ * @return The void *passed to siplus_value_create, or NULL if value is 
+ * not valid, or not a value created with siplus_value_create
+ */
+SIPLUS_EXPORT void *siplus_value_data_ptr(SIPlusValueRetriever *value);
 
 /**
  * @brief retrieve the value from a ValueRetriever
@@ -566,6 +593,15 @@ SIPLUS_EXPORT int siplus_type_new_s(SIPlusTypeInfo **type, SIPlusTypeNewParams d
 SIPLUS_EXPORT int siplus_type_new(SIPlusTypeInfo **type, void *data, const char *name, SIPlusTypeIsIterable is_iterable, SIPlusTypeAccess access, SIPlusTypeIndex index, SIPlusTypeIterate iterate, SIPlusTypeDeleter deleter);
 
 /**
+ * @brief Get the void *data passed into siplus_type_new.
+ *
+ * @param[in] type (Reference) Pointer to the object
+ * @return The void *passed to siplus_type_new, or NULL if type is 
+ * not valid, or not a type created with siplus_type_new
+ */
+SIPLUS_EXPORT void *siplus_type_data_ptr(SIPlusTypeInfo *type);
+
+/**
  * @brief Get the base IntegerType TypeInfo
  *
  * @return (Owner) The TypeInfo
@@ -678,6 +714,15 @@ SIPLUS_EXPORT void siplus_type_unref(SIPlusTypeInfo *type);
  * @return Error code
  */
 SIPLUS_EXPORT int siplus_iterator_new(SIPlusIterator **iterator, void *data, SIPlusIteratorMore more, SIPlusIteratorNext next, SIPlusIteratorCurrent current, SIPlusIteratorDeleter deleter);
+
+/**
+ * @brief Get the void *data passed into siplus_iterator_new.
+ *
+ * @param[in] iterator (Reference) Pointer to the object
+ * @return The void *passed to siplus_iterator_new, or NULL if iterator is 
+ * not valid, or not an iterator created with siplus_iterator_new
+ */
+SIPLUS_EXPORT void *siplus_iterator_data_ptr(SIPlusIterator *iterator);
 
 /**
  * @brief Move to the next Iterator item.
