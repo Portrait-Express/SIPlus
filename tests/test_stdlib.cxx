@@ -381,6 +381,14 @@ int test_set() {
         value = expr->retrieve(*ctx);
         expect_equal<types::BoolType>(value, true);
 
+        //Test for no default data. This was causing variable 0 not defined earlier.
+        expr = parser.get_expression(
+            "const var $s = set_new; set_add $s 1; set_add $s 2; set_add $s 2; $s | map .", 
+            ParseOpts{});
+
+        ctx = parser.context().builder().build();
+        value = expr->retrieve(*ctx);
+
         return tests(
             test_expression(R"(set_new | set_add 143 | set_has 143)", true),
             test_expression(R"(set_new | set_add 143 | set_add "test" | set_has 420)", false),

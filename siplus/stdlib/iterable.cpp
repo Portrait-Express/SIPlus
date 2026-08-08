@@ -256,12 +256,8 @@ map_impl::retrieve(InvocationContext& val) const {
     using vec_type = std::vector<UnknownDataTypeContainer>;
 
     std::unique_ptr<vec_type> ret = std::make_unique<vec_type>();
-    UnknownDataTypeContainer iterable = val.default_data();
+    UnknownDataTypeContainer iterable = input_->retrieve(val);;
     auto context = context_.lock();
-
-    if(input_) {
-        iterable = input_->retrieve(val);
-    }
 
     auto iterator = iterable.iterate();
 
