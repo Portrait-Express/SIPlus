@@ -278,10 +278,10 @@ UnknownDataTypeContainer CType::index(
 ) const {
     if(index_) {
         SIPlusContext cContext{context};
-        SIPlusUnknownDataContainer cIndex{std::make_unique<UnknownDataTypeContainer>(index)};
+        SIPlusUnknownDataContainer *cIndex = new SIPlusUnknownDataContainer{std::make_unique<UnknownDataTypeContainer>(index)};
 
         SIPlusUnknownDataContainer *result;
-        if(index_(&result, data, &cContext, value.ptr, &cIndex)) {
+        if(index_(&result, data, &cContext, value.ptr, cIndex)) {
             throw std::runtime_error{last_message.value_or(
                 util::to_string(
                     "Indexing object of type '", value.type->name(), 
