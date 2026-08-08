@@ -266,6 +266,8 @@ int language_info_index(SIPlusUnknownDataContainer **result, void *thisData, SIP
     if(siplus_data_is_int(indexData)) {
         int64_t index;
         siplus_data_as_int(&index, indexData);
+        siplus_data_delete(indexData);
+
         *result = siplus_data_make_int(index);
         return siplus_error_set(SIPLUS_OK, NULL);
     } 
@@ -274,6 +276,7 @@ int language_info_index(SIPlusUnknownDataContainer **result, void *thisData, SIP
     char *name;
     siplus_data_type(&info, indexData);
     siplus_type_name(&name, info);
+    siplus_data_delete(indexData);
     return siplus_error_set(SIPLUS_ERR, util::to_string(
         "Unsure how to index 'LanguageInfo' with '", name, "'"
     ).c_str());

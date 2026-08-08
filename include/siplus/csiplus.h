@@ -167,7 +167,7 @@ typedef int (*SIPlusTypeAccess)(SIPlusUnknownDataContainer **result, void *data,
  * @param[in] data (Reference) The data void* passed to siplus_type_new
  * @param[in] context (Reference) Context object
  * @param[in] value (Reference) The data object to access
- * @param[in] index (Reference) The property name
+ * @param[in] index (Owner) The index value
  * @return Error code
  */
 typedef int (*SIPlusTypeIndex)(SIPlusUnknownDataContainer **result, void *data, SIPlusContext *context,
