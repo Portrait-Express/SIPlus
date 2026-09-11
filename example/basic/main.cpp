@@ -1,3 +1,4 @@
+#include "siplus/context.hxx"
 #include <siplus/siplus.hxx>
 #include <iostream>
 
@@ -10,24 +11,23 @@ struct Person { std::string name = "Dave"; } person;
  * implementation. This class contains the logic required for the templates to 
  * interact with your data properly.
  *
- * Hopefully C++26 should allow us to create these automatically 
- * with reflection, but for now they must be done by hand.
+ * Each unique type needs a descriptor, created with `new TypeInfoDescriptor`.
+ * The pointer to this descriptor will be used to identify a specific type.
+ * Types with equivalent descriptors are considered the same type implementation.
+ *
+ * Hopefully C++26 should allow us to create these automatically with 
+ * reflection, but for now they must be done by hand.
  */
 struct PersonType : public TypeInfo {
-    // data_type is optional, but HIGHLY recommended as it makes most operations 
-    //much easier. 
+    // data_type and Type::descriptor are optional, but HIGHLY recommended as 
+    // they make most operations much easier. 
     //
-    //Providing this allows you to use as<>() with this type. 
+    // Providing these allows you to use as<>() with this type. See concept 
+    // simple_value_retrievable_type<T> in context.hxx
     using data_type = Person; 
-                              
-    virtual std::string name() const { 
-        //This NEEDS to be unique among all registered types. There are a 
-        //handful of builtin types, so ensure that your tyoe name does not 
-        //overlap. If two TypeInfo objects have the same name(), they are 
-        //considered equivalent. This is not ideal, but a better solution is 
-        //not known.
-        return "Person"; 
-    }
+    static const TypeInfoDescriptor *const descriptor;
+
+    PersonType() : TypeInfo(descriptor) {}
 
     virtual bool is_iterable(const UnknownDataTypeContainer& data) const {
         //This is not an iterable type, it has no sub elements you can iterate 
@@ -50,6 +50,10 @@ struct PersonType : public TypeInfo {
     }
 };
 
+// The definition of the descriptor has to be done out of line since inline
+// initializers have to be constant expressions.
+const TypeInfoDescriptor *const PersonType::descriptor = new TypeInfoDescriptor("Person");
+
 //This makes PersonType info able to be looked up in 
 //SIPlus::type_info_for_t<Person>, and therefore we do not have to specify
 //PersonType when calling make_data on a Person. This is optional, but also 
@@ -64,9 +68,6 @@ int main() {
 
     //Create a new parser
     Parser c;
-
-    //Attach the STL functions. None of which are used in this example, but you likely will use them.
-    c.context().use_stl();
 
     //Parse and build the template
     text::TextConstructor constructor = c.get_interpolation(templateText);

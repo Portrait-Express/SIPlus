@@ -8,7 +8,6 @@
 #include "siplus/text/constructor_steps/literal_step.hxx"
 #include "siplus/text/constructor_steps/repeated_constructor_step.hxx"
 #include "siplus/text/constructor_steps/retriever_step.hxx"
-#include "siplus/types.hxx"
 #include "siplus/util.hxx"
 #include "siplus/context.hxx"
 #include "siplus/text/constructor.hxx"

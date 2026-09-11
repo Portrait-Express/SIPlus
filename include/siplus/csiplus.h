@@ -2,58 +2,6 @@
 #ifndef INCLUDE_SIPLUS_SIPLUS_H_
 #define INCLUDE_SIPLUS_SIPLUS_H_
 
-#include <stdint.h>
-
-#include "siplus/config.h"
-
-enum SIPlusErrors {
-    SIPLUS_OK = 0,
-    SIPLUS_ERR,
-    SIPLUS_INVALID_ARG,
-    SIPLUS_PARSE_ERROR,
-    SIPLUS_INVOKE_ERROR
-};
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-struct _SIPlusTypeInfo;
-typedef struct _SIPlusTypeInfo                     SIPlusTypeInfo;
-
-struct _SIPlusUnknownDataContainer;
-typedef struct _SIPlusUnknownDataContainer         SIPlusUnknownDataContainer;
-
-struct _SIPlusParser;
-typedef struct _SIPlusParser                       SIPlusParser;
-
-struct _SIPlusParseOpts;
-typedef struct _SIPlusParseOpts                    SIPlusParseOpts;
-
-struct _SIPlusFunction;
-typedef struct _SIPlusFunction                     SIPlusFunction;
-
-struct _SIPlusParserContext;
-typedef struct _SIPlusParserContext                SIPlusContext;
-
-struct _SIPlusInvocationContext;
-typedef struct _SIPlusInvocationContext            SIPlusInvocationContext;
-
-struct _SIPlusValueRetriever;
-typedef struct _SIPlusValueRetriever               SIPlusValueRetriever;
-
-struct _SIPlusTextConstructor;
-typedef struct _SIPlusTextConstructor              SIPlusTextConstructor;
-
-struct _SIPlusInvocationContextBuilder;
-typedef struct _SIPlusInvocationContextBuilder     SIPlusInvocationContextBuilder;
-
-struct _SIPlusIterator;
-typedef struct _SIPlusIterator                     SIPlusIterator;
-
-struct _SIPlusConverter;
-typedef struct _SIPlusConverter                    SIPlusConverter;
-
 // NOTE: Function parameters can be marked (Reference) or (Owner) which denotes 
 // their ownership semantics. The exact semantics depend on whether or not the 
 // parameter is an `in` or an `out` parameter. The exact semanatics are as follows:
@@ -71,13 +19,67 @@ typedef struct _SIPlusConverter                    SIPlusConverter;
 //
 // - (Owner) The caller now owns the object, and is responsible for deleting it.
 
-/**
- * @brief Deleter callback for when the SIPlusFunction is deleted. This 
- * typically happens during siplus_parser_delete.
- *
- * @param[in] data (Owner) The void* passed to siplus_context_add_function
- */
-typedef void (*SIPlusFunctionDeleter)(void *data);
+#include <stdint.h>
+#include <stddef.h>
+
+#include "siplus/config.h"
+
+enum SIPlusErrors {
+    SIPLUS_OK = 0,
+    SIPLUS_ERR,
+    SIPLUS_INVALID_ARG,
+    SIPLUS_PARSE_ERROR,
+    SIPLUS_INVOKE_ERROR
+};
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef struct _SIPlusTypeDescriptor                   SIPlusTypeDescriptor;
+
+typedef struct _SIPlusTypeExtensionDescriptor          SIPlusTypeExtensionDescriptor;
+typedef struct _SIPlusTypeExtensionImpl                SIPlusTypeExtensionImpl;
+
+typedef struct _SIPlusBinaryTypeExtensionDescriptor    SIPlusBinaryTypeExtensionDescriptor;
+typedef struct _SIPlusBinaryTypeExtensionImpl          SIPlusBinaryTypeExtensionImpl;
+
+typedef struct _SIPlusUnaryTypeExtensionDescriptor     SIPlusUnaryTypeExtensionDescriptor;
+typedef struct _SIPlusUnaryTypeExtensionImpl           SIPlusUnaryTypeExtensionImpl;
+
+typedef struct _SIPlusTypeInfo                         SIPlusTypeInfo;
+
+struct _SIPlusUnknownDataContainer;
+typedef struct _SIPlusUnknownDataContainer             SIPlusUnknownDataContainer;
+
+struct _SIPlusParser;
+typedef struct _SIPlusParser                           SIPlusParser;
+
+struct _SIPlusParseOpts;
+typedef struct _SIPlusParseOpts                        SIPlusParseOpts;
+
+struct _SIPlusFunction;
+typedef struct _SIPlusFunction                         SIPlusFunction;
+
+struct _SIPlusParserContext;
+typedef struct _SIPlusParserContext                    SIPlusContext;
+
+struct _SIPlusInvocationContext;
+typedef struct _SIPlusInvocationContext                SIPlusInvocationContext;
+
+struct _SIPlusValueRetriever;
+typedef struct _SIPlusValueRetriever                   SIPlusValueRetriever;
+
+struct _SIPlusTextConstructor;
+typedef struct _SIPlusTextConstructor                  SIPlusTextConstructor;
+
+struct _SIPlusInvocationContextBuilder;
+typedef struct _SIPlusInvocationContextBuilder         SIPlusInvocationContextBuilder;
+
+struct _SIPlusIterator;
+typedef struct _SIPlusIterator                         SIPlusIterator;
+
+typedef void (*SIPlusDataDeleterCallback)(void* data);
 
 /**
  * @brief Get the result of this function. 
@@ -94,13 +96,6 @@ typedef int (*SIPlusFunctionValue)(SIPlusValueRetriever **result, void *data, SI
 
 
 /**
- * @brief Deleter callback for when the SIPlusValueRetriever is deleted.
- *
- * @param[in] data (Owner) The void* passed to siplus_value_create
- */
-typedef void (*SIPlusRetrieverDeleter)(void *data);
-
-/**
  * @brief Implementation for the ValueRetriever
  *
  * @param[out] result (Owner) The result data
@@ -112,22 +107,43 @@ typedef int (*SIPlusRetrieverImpl)(SIPlusUnknownDataContainer **result, void *da
 
 
 
-/**
- * @brief Deleter for UnknownDataContainer. This is called when all instances 
- * of the stored object are deleted. This is not necessarily when you call 
- * siplus_data_delete(), as UnknownDataContainer uses an internal reference 
- * counting mechanism similar to shared_ptr.
- *
- * @param[in] data (Owner) The void* data passed to siplus_data_make
- */
-typedef void (*SIPlusUnknownDataContainerDeleter)(void *data);
-
 
 
 typedef int (*SIPlusIteratorMore)(void *data);
 typedef int (*SIPlusIteratorNext)(void *data);
 typedef int (*SIPlusIteratorCurrent)(SIPlusUnknownDataContainer **result, void *data);
-typedef void (*SIPlusIteratorDeleter)(void *data);
+
+/**
+ * @brief Implementation for BinaryOperatorTypeExtensionImpl::can_handle
+ *
+ * @param[out] result The result of the operation. 1 if this can handle the other value.
+ * @param[in] (Reference) data The void* data passed to impl_new
+ * @param[in] (Reference) other The other value that will be passed to invoke()
+ * @return Error code
+ */
+typedef int (*SIPlusBinaryTypeExtensionImplCanHandleCallback)(int *result, void *data, SIPlusUnknownDataContainer *other);
+
+/**
+ * @brief Implementation for BinaryOperatorTypeExtensionImpl::invoke
+ *
+ * @param[out] (Owner) result The result of the operation
+ * @param[in] (Reference) data The void* data passed to impl_new
+ * @param[in] isLhs boolean value. Will be 1 if `thisValue` is lhs of the operation, false if rhs
+ * @param[in] (Reference) thisVal The value of the type this implementation is attached to.
+ * @param[in] (Reference) other The other value
+ * @return Error code
+ */
+typedef int (*SIPlusBinaryTypeExtensionImplCallback)(SIPlusUnknownDataContainer **result, void *data, int isLhs, SIPlusUnknownDataContainer *thisVal, SIPlusUnknownDataContainer *other);
+
+
+/**
+ * @brief Callback for UnaryTypeExtensionImpl::invoke
+ *
+ * @param[in] data (Reference) The data void* passed to siplus_type_extension_unary_new
+ * @param[in] container (Reference) The data object.
+ * @return TRUE if the type is iterable
+ */
+typedef int (*SIPlusUnaryTypeExtensionImplCallback)(SIPlusUnknownDataContainer **result, void *data, SIPlusUnknownDataContainer *value);
 
 
 /**
@@ -174,56 +190,20 @@ typedef int (*SIPlusTypeIndex)(SIPlusUnknownDataContainer **result, void *data, 
                                void *value, SIPlusUnknownDataContainer *index);
 
 /**
- * @brief Deleter for SIPlusTypeInfo
- *
- * @param[in] data (Owner) The data void* passed to siplus_type_new
- */
-typedef void (*SIPlusTypeDeleter)(void *data);
-
-/**
  * struct SIPlusTypeInfoData - Collection of data required for implementing SIPlusTypeInfo
  * iterate may be NULL as long as is_iterable will never be true.
  */
 struct SIPlusTypeNewParams {
     void *data;
-    const char *name;
+    const SIPlusTypeDescriptor *descriptor;
     SIPlusTypeAccess access;
     SIPlusTypeIndex index;
     SIPlusTypeIterate iterate;
     SIPlusTypeIsIterable is_iterable;
-    SIPlusTypeDeleter deleter;
+    SIPlusDataDeleterCallback deleter;
 };
 typedef struct SIPlusTypeNewParams SIPlusTypeNewParams;
 
-
-/**
- * @brief Can convert test implementation
- *
- * @param[out] result Should be 1 if this converter can convert as specified
- * @param[in] data (Reference) Data ptr passed to siplus_converter_new
- * @param[in] from (Reference) The from type
- * @param[in] to (Reference) The to type
- * @return Error code
- */
-typedef int (*SIPlusConverterCanConvert)(int *result, void *data, SIPlusTypeInfo *from, SIPlusTypeInfo *to);
-
-/**
- * @brief Converter implementation
- *
- * @param[out] result (Owner) The converted data
- * @param[in] data (Reference) Data ptr passed to siplus_converter_new
- * @param[in] from (Reference) The source of the data
- * @param[in] to (Reference) The type to convert to
- * @return Error code
- */
-typedef int (*SIPlusConverterImpl)(SIPlusUnknownDataContainer **result, void *data, SIPlusUnknownDataContainer *from, SIPlusTypeInfo *to);
-
-/**
- * @brief Deleter for the data ptr passed to siplus_converter_new
- *
- * @param[in] data (Owner) Data ptr passed to siplus_converter_new
- */
-typedef void (*SIPlusConverterDeleter)(void *data);
 
 /**
  * @brief Free a string result. Any function that uses char** to return text 
@@ -307,7 +287,7 @@ SIPLUS_EXPORT void siplus_parser_delete(SIPlusParser *parser);
  * @param[in] deleter Deleter for `data` when this function is deleted
  * @return Error code
  */
-SIPLUS_EXPORT int siplus_function_create(SIPlusFunction **function, void *data, SIPlusFunctionValue value, SIPlusFunctionDeleter deleter);
+SIPLUS_EXPORT int siplus_function_create(SIPlusFunction **function, void *data, SIPlusFunctionValue value, SIPlusDataDeleterCallback deleter);
 
 /**
  * @brief Get the void *data passed into siplus_function_create.
@@ -341,59 +321,6 @@ SIPLUS_EXPORT void siplus_function_unref(SIPlusFunction *function);
 
 
 /**
- * @brief Create a new converter
- *
- * @param[out] converter (Owner) The created converter
- * @param[in] data (Owner) Arbitrary optional data pointer to store with this converter.
- * @param[in] can A test for if this converter can convert bertween two types
- * @param[in] impl The implementation for conversion
- * @param[in] deleter Deleter for `data`
- * @return Error code
- */
-SIPLUS_EXPORT int siplus_converter_new(SIPlusConverter **converter, void *data, SIPlusConverterCanConvert can, SIPlusConverterImpl impl, SIPlusConverterDeleter deleter);
-
-/**
- * @brief Get the void *data passed into siplus_converter_new.
- *
- * @param[in] converter (Reference) Pointer to the object
- * @return The void *passed to siplus_converter_new, or NULL if converter is 
- * not valid, or not a converter created with siplus_converter_new
- */
-SIPLUS_EXPORT void *siplus_converter_data_ptr(SIPlusConverter *converter);
-
-/**
- * @brief Check if a converter can convert between two types
- *
- * @param[out] result The result. 1 if the converter can convert, 0 otherwise.
- * @param[in] converter (Reference) The converter
- * @param[in] from (Reference) The type to convert from
- * @param[in] to (Reference) The type to convert to
- * @return Error code
- */
-SIPLUS_EXPORT int siplus_converter_can_convert(int *result, SIPlusConverter *converter, SIPlusTypeInfo *from, SIPlusTypeInfo *to);
-
-/**
- * @brief Convert a value. Calling this when can_convert is false between the two types is UB.
- *
- * @param[out] result (Owner) The result data
- * @param[in] converter (Reference) The converter
- * @param[in] from (Reference) The data to convert from
- * @param[in] to (Reference) The type to convert to
- * @return Error code
- */
-SIPLUS_EXPORT int siplus_converter_convert(SIPlusUnknownDataContainer **result, SIPlusConverter *converter, SIPlusUnknownDataContainer *from, SIPlusTypeInfo *to);
-
-/**
- * @brief Dereference a converter. These are reference counted, so this will not 
- * always result in a deletion of your converter.
- *
- * @param[in] converter (Owner) The converter to dereference
- */
-SIPLUS_EXPORT void siplus_converter_unref(SIPlusConverter *converter);
-
-
-
-/**
  * @brief Get the result from a TextConstructor.
  *
  * @param[out] text (Owner) The result. Delete this with `siplus_string_delete`
@@ -421,7 +348,7 @@ SIPLUS_EXPORT void siplus_text_unref(SIPlusTextConstructor *constructor);
  * @param[in] deleter Deleter for `data`
  * @return Error Code
  */
-SIPLUS_EXPORT int siplus_value_create(SIPlusValueRetriever **retriever, void* data, SIPlusRetrieverImpl impl, SIPlusRetrieverDeleter deleter);
+SIPLUS_EXPORT int siplus_value_create(SIPlusValueRetriever **retriever, void* data, SIPlusRetrieverImpl impl, SIPlusDataDeleterCallback deleter);
 
 /**
  * @brief Get the void *data passed into siplus_value_create
@@ -485,14 +412,6 @@ SIPLUS_EXPORT void siplus_parse_opts_delete(SIPlusParseOpts *opts);
  * @return Error Code
  */
 SIPLUS_EXPORT int siplus_context_add_function(SIPlusContext *context, const char *name, SIPlusFunction *function);
-/**
- * @brief Add a converter to the context
- *
- * @param[in] context (Reference) The context
- * @param[in] converter (Reference) The converter to add
- * @return Error code
- */
-SIPLUS_EXPORT int siplus_context_add_converter(SIPlusContext *context, SIPlusConverter *converter);
 
 /**
  * @brief Attach the STL library of functions and converters.
@@ -566,6 +485,120 @@ SIPLUS_EXPORT void siplus_invocation_unref(SIPlusInvocationContext *context);
 
 
 
+SIPLUS_EXPORT const SIPlusBinaryTypeExtensionDescriptor *siplus_type_extension_new_binary(const char *name);
+SIPLUS_EXPORT const SIPlusUnaryTypeExtensionDescriptor *siplus_type_extension_new_unary(const char *name);
+
+
+SIPLUS_EXPORT const SIPlusBinaryTypeExtensionDescriptor *siplus_type_extension_addable();
+SIPLUS_EXPORT const SIPlusBinaryTypeExtensionDescriptor *siplus_type_extension_subtractable();
+SIPLUS_EXPORT const SIPlusBinaryTypeExtensionDescriptor *siplus_type_extension_multiplicable();
+SIPLUS_EXPORT const SIPlusBinaryTypeExtensionDescriptor *siplus_type_extension_divisible();
+SIPLUS_EXPORT const SIPlusBinaryTypeExtensionDescriptor *siplus_type_extension_equatable();
+SIPLUS_EXPORT const SIPlusBinaryTypeExtensionDescriptor *siplus_type_extension_comparable();
+SIPLUS_EXPORT const SIPlusUnaryTypeExtensionDescriptor *siplus_type_extension_hashable();
+SIPLUS_EXPORT const SIPlusUnaryTypeExtensionDescriptor *siplus_type_extension_converter(const SIPlusTypeDescriptor *to_type);
+
+
+SIPLUS_EXPORT SIPlusBinaryTypeExtensionImpl *siplus_type_extension_impl_new_binary(
+    const SIPlusBinaryTypeExtensionDescriptor *extension,
+    void *data, 
+    SIPlusBinaryTypeExtensionImplCanHandleCallback can_handle,
+    SIPlusBinaryTypeExtensionImplCallback impl, 
+    SIPlusDataDeleterCallback deleter
+);
+
+SIPLUS_EXPORT SIPlusUnaryTypeExtensionImpl *siplus_type_extension_impl_new_unary(
+    const SIPlusUnaryTypeExtensionDescriptor *extension,
+    void *data, 
+    SIPlusUnaryTypeExtensionImplCallback impl, 
+    SIPlusDataDeleterCallback deleter
+);
+
+SIPLUS_EXPORT SIPlusUnaryTypeExtensionDescriptor *siplus_type_extension_impl_descriptor_unary(const SIPlusUnaryTypeExtensionImpl *impl);
+SIPLUS_EXPORT SIPlusBinaryTypeExtensionDescriptor *siplus_type_extension_impl_descriptor_binary(const SIPlusBinaryTypeExtensionImpl *impl);
+
+SIPLUS_EXPORT int siplus_type_extension_impl_invoke_unary(
+    SIPlusUnknownDataContainer **out,
+    const SIPlusUnaryTypeExtensionImpl *impl,
+    SIPlusUnknownDataContainer *data
+);
+SIPLUS_EXPORT int siplus_type_extension_impl_invoke_binary(
+    SIPlusUnknownDataContainer **out,
+    const SIPlusBinaryTypeExtensionImpl *impl,
+    int isLhs,
+    SIPlusUnknownDataContainer *thisValue,
+    SIPlusUnknownDataContainer *other
+);
+
+
+
+/**
+ * @brief Create a new TypeInfoDescriptor. The returned pointer will be used to 
+ * uniquely identify a new type. Generally this should only be called once for
+ * each type over the program's lifespan. These are considered static storage 
+ * objects that will survive for long times.
+ *
+ * Using `siplus_type_descriptor_delete` is generally discouraged as well. 
+ * Usually type descriptors will be left for the kernel to remove when unmapping
+ * process memory. 
+ *
+ * @param[in] name The name of the type this descriptor will represent.
+ * @return A pointer to a new type descriptor.
+ */
+SIPLUS_EXPORT const SIPlusTypeDescriptor *siplus_type_descriptor_new(const char *name);
+
+/**
+ * @brief Get a descriptor for the array type.
+ *
+ * @return The type descriptor. Do not free this.
+ */
+SIPLUS_EXPORT const SIPlusTypeDescriptor *siplus_type_descriptor_array();
+
+/**
+ * @brief Get a descriptor for the string type.
+ *
+ * @return The type descriptor. Do not free this.
+ */
+SIPLUS_EXPORT const SIPlusTypeDescriptor *siplus_type_descriptor_string();
+
+/**
+ * @brief Get a descriptor for the float type.
+ *
+ * @return The type descriptor. Do not free this.
+ */
+SIPLUS_EXPORT const SIPlusTypeDescriptor *siplus_type_descriptor_float();
+
+/**
+ * @brief Get a descriptor for the integer type.
+ *
+ * @return The type descriptor. Do not free this.
+ */
+SIPLUS_EXPORT const SIPlusTypeDescriptor *siplus_type_descriptor_integer();
+
+/**
+ * @brief Get a descriptor for the bool type.
+ *
+ * @return The type descriptor. Do not free this.
+ */
+SIPLUS_EXPORT const SIPlusTypeDescriptor *siplus_type_descriptor_bool();
+
+/**
+ * @brief Get a descriptor for the null type.
+ *
+ * @return The type descriptor. Do not free this.
+ */
+SIPLUS_EXPORT const SIPlusTypeDescriptor *siplus_type_descriptor_null();
+
+/**
+ * @brief Delete a type descriptor. Only do this when you are SURE that the 
+ * type will never be used again, and only call this on desciptors you created. 
+ * Ideally, never call this and just let the pointer leak to get cleaned up at 
+ * process end.
+ */
+SIPLUS_EXPORT void siplus_type_descriptor_delete(const SIPlusTypeDescriptor *descriptor);
+
+
+
 /**
  * @brief Create a new TypeInfo. This method takes a struct containing the arguments 
  * to siplus_type_new, in order to reduce the parameter count. Each member of 
@@ -575,7 +608,7 @@ SIPLUS_EXPORT void siplus_invocation_unref(SIPlusInvocationContext *context);
  * @param[in] data Parameter collection to pass to `siplus_type_new`
  * @return [TODO:description]
  */
-SIPLUS_EXPORT int siplus_type_new_s(SIPlusTypeInfo **type, SIPlusTypeNewParams data);
+SIPLUS_EXPORT SIPlusTypeInfo *siplus_type_new_s(SIPlusTypeNewParams data);
 
 /**
  * @brief Create a new TypeInfo
@@ -590,7 +623,46 @@ SIPLUS_EXPORT int siplus_type_new_s(SIPlusTypeInfo **type, SIPlusTypeNewParams d
  * @param[in] deleter Deleter for `data`. You may pass NULL.
  * @return Error Code
  */
-SIPLUS_EXPORT int siplus_type_new(SIPlusTypeInfo **type, void *data, const char *name, SIPlusTypeIsIterable is_iterable, SIPlusTypeAccess access, SIPlusTypeIndex index, SIPlusTypeIterate iterate, SIPlusTypeDeleter deleter);
+SIPLUS_EXPORT SIPlusTypeInfo *siplus_type_new(const SIPlusTypeDescriptor *descriptor, void *data, SIPlusTypeIsIterable is_iterable, SIPlusTypeAccess access, SIPlusTypeIndex index, SIPlusTypeIterate iterate, SIPlusDataDeleterCallback deleter);
+
+
+/**
+ * @brief Get an implementation for a type extension.
+ *
+ * @param[in] type The type to find an implementation on
+ * @param[in] impl The impl to add
+ * @return Error code
+ */
+SIPLUS_EXPORT const SIPlusUnaryTypeExtensionImpl *siplus_type_get_extension_unary(const SIPlusTypeInfo *info, const SIPlusUnaryTypeExtensionDescriptor *extension);
+
+/**
+ * @brief Get an implementation for a type extension.
+ *
+ * @param[in] type The type to find an implementation on
+ * @param[in] impl The impl to add
+ * @return Error code
+ */
+SIPLUS_EXPORT const SIPlusBinaryTypeExtensionImpl *siplus_type_get_extension_binary(const SIPlusTypeInfo *info, const SIPlusBinaryTypeExtensionDescriptor *extension);
+
+/**
+ * @brief Add an implementation for a type extension. Only call this on types 
+ * that you created with siplus_type_new.
+ *
+ * @param[in] type The type to add an implementation to
+ * @param[in] impl The impl to add
+ * @return Error code
+ */
+SIPLUS_EXPORT void siplus_type_add_extension_unary(SIPlusTypeInfo *type, const SIPlusUnaryTypeExtensionImpl *impl);
+
+/**
+ * @brief Add an implementation for a type extension. Only call this on types 
+ * that you created with siplus_type_new.
+ *
+ * @param[in] type The type to add an implementation to
+ * @param[in] impl The impl to add
+ * @return Error code
+ */
+SIPLUS_EXPORT void siplus_type_add_extension_binary(SIPlusTypeInfo *type, const SIPlusBinaryTypeExtensionImpl *impl);
 
 /**
  * @brief Get the void *data passed into siplus_type_new.
@@ -599,49 +671,56 @@ SIPLUS_EXPORT int siplus_type_new(SIPlusTypeInfo **type, void *data, const char 
  * @return The void *passed to siplus_type_new, or NULL if type is 
  * not valid, or not a type created with siplus_type_new
  */
-SIPLUS_EXPORT void *siplus_type_data_ptr(SIPlusTypeInfo *type);
+SIPLUS_EXPORT void *siplus_type_data_ptr(const SIPlusTypeInfo *type);
+
+/**
+ * @brief Get the descriptor for this type info.
+ *
+ * @return The descriptor of the type.
+ */
+SIPLUS_EXPORT const SIPlusTypeDescriptor *siplus_type_descriptor(const SIPlusTypeInfo *type);
 
 /**
  * @brief Get the base IntegerType TypeInfo
  *
  * @return (Owner) The TypeInfo
  */
-SIPLUS_EXPORT SIPlusTypeInfo *siplus_type_int();
+SIPLUS_EXPORT const SIPlusTypeInfo *siplus_type_int();
 
 /**
  * @brief Get the base FloatType TypeInfo
  *
  * @return (Owner) The TypeInfo
  */
-SIPLUS_EXPORT SIPlusTypeInfo *siplus_type_float();
+SIPLUS_EXPORT const SIPlusTypeInfo *siplus_type_float();
 
 /**
  * @brief Get the base StringType TypeInfo
  *
  * @return (Owner) The TypeInfo
  */
-SIPLUS_EXPORT SIPlusTypeInfo *siplus_type_string();
+SIPLUS_EXPORT const SIPlusTypeInfo *siplus_type_string();
 
 /**
  * @brief Get the base BoolType TypeInfo
  *
  * @return (Owner) The TypeInfo
  */
-SIPLUS_EXPORT SIPlusTypeInfo *siplus_type_bool();
+SIPLUS_EXPORT const SIPlusTypeInfo *siplus_type_bool();
 
 /**
  * @brief Get the base ArrayType TypeInfo
  *
  * @return (Owner) The TypeInfo
  */
-SIPLUS_EXPORT SIPlusTypeInfo *siplus_type_array();
+SIPLUS_EXPORT const SIPlusTypeInfo *siplus_type_array();
 
 /**
  * @brief Get the base NullType TypeInfo
  *
  * @return (Owner) The TypeInfo
  */
-SIPLUS_EXPORT SIPlusTypeInfo *siplus_type_null();
+SIPLUS_EXPORT const SIPlusTypeInfo *siplus_type_null();
 
 /**
  * @brief Call `access` for a type
@@ -652,7 +731,7 @@ SIPLUS_EXPORT SIPlusTypeInfo *siplus_type_null();
  * @param[in] property (Reference) The property to access
  * @return Error code
  */
-SIPLUS_EXPORT int siplus_type_access(SIPlusUnknownDataContainer **result, SIPlusTypeInfo *type, SIPlusUnknownDataContainer *data, char *property);
+SIPLUS_EXPORT int siplus_type_access(SIPlusUnknownDataContainer **result, const SIPlusTypeInfo *type, const SIPlusUnknownDataContainer *data, char *property);
 
 /**
  * @brief Check if a type is iterable
@@ -662,7 +741,7 @@ SIPLUS_EXPORT int siplus_type_access(SIPlusUnknownDataContainer **result, SIPlus
  * @param[in] data (Reference) The data object
  * @return Error code
  */
-SIPLUS_EXPORT int siplus_type_is_iterable(int *result, SIPlusTypeInfo *info, SIPlusUnknownDataContainer *data);
+SIPLUS_EXPORT int siplus_type_is_iterable(int *result, const SIPlusTypeInfo *info, const SIPlusUnknownDataContainer *data);
 
 /**
  * @brief Iterate on a type
@@ -672,33 +751,35 @@ SIPLUS_EXPORT int siplus_type_is_iterable(int *result, SIPlusTypeInfo *info, SIP
  * @param[in] container (Reference) The data
  * @return Error code
  */
-SIPLUS_EXPORT int siplus_type_iterate(SIPlusIterator **result, SIPlusTypeInfo *typeInfo, SIPlusUnknownDataContainer *container);
+SIPLUS_EXPORT int siplus_type_iterate(SIPlusIterator **result, const SIPlusTypeInfo *typeInfo, const SIPlusUnknownDataContainer *container);
 
 /**
  * @brief Get the name of the type. Delete the result with `siplus_string_delete`.
  *
- * @param[out] name (Owner) The name of the type
+ * @param[in] buf (Reference) The location to copy the name to
+ * @param[in] size The size of `buf`
  * @param[in] first (Reference) The type
- * @return Error Code
+ * @return The number of bytes copied. If either `buf` is NULL, or `size` is 0,
+ * this returns the size of the string to be copied.
  */
-SIPLUS_EXPORT int siplus_type_name(char **name, SIPlusTypeInfo *first);
+SIPLUS_EXPORT int siplus_type_name(char *buf, size_t size, const SIPlusTypeInfo *first);
 
 /**
- * @brief Checks if types are equal. Wrapper for checking equality of names.
+ * @brief Checks if types are equal (if they both have the same descriptor).
  *
  * @param[in] first (Reference) The type
  * @param[in] second (Reference) The other type
  * @return Error Code
  */
-SIPLUS_EXPORT int siplus_type_is(SIPlusTypeInfo *first, SIPlusTypeInfo *second);
+SIPLUS_EXPORT int siplus_type_is(const SIPlusTypeInfo *first, const SIPlusTypeInfo *second);
 
 /**
  * @brief Dereference a TypeInfo. These are reference counted, so this will not 
- * always result in a deletion of your TypeInfo.
+ * always result in an immediate deletion of your TypeInfo.
  *
  * @param[in] type (Owner) The TypeInfo
  */
-SIPLUS_EXPORT void siplus_type_unref(SIPlusTypeInfo *type);
+SIPLUS_EXPORT void siplus_type_unref(const SIPlusTypeInfo *type);
 
 
 
@@ -713,7 +794,7 @@ SIPLUS_EXPORT void siplus_type_unref(SIPlusTypeInfo *type);
  * @param[in] deleter Deleter for `data`
  * @return Error code
  */
-SIPLUS_EXPORT int siplus_iterator_new(SIPlusIterator **iterator, void *data, SIPlusIteratorMore more, SIPlusIteratorNext next, SIPlusIteratorCurrent current, SIPlusIteratorDeleter deleter);
+SIPLUS_EXPORT SIPlusIterator *siplus_iterator_new(void *data, SIPlusIteratorMore more, SIPlusIteratorNext next, SIPlusIteratorCurrent current, SIPlusDataDeleterCallback deleter);
 
 /**
  * @brief Get the void *data passed into siplus_iterator_new.
@@ -893,7 +974,7 @@ SIPLUS_EXPORT int siplus_data_as_string(char **result, SIPlusUnknownDataContaine
  * @param[in] deleter Logic to delete the void*.
  * @return (Owner) The newly created container.
  */
-SIPLUS_EXPORT SIPlusUnknownDataContainer *siplus_data_make(SIPlusTypeInfo *type, void *data, SIPlusUnknownDataContainerDeleter deleter);
+SIPLUS_EXPORT SIPlusUnknownDataContainer *siplus_data_make(const SIPlusTypeInfo *type, void *data, SIPlusDataDeleterCallback deleter);
 
 /**
  * @brief Check if a container is of a certain type.
@@ -902,7 +983,7 @@ SIPLUS_EXPORT SIPlusUnknownDataContainer *siplus_data_make(SIPlusTypeInfo *type,
  * @param[in] type (Reference) The type to check
  * @return Error code.
  */
-SIPLUS_EXPORT int siplus_data_is(SIPlusUnknownDataContainer *container, SIPlusTypeInfo *type);
+SIPLUS_EXPORT int siplus_data_is(SIPlusUnknownDataContainer *container, const SIPlusTypeInfo *type);
 
 /**
  * @brief Get the type of the container.
@@ -911,7 +992,7 @@ SIPLUS_EXPORT int siplus_data_is(SIPlusUnknownDataContainer *container, SIPlusTy
  * @param[in] container (Reference) The container to check
  * @return Error code
  */
-SIPLUS_EXPORT int siplus_data_type(SIPlusTypeInfo **type, SIPlusUnknownDataContainer *container);
+SIPLUS_EXPORT const SIPlusTypeInfo *siplus_data_type(SIPlusUnknownDataContainer *container);
 
 /**
  * @brief Get the void* to the data
@@ -920,7 +1001,7 @@ SIPLUS_EXPORT int siplus_data_type(SIPlusTypeInfo **type, SIPlusUnknownDataConta
  * @param[in] container (Reference) The container
  * @return Error code
  */
-SIPLUS_EXPORT int siplus_data_ptr(void **data, SIPlusUnknownDataContainer *container);
+SIPLUS_EXPORT void *siplus_data_ptr(SIPlusUnknownDataContainer *container);
 
 /**
  * @brief Delete a reference to a data container.

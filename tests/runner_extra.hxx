@@ -18,7 +18,7 @@ static void posix_segv_handler(int sig, siginfo_t *info, void *ucontext) {
     auto addr = info->si_addr;
     std::cerr << "Received SIGSEGV/SIGABRT. Faulting address:" << addr << std::endl;
 
-    std::cout << std::stacktrace::current() << '\n';
+    std::cout << std::stacktrace::current() << std::endl;
 
     std::abort();
 }

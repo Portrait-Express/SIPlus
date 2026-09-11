@@ -2,12 +2,13 @@
 #ifndef INCLUDE_SIPLUS_UTIL_HXX_
 #define INCLUDE_SIPLUS_UTIL_HXX_
 
-#include <memory>
 #include <sstream>
 #include <string>
 #include <tuple>
 #include <utility>
 #include <vector>
+
+#include "siplus/config.h"
 
 namespace SIPLUS_NAMESPACE {
 namespace util {
@@ -118,6 +119,8 @@ std::string to_string(const Ts&... value) {
     (ss << ... << value);
     return ss.str();
 }
+
+
 
 } /* util */
 } /* SIPLUS_NAMESPACE */

@@ -5,25 +5,20 @@ endif()
 
 enable_testing()
 
-if(MSVC) 
-    set(USE_ASAN_DEFAULT OFF)
-else()
-    set(USE_ASAN_DEFAULT ON)
-endif()
-
 option(SIPLUS_RUN_TESTS "Whether or not to run built tests" ON)
 option(SIPLUS_BUILD_TESTS "Whether or not to build tests" ON)
-option(SIPLUS_TESTS_USE_ASAN "Sets -fsanitize=address for tests. Separate from SIPLUS_SANITIZE_ADDRESS" ${USE_ASAN_DEFAULT})
 
 if(NOT SIPLUS_BUILD_TESTS)
 return()
 endif()
 
-set(TEST_SOURCES test_base.cxx test_c.cxx)
+set(TEST_SOURCES 
 
-if(SIPLUS_INCLUDE_STDLIB)
-    set(TEST_SOURCES ${TEST_SOURCES} test_stdlib.cxx)
-endif()
+    test_data.cxx 
+    test_base.cxx 
+    test_c.cxx
+    test_stdlib.cxx
+)
 
 
 create_test_sourcelist (
@@ -33,20 +28,11 @@ create_test_sourcelist (
 )
 
 # add the executable
-add_executable (runner ${TESTS})
+add_executable (runner ${TESTS} testing.cxx)
 
 if(SIPLUS_TESTS_USE_CPPTRACE) 
     set(SIPLUS_TEST_LIBRARIES ${SIPLUS_TEST_LIBRARIES})
     target_compile_definitions(runner PUBLIC SIPLUS_HAS_CPPTRACE)
-endif()
-
-if(SIPLUS_TESTS_USE_ASAN)
-    target_compile_options(runner PUBLIC -fsanitize=address)
-    target_link_options(runner PUBLIC -fsanitize=address)
-
-    if(MSVC)
-        message(FATAL_ERROR "Due to limitations with MSVC, ASAN on Windows is currently not supported")
-    endif()
 endif()
 
 target_link_libraries(runner PRIVATE siplus ${SIPLUS_TEST_LIBRARIES})

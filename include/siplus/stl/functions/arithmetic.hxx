@@ -2,96 +2,46 @@
 #ifndef INCLUDE_FUNCTIONS_ARITHMETIC_HXX_
 #define INCLUDE_FUNCTIONS_ARITHMETIC_HXX_
 
-#include "siplus/config.h"
-
-#ifdef SIPLUS_INCLUDE_STDLIB
-
 #include <memory>
 
+#include "siplus/config.h"
 #include "siplus/context.hxx"
-#include "siplus/stl/functions/converting_operator.hxx"
-#include "siplus/text/text.hxx"
 
 namespace SIPLUS_NAMESPACE {
 namespace stl {
 
-//These are meant to be used as implementations for a converting_operator_function
+struct SIPLUS_EXPORT AddFunction : Function {
 
-/**
- * struct base_numeric_operator_impl - Base class for numeric operator 
- * implementations. Implements `can_handle`.
- */
-struct SIPLUS_EXPORT base_numeric_operator_impl : operator_impl {
-    bool can_handle(const TypeInfo& lhs, const TypeInfo& rhs) const override {
-        return (lhs.is<types::IntegerType>() || lhs.is<types::FloatType>()) &&
-            (rhs.is<types::IntegerType>() || rhs.is<types::FloatType>());
-    }
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent,
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
+    ) const override;
 };
 
-/**
- * struct numeric_adder - Implementation for adding
- */
-struct SIPLUS_EXPORT numeric_adder : base_numeric_operator_impl {
-    UnknownDataTypeContainer 
-    invoke(
-        std::shared_ptr<SIPlusParserContext> context,
-        UnknownDataTypeContainer lhs, 
-        UnknownDataTypeContainer rhs
-    ) override;
+struct SIPLUS_EXPORT SubtractFunction : Function {
+
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent,
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
+    ) const override;
 };
 
-/**
- * struct numeric_subtractor - Implementation for subtracting
- */
-struct SIPLUS_EXPORT numeric_subtractor : base_numeric_operator_impl {
-    UnknownDataTypeContainer 
-    invoke(
-        std::shared_ptr<SIPlusParserContext> context,
-        UnknownDataTypeContainer lhs, 
-        UnknownDataTypeContainer rhs
-    ) override;
+struct SIPLUS_EXPORT MultiplyFunction : Function {
+
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent,
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
+    ) const override;
 };
 
-/**
- * struct numeric_multiplier - Implementation for Multiplication
- */
-struct SIPLUS_EXPORT numeric_multiplier : base_numeric_operator_impl {
-    UnknownDataTypeContainer 
-    invoke(
-        std::shared_ptr<SIPlusParserContext> context,
-        UnknownDataTypeContainer lhs, 
-        UnknownDataTypeContainer rhs
-    ) override;
-};
-
-/**
- * struct numeric_divider - Implementation for division
- */
-struct SIPLUS_EXPORT numeric_divider : base_numeric_operator_impl {
-    UnknownDataTypeContainer 
-    invoke(
-        std::shared_ptr<SIPlusParserContext> context,
-        UnknownDataTypeContainer lhs, 
-        UnknownDataTypeContainer rhs
-    ) override;
-};
-
-/**
- * struct numeric_comparator - Implementation for comparison
- */
-struct SIPLUS_EXPORT numeric_comparator : base_numeric_operator_impl {
-    UnknownDataTypeContainer 
-    invoke(
-        std::shared_ptr<SIPlusParserContext> context,
-        UnknownDataTypeContainer lhs, 
-        UnknownDataTypeContainer rhs
-    ) override;
-
+struct SIPLUS_EXPORT DivideFunction : Function {
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent,
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
+    ) const override;
 };
 
 } /* stl */
 } /* SIPLUS_NAMESPACE */
-
-#endif  // SIPLUS_INCLUDE_STDLIB
 
 #endif  // INCLUDE_FUNCTIONS_ARITHMETIC_HXX_

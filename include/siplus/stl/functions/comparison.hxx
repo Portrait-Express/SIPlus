@@ -2,80 +2,79 @@
 #ifndef INCLUDE_FUNCTIONS_COMPARISON_HXX_
 #define INCLUDE_FUNCTIONS_COMPARISON_HXX_
 
-#include "siplus/config.h"
-
-#ifdef SIPLUS_INCLUDE_STDLIB 
-
 #include <memory>
 #include <vector>
 
+#include "siplus/config.h"
 #include "siplus/context.hxx"
 
 namespace SIPLUS_NAMESPACE {
 namespace stl {
 
-/**
- * struct lt_func - Less than function
- */
-struct SIPLUS_EXPORT lt_func : Function  {
-    explicit lt_func(
-        std::weak_ptr<SIPlusParserContext> context,
-        std::shared_ptr<Function> cmp_func
-    ) : ctx_(context), cmp_(cmp_func) { }
 
+/**
+ * @brief Implementation for the 'lt' function
+ */
+struct SIPLUS_EXPORT LessThanFunction : Function {
     std::shared_ptr<ValueRetriever> value(
         std::shared_ptr<ValueRetriever> parent, 
         std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
-
-private:
-    std::weak_ptr<SIPlusParserContext> ctx_;
-    std::shared_ptr<Function> cmp_;
 };
 
 /**
- * struct gt_func - Greater than function
+ * @brief Implementation for the 'gt' function
  */
-struct SIPLUS_EXPORT gt_func : Function  {
-    explicit gt_func(
-        std::weak_ptr<SIPlusParserContext> context,
-        std::shared_ptr<Function> cmp_func
-    ) : ctx_(context), cmp_(cmp_func) { }
-
+struct SIPLUS_EXPORT GreaterThanFunction : Function {
     std::shared_ptr<ValueRetriever> value(
         std::shared_ptr<ValueRetriever> parent, 
         std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
-
-private:
-    std::weak_ptr<SIPlusParserContext> ctx_;
-    std::shared_ptr<Function> cmp_;
 };
 
 /**
- * struct eq_func - Equality function
+ * @brief Implementation for the 'lte' function
  */
-struct SIPLUS_EXPORT eq_func : Function  {
-    explicit eq_func(
-        std::weak_ptr<SIPlusParserContext> context,
-        std::shared_ptr<Function> cmp_func
-    ) : ctx_(context), cmp_(cmp_func) { }
-
+struct SIPLUS_EXPORT LessThanEqualFunction : Function {
     std::shared_ptr<ValueRetriever> value(
         std::shared_ptr<ValueRetriever> parent, 
         std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
+};
 
-private:
-    std::weak_ptr<SIPlusParserContext> ctx_;
-    std::shared_ptr<Function> cmp_;
+/**
+ * @brief Implementation for the 'gte' function.
+ */
+struct SIPLUS_EXPORT GreaterThanEqualFunction : Function {
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent, 
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
+    ) const override;
+};
+
+/**
+ * @brief Implementation for the 'eq' function
+ */
+struct SIPLUS_EXPORT EqualsFunction : Function {
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent, 
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
+    ) const override;
+};
+
+/**
+ * @brief Implementation for the 'cmp' function. 
+ */
+struct SIPLUS_EXPORT CompareFunction : Function {
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent, 
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
+    ) const override;
 };
 
 
 } /* stl */
 } /* SIPLUS_NAMESPACE */
 
-
-#endif
 
 #endif  // INCLUDE_FUNCTIONS_COMPARISON_HXX_

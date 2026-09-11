@@ -15,10 +15,14 @@ namespace {
 
 struct DummyScopeType : public TypeInfo { 
     using data_type = std::weak_ptr<InvocationContext>;
+    static const TypeInfoDescriptor *const descriptor;
 
-    virtual std::string name() const { return "<internal-scope>"; }
+    DummyScopeType() : TypeInfo(descriptor) {};
+
     virtual bool is_iterable(const UnknownDataTypeContainer& data) const { return false; }
 };
+
+const TypeInfoDescriptor *const DummyScopeType::descriptor = new TypeInfoDescriptor("<internal-scope>");
 
 //I hate this solution for storing the scope, but its the best I can come up with
 void store_function_context(const std::string function, std::shared_ptr<InvocationContext> ctx) {

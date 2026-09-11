@@ -7,7 +7,7 @@
 #include "siplus/text/constructor_steps/retriever_step.hxx"
 #include "siplus/value_retrievers/literal_retriever.hxx"
 #include "siplus/value_retrievers/accessor_retriever.hxx"
-#include "siplus/types/string.hxx"
+#include "siplus/value_retrievers/binary_operator_value_retriever.hxx"
 
 namespace SIPLUS_NAMESPACE {
 namespace text {
@@ -74,7 +74,7 @@ std::string ValueRetrieverConstructorStep::getPart(InvocationContext& part) {
     auto value = retriever_->retrieve(part);
 
     if(!value.is<types::StringType>()) {
-        value = context_->convert<types::StringType>(value);
+        value = value.convert<types::StringType>();
     }
 
     return value.as<types::StringType>();
@@ -86,6 +86,21 @@ LiteralValueRetriever::LiteralValueRetriever(UnknownDataTypeContainer value) : v
 
 UnknownDataTypeContainer LiteralValueRetriever::retrieve(InvocationContext& value) const {
     return value_;
+}
+ 
+UnknownDataTypeContainer BinaryOperatorFunctionRetriever::retrieve(InvocationContext &value) const {
+    auto lhs = lhs_->retrieve(value);
+    auto rhs = rhs_->retrieve(value);
+
+    auto result = do_binary(descriptor_, lhs, rhs);
+    if(result == std::nullopt) {
+        throw std::runtime_error{util::to_string(
+            "Cannot operate on '", lhs.type->name(), "' and '", lhs.type->name(), 
+            "'. Neither type is '", descriptor_->name(), "'."
+        )};
+    }
+
+    return *result;
 }
 
 AccessorValueRetriever::AccessorValueRetriever(

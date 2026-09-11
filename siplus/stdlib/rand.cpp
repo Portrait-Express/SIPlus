@@ -1,9 +1,7 @@
-#include "siplus/types/float.hxx"
-#include "siplus/types/integer.hxx"
-#include "siplus/types/string.hxx"
+#include <random>
+
 #include "siplus/util.hxx"
 #include "siplus/stl/functions/rand.hxx"
-#include <random>
 
 namespace SIPLUS_NAMESPACE {
 namespace stl {
@@ -28,30 +26,26 @@ UInt rand() {
 
 struct rand_impl : ValueRetriever {
     rand_impl(
-        std::weak_ptr<SIPlusParserContext> context,
         std::shared_ptr<ValueRetriever> begin,
         std::shared_ptr<ValueRetriever> end
-    ) : context_(context), begin_(begin), end_(end) {}
+    ) : begin_(begin), end_(end) {}
 
     virtual UnknownDataTypeContainer retrieve(InvocationContext& value) const override;
 
 private:
-    std::weak_ptr<SIPlusParserContext> context_;
     std::shared_ptr<ValueRetriever> begin_;
     std::shared_ptr<ValueRetriever> end_;
 };
 
 struct rand_str_impl : ValueRetriever {
     rand_str_impl(
-        std::weak_ptr<SIPlusParserContext> context,
         std::shared_ptr<ValueRetriever> characters,
         std::shared_ptr<ValueRetriever> length
-    ) : context_(context), characters_(characters), length_(length) {}
+    ) : characters_(characters), length_(length) {}
 
     virtual UnknownDataTypeContainer retrieve(InvocationContext& value) const override;
 
 private:
-    std::weak_ptr<SIPlusParserContext> context_;
     std::shared_ptr<ValueRetriever> characters_;
     std::shared_ptr<ValueRetriever> length_;
 };
@@ -68,12 +62,11 @@ std::shared_ptr<ValueRetriever> rand_func::value(
         throw std::runtime_error{"Must specify both begin and end, only begin was specified"};
     }
 
-    return std::make_shared<rand_impl>(context_, begin, end);
+    return std::make_shared<rand_impl>(begin, end);
 }
 
 UnknownDataTypeContainer 
 rand_impl::retrieve(InvocationContext& container) const {
-    auto ctx = context_.lock();
 
     std::mt19937::result_type seed = std::random_device{}();
 
@@ -82,8 +75,8 @@ rand_impl::retrieve(InvocationContext& container) const {
         std::uniform_real_distribution<double> dist{0, 1};
         return make_data<types::FloatType>(dist(engine));
     } else {
-        auto begin = ctx->convert<types::IntegerType>(begin_->retrieve(container)).as<types::IntegerType>();
-        auto end = ctx->convert<types::IntegerType>(end_->retrieve(container)).as<types::IntegerType>();
+        auto begin = begin_->retrieve(container).convert<types::IntegerType>().as<types::IntegerType>();
+        auto end = end_->retrieve(container).convert<types::IntegerType>().as<types::IntegerType>();
 
         std::mt19937 engine{seed};
         std::uniform_int_distribution<int64_t> dist{begin, end};
@@ -98,14 +91,13 @@ std::shared_ptr<ValueRetriever> rand_str_func::value(
     std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [ characters, length ] = util::get_parameters_first_parent<2>(parent, parameters);
-    return std::make_shared<rand_str_impl>(context_, characters, length);
+    return std::make_shared<rand_str_impl>(characters, length);
 }
 
 UnknownDataTypeContainer 
 rand_str_impl::retrieve(InvocationContext& value) const {
-    auto ctx = context_.lock();
-    auto characters = ctx->convert<types::StringType>(characters_->retrieve(value)).as<types::StringType>();
-    auto length = ctx->convert<types::IntegerType>(length_->retrieve(value)).as<types::IntegerType>();
+    auto characters = characters_->retrieve(value).convert<types::StringType>().as<types::StringType>();
+    auto length = length_->retrieve(value).convert<types::IntegerType>().as<types::IntegerType>();
 
     std::string str{};
     str.resize(length, ' ');

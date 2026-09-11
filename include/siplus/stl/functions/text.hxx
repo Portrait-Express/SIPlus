@@ -2,15 +2,11 @@
 #ifndef INCLUDE_FUNCTIONS_TEXT_HXX_
 #define INCLUDE_FUNCTIONS_TEXT_HXX_
 
-#include "siplus/config.h"
-
-#ifdef SIPLUS_INCLUDE_STDLIB
-
 #include <memory>
 #include <vector>
 
+#include "siplus/config.h"
 #include "siplus/context.hxx"
-#include "siplus/stl/functions/converting_operator.hxx"
 
 namespace SIPLUS_NAMESPACE {
 namespace stl {
@@ -19,167 +15,94 @@ namespace stl {
  * struct str_func - Explicitly convert a value to a string
  */
 struct SIPLUS_EXPORT str_func : Function  {
-    explicit str_func(std::weak_ptr<SIPlusParserContext> context) : context_(context) { }
-
     std::shared_ptr<ValueRetriever> value(
         std::shared_ptr<ValueRetriever> parent, 
         std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
-
-    std::weak_ptr<SIPlusParserContext> context_;
-
 };
 
 /**
  * struct replace_function - Function to replace text in the string with another string
  */
 struct SIPLUS_EXPORT replace_function : Function {
-    replace_function(std::weak_ptr<SIPlusParserContext> context) : ctx_(context) {}
-
     std::shared_ptr<ValueRetriever> value(
         std::shared_ptr<ValueRetriever> parent,
         std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
-
-private:
-    std::weak_ptr<SIPlusParserContext> ctx_;
 };
 
 /**
  * struct pad_end_function - Function to pad the end of a string to a specified length
  */
 struct SIPLUS_EXPORT pad_end_function : Function {
-    pad_end_function(std::weak_ptr<SIPlusParserContext> context) : ctx_(context) {}
-
     std::shared_ptr<ValueRetriever> value(
         std::shared_ptr<ValueRetriever> parent,
         std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
-
-private:
-    std::weak_ptr<SIPlusParserContext> ctx_;
 };
 
 /**
  * struct pad_start_function - Function to pad the start of a string to a specified length
  */
 struct SIPLUS_EXPORT pad_start_function : Function {
-    pad_start_function(std::weak_ptr<SIPlusParserContext> context) : ctx_(context) {}
-
     std::shared_ptr<ValueRetriever> value(
         std::shared_ptr<ValueRetriever> parent,
         std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
-
-private:
-    std::weak_ptr<SIPlusParserContext> ctx_;
 };
 
 /**
  * struct trim_function - Function to trim the leading and trailing whitespace from the text
  */
 struct SIPLUS_EXPORT trim_function : Function {
-    trim_function(std::weak_ptr<SIPlusParserContext> context) : ctx_(context) {}
-
     std::shared_ptr<ValueRetriever> value(
         std::shared_ptr<ValueRetriever> parent,
         std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
-
-private:
-    std::weak_ptr<SIPlusParserContext> ctx_;
 };
 
 /**
  * struct upper_function - Function to convert the text to uppercase
  */
 struct SIPLUS_EXPORT upper_function : Function {
-    upper_function(std::weak_ptr<SIPlusParserContext> context) : ctx_(context) {}
-
     std::shared_ptr<ValueRetriever> value(
         std::shared_ptr<ValueRetriever> parent,
         std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
-
-private:
-    std::weak_ptr<SIPlusParserContext> ctx_;
 };
 
 /**
  * struct lower_function - Function to convert the text to lowercase.
  */
 struct SIPLUS_EXPORT lower_function : Function {
-    lower_function(std::weak_ptr<SIPlusParserContext> context) : ctx_(context) {}
-
     std::shared_ptr<ValueRetriever> value(
         std::shared_ptr<ValueRetriever> parent,
         std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
-
-private:
-    std::weak_ptr<SIPlusParserContext> ctx_;
 };
 
 /**
  * struct split_function - Split a string on a delimiter
  */
 struct SIPLUS_EXPORT split_function : Function {
-    split_function(std::weak_ptr<SIPlusParserContext> context) : ctx_(context) {}
-
     std::shared_ptr<ValueRetriever> value(
         std::shared_ptr<ValueRetriever> parent,
         std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
-
-private:
-    std::weak_ptr<SIPlusParserContext> ctx_;
 };
 
 /**
  * struct substr_function - Get a substring from a string
  */
 struct SIPLUS_EXPORT substr_function : Function {
-    substr_function(std::weak_ptr<SIPlusParserContext> context) : ctx_(context) {}
-
     std::shared_ptr<ValueRetriever> value(
         std::shared_ptr<ValueRetriever> parent,
         std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
-
-private:
-    std::weak_ptr<SIPlusParserContext> ctx_;
 };
 
-/**
- * struct string_concatenator - String implementation for add
- */
-struct SIPLUS_EXPORT string_concatenator : operator_impl {
-    UnknownDataTypeContainer 
-    invoke(
-        std::shared_ptr<SIPlusParserContext> context,
-        UnknownDataTypeContainer lhs, 
-        UnknownDataTypeContainer rhs
-    ) override;
-
-    bool can_handle(const TypeInfo& lhs, const TypeInfo& rhs) const override;
-};
-
-/**
- * struct string_comparator - String comparer
- */
-struct SIPLUS_EXPORT string_comparator : operator_impl {
-    UnknownDataTypeContainer 
-    invoke(
-        std::shared_ptr<SIPlusParserContext> context,
-        UnknownDataTypeContainer lhs, 
-        UnknownDataTypeContainer rhs
-    ) override;
-
-    bool can_handle(const TypeInfo& lhs, const TypeInfo& rhs) const override;
-};
 
 } /* stl */
 } /* SIPLUS_NAMESPACE */
 
-#endif  // SIPLUS_INCLUDE_STDLIB
 #endif  // INCLUDE_FUNCTIONS_TEXT_HXX_

@@ -3,55 +3,19 @@
 #define INCLUDE_FUNCTIONS_SET_HXX_
 
 #include "siplus/config.h"
-
-#ifdef SIPLUS_INCLUDE_STDLIB
-
 #include "siplus/context.hxx"
-#include "siplus/types/float.hxx"
-#include "siplus/types/integer.hxx"
-#include "siplus/types/string.hxx"
 
 #include <unordered_set>
-
-namespace std {
-
-template<>
-struct hash<SIPLUS_NAMESPACE::UnknownDataTypeContainer> {
-    std::uint64_t operator()(
-        const SIPLUS_NAMESPACE::UnknownDataTypeContainer& container
-    ) const;
-
-private:
-    hash<SIPLUS_NAMESPACE::types::StringType::data_type> string_;
-    hash<SIPLUS_NAMESPACE::types::FloatType::data_type> double_;
-    hash<SIPLUS_NAMESPACE::types::IntegerType::data_type> long_;
-};
-
-template<>
-struct equal_to<SIPLUS_NAMESPACE::UnknownDataTypeContainer> {
-    equal_to(
-        shared_ptr<SIPLUS_NAMESPACE::SIPlusParserContext> context,
-        shared_ptr<SIPLUS_NAMESPACE::ValueRetriever> comparator
-    );
-
-    bool operator()(
-        const SIPLUS_NAMESPACE::UnknownDataTypeContainer& lhs,
-        const SIPLUS_NAMESPACE::UnknownDataTypeContainer& rhs
-    ) const;
-
-private:
-    shared_ptr<SIPLUS_NAMESPACE::SIPlusParserContext> context_;
-    shared_ptr<SIPLUS_NAMESPACE::ValueRetriever> comparator_;
-};
-
-} /* std */
 
 namespace SIPLUS_NAMESPACE {
 namespace stl {
 
 struct SIPLUS_EXPORT SetType : public TypeInfo {
     using data_type = std::unordered_set<UnknownDataTypeContainer>;
-    virtual std::string name() const override;
+    static const TypeInfoDescriptor *const descriptor;
+
+    SetType();
+
     virtual bool is_iterable(const UnknownDataTypeContainer& data) const override;
 
     virtual std::unique_ptr<Iterator> iterate(const UnknownDataTypeContainer& data) const override;
@@ -61,16 +25,10 @@ struct SIPLUS_EXPORT SetType : public TypeInfo {
  * struct set_new_func - Function to create a new instance of a set
  */
 struct SIPLUS_EXPORT set_new_func : Function {
-    set_new_func(std::weak_ptr<SIPlusParserContext> context) 
-        : context_(context) {}
-
     std::shared_ptr<ValueRetriever> value(
         std::shared_ptr<ValueRetriever> parent,
         std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
-
-private:
-    std::weak_ptr<SIPlusParserContext> context_;
 };
 
 /**
@@ -96,5 +54,4 @@ struct SIPLUS_EXPORT set_add_func : Function {
 } /* stl */
 } /* SIPLUS_NAMESPACE */
 
-#endif  // SIPLUS_INCLUDE_STDLIB
 #endif  // INCLUDE_FUNCTIONS_SET_HXX_

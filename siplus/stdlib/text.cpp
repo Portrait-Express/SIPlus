@@ -1,6 +1,3 @@
-#include "siplus/types/array.hxx"
-#include "siplus/types/integer.hxx"
-#include "siplus/types/string.hxx"
 #include "siplus/util.hxx"
 
 #include <algorithm>
@@ -16,32 +13,26 @@ namespace stl {
 namespace {
 
 struct str_impl : public ValueRetriever {
-    str_impl(
-        std::shared_ptr<ValueRetriever> param,
-        std::weak_ptr<SIPlusParserContext> context
-    ) : param_(param), context_(context) {}
+    str_impl(std::shared_ptr<ValueRetriever> param) : param_(param) {}
 
     UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
-    std::weak_ptr<SIPlusParserContext> context_;
     std::shared_ptr<ValueRetriever> param_;
 };
 
 struct replace_function_impl : ValueRetriever {
     replace_function_impl(
-        std::weak_ptr<SIPlusParserContext> ctx,
         std::shared_ptr<ValueRetriever> input,
         std::shared_ptr<ValueRetriever> target,
         std::shared_ptr<ValueRetriever> value
-    ) : ctx_(ctx), input_(input), target_(target), value_(value) { }
+    ) : input_(input), target_(target), value_(value) { }
 
     UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
-    std::weak_ptr<SIPlusParserContext> ctx_;
     std::shared_ptr<ValueRetriever> input_;
     std::shared_ptr<ValueRetriever> target_;
     std::shared_ptr<ValueRetriever> value_;
@@ -49,17 +40,15 @@ private:
 
 struct pad_end_impl : ValueRetriever {
     pad_end_impl(
-        std::weak_ptr<SIPlusParserContext> ctx,
         std::shared_ptr<ValueRetriever> input,
         std::shared_ptr<ValueRetriever> length,
         std::shared_ptr<ValueRetriever> padding
-    ) : ctx_(ctx), input_(input), length_(length), padding_(padding) { }
+    ) : input_(input), length_(length), padding_(padding) { }
 
     UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
-    std::weak_ptr<SIPlusParserContext> ctx_;
     std::shared_ptr<ValueRetriever> input_;
     std::shared_ptr<ValueRetriever> length_;
     std::shared_ptr<ValueRetriever> padding_;
@@ -67,17 +56,15 @@ private:
 
 struct pad_start_impl : ValueRetriever {
     pad_start_impl(
-        std::weak_ptr<SIPlusParserContext> ctx,
         std::shared_ptr<ValueRetriever> input,
         std::shared_ptr<ValueRetriever> length,
         std::shared_ptr<ValueRetriever> padding
-    ) : ctx_(ctx), input_(input), length_(length), padding_(padding) { }
+    ) : input_(input), length_(length), padding_(padding) { }
 
     UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
-    std::weak_ptr<SIPlusParserContext> ctx_;
     std::shared_ptr<ValueRetriever> input_;
     std::shared_ptr<ValueRetriever> length_;
     std::shared_ptr<ValueRetriever> padding_;
@@ -85,75 +72,65 @@ private:
 
 struct trim_impl : ValueRetriever {
     trim_impl(
-        std::weak_ptr<SIPlusParserContext> ctx,
         std::shared_ptr<ValueRetriever> input
-    ) : ctx_(ctx), input_(input) { }
+    ) : input_(input) { }
 
     UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
-    std::weak_ptr<SIPlusParserContext> ctx_;
     std::shared_ptr<ValueRetriever> input_;
 };
 
 struct upper_impl : ValueRetriever {
     upper_impl(
-        std::weak_ptr<SIPlusParserContext> ctx,
         std::shared_ptr<ValueRetriever> input
-    ) : ctx_(ctx), input_(input) { }
+    ) : input_(input) { }
 
     UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
-    std::weak_ptr<SIPlusParserContext> ctx_;
     std::shared_ptr<ValueRetriever> input_;
 };
 
 struct lower_impl : ValueRetriever {
     lower_impl(
-        std::weak_ptr<SIPlusParserContext> ctx,
         std::shared_ptr<ValueRetriever> input
-    ) : ctx_(ctx), input_(input) { }
+    ) : input_(input) { }
 
     UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
-    std::weak_ptr<SIPlusParserContext> ctx_;
     std::shared_ptr<ValueRetriever> input_;
 };
 
 struct split_impl : ValueRetriever {
     split_impl(
-        std::weak_ptr<SIPlusParserContext> ctx,
         std::shared_ptr<ValueRetriever> input,
         std::shared_ptr<ValueRetriever> delim
-    ) : ctx_(ctx), input_(input), delimiter_(delim) { }
+    ) : input_(input), delimiter_(delim) { }
 
     UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
-    std::weak_ptr<SIPlusParserContext> ctx_;
     std::shared_ptr<ValueRetriever> input_;
     std::shared_ptr<ValueRetriever> delimiter_;
 };
 
 struct substr_impl : ValueRetriever {
     substr_impl(
-        std::weak_ptr<SIPlusParserContext> ctx,
         std::shared_ptr<ValueRetriever> input,
         std::shared_ptr<ValueRetriever> begin,
         std::shared_ptr<ValueRetriever> end
-    ) : ctx_(ctx), input_(input), begin_(begin), end_(end) { }
+    ) : input_(input), begin_(begin), end_(end) { }
 
     UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
-    std::weak_ptr<SIPlusParserContext> ctx_;
     std::shared_ptr<ValueRetriever> input_;
     std::shared_ptr<ValueRetriever> begin_;
     std::shared_ptr<ValueRetriever> end_;
@@ -167,14 +144,14 @@ str_func::value(
     std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [input] = util::get_parameters_first_parent<1>(parent, parameters);
-    return std::make_shared<str_impl>(input, context_);
+    return std::make_shared<str_impl>(input);
 }
 
 UnknownDataTypeContainer 
 str_impl::retrieve(InvocationContext& value) const {
-    auto ctx = context_.lock();
     auto val = param_->retrieve(value);
-    return ctx->convert<types::StringType>(val);
+
+    return val.convert<types::StringType>();
 }
 
 std::shared_ptr<ValueRetriever> replace_function::value(
@@ -182,15 +159,14 @@ std::shared_ptr<ValueRetriever> replace_function::value(
     std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [input, target, value] = util::get_parameters_first_parent<3>(parent, parameters);
-    return std::make_shared<replace_function_impl>(ctx_, input, target, value);
+    return std::make_shared<replace_function_impl>(input, target, value);
 }
 
 UnknownDataTypeContainer
 replace_function_impl::retrieve(InvocationContext& value) const {
-    std::shared_ptr<SIPlusParserContext> ctx = ctx_.lock();
-    auto input = ctx->convert<types::StringType>(input_->retrieve(value)).as<types::StringType>();
-    auto target = ctx->convert<types::StringType>(target_->retrieve(value)).as<types::StringType>();
-    auto with = ctx->convert<types::StringType>(value_->retrieve(value)).as<types::StringType>();
+    auto input = input_->retrieve(value).convert<types::StringType>().as<types::StringType>();
+    auto target = target_->retrieve(value).convert<types::StringType>().as<types::StringType>();
+    auto with = value_->retrieve(value).convert<types::StringType>().as<types::StringType>();
 
     if(input.empty() || target.empty()) return make_data<types::StringType>(input);
 
@@ -208,15 +184,14 @@ std::shared_ptr<ValueRetriever> pad_end_function::value(
     std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [input, length, padding] = util::get_parameters_first_parent<3>(parent, parameters);
-    return std::make_shared<pad_end_impl>(ctx_, input, length, padding);
+    return std::make_shared<pad_end_impl>(input, length, padding);
 }
 
 UnknownDataTypeContainer 
 pad_end_impl::retrieve(InvocationContext& value) const {
-    std::shared_ptr<SIPlusParserContext> ctx = ctx_.lock();
-    auto val = ctx->convert<types::StringType>(input_->retrieve(value)).as<types::StringType>();
-    auto length = ctx->convert<types::IntegerType>(length_->retrieve(value)).as<types::IntegerType>();
-    auto padding = ctx->convert<types::StringType>(padding_->retrieve(value)).as<types::StringType>();
+    auto val = input_->retrieve(value).convert<types::StringType>().as<types::StringType>();
+    auto length = length_->retrieve(value).convert<types::IntegerType>().as<types::IntegerType>();
+    auto padding = padding_->retrieve(value).convert<types::StringType>().as<types::StringType>();
 
     if(padding.size() != 1) {
         throw std::runtime_error{"Expected padding size to be one character."};
@@ -236,15 +211,14 @@ std::shared_ptr<ValueRetriever> pad_start_function::value(
     std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [input, length, padding] = util::get_parameters_first_parent<3>(parent, parameters);
-    return std::make_shared<pad_start_impl>(ctx_, input, length, padding);
+    return std::make_shared<pad_start_impl>(input, length, padding);
 }
 
 UnknownDataTypeContainer 
 pad_start_impl::retrieve(InvocationContext& value) const {
-    std::shared_ptr<SIPlusParserContext> ctx = ctx_.lock();
-    auto val = ctx->convert<types::StringType>(input_->retrieve(value)).as<types::StringType>();
-    auto length = ctx->convert<types::IntegerType>(length_->retrieve(value)).as<types::IntegerType>();
-    auto padding = ctx->convert<types::StringType>(padding_->retrieve(value)).as<types::StringType>();
+    auto val = input_->retrieve(value).convert<types::StringType>().as<types::StringType>();
+    auto length = length_->retrieve(value).convert<types::IntegerType>().as<types::IntegerType>();
+    auto padding = padding_->retrieve(value).convert<types::StringType>().as<types::StringType>();
 
     if(padding.size() != 1) {
         throw std::runtime_error{"Expected padding size to be one character."};
@@ -268,13 +242,12 @@ std::shared_ptr<ValueRetriever> trim_function::value(
     std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [input] = util::get_parameters_first_parent<1>(parent, parameters);
-    return std::make_shared<trim_impl>(ctx_, input);
+    return std::make_shared<trim_impl>(input);
 }
 
 UnknownDataTypeContainer
 trim_impl::retrieve(InvocationContext& value) const {
-    auto ctx = ctx_.lock();
-    auto str = ctx->convert<types::StringType>(input_->retrieve(value)).as<types::StringType>();
+    auto str = input_->retrieve(value).convert<types::StringType>().as<types::StringType>();
     
     str.erase(str.begin(), std::find_if(str.begin(), str.end(), [](unsigned char c) {
         return !std::isspace(c);
@@ -292,13 +265,12 @@ std::shared_ptr<ValueRetriever> upper_function::value(
     std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [input] = util::get_parameters_first_parent<1>(parent, parameters); 
-    return std::make_shared<upper_impl>(ctx_, input);
+    return std::make_shared<upper_impl>(input);
 }
 
 UnknownDataTypeContainer
 upper_impl::retrieve(InvocationContext& value) const {
-    auto ctx = ctx_.lock();
-    auto str = ctx->convert<types::StringType>(input_->retrieve(value)).as<types::StringType>();
+    auto str = input_->retrieve(value).convert<types::StringType>().as<types::StringType>();
     
     std::transform(str.begin(), str.end(), str.begin(), [](char c) {
         return std::toupper(c);
@@ -312,13 +284,12 @@ std::shared_ptr<ValueRetriever> lower_function::value(
     std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [input] = util::get_parameters_first_parent<1>(parent, parameters);
-    return std::make_shared<lower_impl>(ctx_, input);
+    return std::make_shared<lower_impl>(input);
 }
 
 UnknownDataTypeContainer
 lower_impl::retrieve(InvocationContext& value) const {
-    auto ctx = ctx_.lock();
-    auto str = ctx->convert<types::StringType>(input_->retrieve(value)).as<types::StringType>();
+    auto str = input_->retrieve(value).convert<types::StringType>().as<types::StringType>();
     
     std::transform(str.begin(), str.end(), str.begin(), [](char c) {
         return std::tolower(c);
@@ -333,16 +304,13 @@ split_function::value(
     std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [input, delim] = util::get_parameters_first_parent<2>(parent, parameters);
-    return std::make_shared<split_impl>(ctx_, input, delim);
+    return std::make_shared<split_impl>(input, delim);
 }
 
 UnknownDataTypeContainer
 split_impl::retrieve(InvocationContext& value) const {
-    auto ctx = ctx_.lock();
-    auto input_val = input_->retrieve(value);
-    auto delimiter_val = delimiter_->retrieve(value);
-    auto delimiter = ctx->convert<types::StringType>(delimiter_val).as<types::StringType>();
-    auto text = ctx->convert<types::StringType>(input_val).as<types::StringType>();
+    auto delimiter = delimiter_->retrieve(value).convert<types::StringType>().as<types::StringType>();
+    auto text = input_->retrieve(value).convert<types::StringType>().as<types::StringType>();
 
     std::vector<UnknownDataTypeContainer> ret;
     auto last = 0;
@@ -371,63 +339,22 @@ substr_function::value(
     std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [input, begin, end] = util::get_parameters_first_parent<2, 1>(parent, parameters);
-    return std::make_shared<substr_impl>(ctx_, input, begin, end);
+    return std::make_shared<substr_impl>(input, begin, end);
 }
 
 UnknownDataTypeContainer
 substr_impl::retrieve(InvocationContext& value) const {
-    auto ctx = ctx_.lock();
-    UnknownDataTypeContainer input_val = input_->retrieve(value);
-    UnknownDataTypeContainer begin_val = begin_->retrieve(value);
-    std::string input = ctx->convert<types::StringType>(input_val).as<types::StringType>();
-    long begin = ctx->convert<types::IntegerType>(begin_val).as<types::IntegerType>();
+    std::string input = input_->retrieve(value)
+        .convert<types::StringType>()
+        .as<types::StringType>();
+    long begin = begin_->retrieve(value).convert<types::IntegerType>().as<types::IntegerType>();
     long end = input.size();
 
     if(end_) {
-        UnknownDataTypeContainer end_val = end_->retrieve(value);
-        end = ctx->convert<types::IntegerType>(end_val).as<types::IntegerType>();
+        end = end_->retrieve(value).convert<types::IntegerType>().as<types::IntegerType>();
     }
 
     return make_data<types::StringType>(input.substr(begin, end));
-}
-
-UnknownDataTypeContainer string_concatenator::invoke(
-    std::shared_ptr<SIPlusParserContext> ctx,
-    UnknownDataTypeContainer       lhs,
-    UnknownDataTypeContainer       rhs
-) {
-    if(!lhs.is<types::StringType>() || !rhs.is<types::StringType>()) {
-        throw std::runtime_error{"String concatenator can only handle std::string"};
-    }
-    return make_data<types::StringType>(lhs.as<types::StringType>() + rhs.as<types::StringType>());
-}
-
-bool string_concatenator::can_handle(const TypeInfo& lhs, const TypeInfo& rhs) const {
-    return lhs.is<types::StringType>() && rhs.is<types::StringType>();
-}
-
-UnknownDataTypeContainer 
-string_comparator::invoke(
-    std::shared_ptr<SIPlusParserContext> context,
-    UnknownDataTypeContainer lhs, 
-    UnknownDataTypeContainer rhs
-) {
-    auto strl = lhs.as<types::StringType>();
-    auto strr = rhs.as<types::StringType>();
-
-    if(strl < strr) {
-        return make_data<types::IntegerType>(-1L);
-    } else if(strl > strr) {
-        return make_data<types::IntegerType>(1L);
-    } else {
-        //static_cast needed because 0 (specifically 0) is convertible to nullptr, 
-        //and therefore a pointer type and causes ambiguity in make_data
-        return make_data<types::IntegerType>(static_cast<int64_t>(0));
-    }
-}
-
-bool string_comparator::can_handle(const TypeInfo& lhs, const TypeInfo& rhs) const {
-    return lhs.is<types::StringType>() && rhs.is<types::StringType>();
 }
 
 } /* stl */

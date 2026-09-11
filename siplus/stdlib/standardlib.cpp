@@ -1,7 +1,4 @@
-#include "siplus/stl/converters/bool_string.hxx"
-#include "siplus/stl/converters/null.hxx"
-#include "siplus/stl/converters/numeric.hxx"
-#include "siplus/stl/converters/string_bool.hxx"
+#include "stl.hxx"
 #include "siplus/stl/functions/comparison.hxx"
 #include "siplus/stl/functions/control.hxx"
 #include "siplus/stl/functions/rand.hxx"
@@ -11,101 +8,69 @@
 #include "siplus/stl/functions/text.hxx"
 #include "siplus/stl/functions/type.hxx"
 #include "siplus/stl/functions/typed_operator.hxx"
-#include "siplus/stl.hxx"
-#include "siplus/types/bool.hxx"
 
 #include <functional>
-#include <memory>
 
-namespace SIPLUS_NAMESPACE {
-namespace stl {
-
+using namespace SIPLUS_NAMESPACE;
+using namespace SIPLUS_NAMESPACE::stl;
 
 //----------------------------
 // Free Functions
 //----------------------------
 
 void attach_stl(SIPlusParserContext& context) {
-    //Base converters
-    context.emplace_converter<string_bool_converter>();
-    context.emplace_converter<bool_string_converter>();
-    context.emplace_converter<numeric_string_converter>();
-    context.emplace_converter<numeric_bool_converter>();
-    context.emplace_converter<null_bool_converter>();
-    context.emplace_converter<null_string_converter>();
-
     //Misc
-    context.emplace_function<str_func>("str", context.shared_from_this());
-    context.emplace_function<if_func>("if", context.shared_from_this());
-    context.emplace_function<while_func>("while", context.shared_from_this());
+    context.emplace_function<str_func>("str");
+    context.emplace_function<if_func>("if");
+    context.emplace_function<while_func>("while");
     context.emplace_function<type_function>("type");
 
     //Set functions
-    context.emplace_function<set_new_func>("set_new", context.shared_from_this());
+    context.emplace_function<set_new_func>("set_new");
     context.emplace_function<set_add_func>("set_add");
     context.emplace_function<set_has_func>("set_has");
 
     //Iterator-related
-    context.emplace_function<map_func>("map", context.shared_from_this());
-    context.emplace_function<length_func>("length", context.shared_from_this());
-    context.emplace_function<join_func>("join", context.shared_from_this());
-    context.emplace_function<contains_func>("contains", context.shared_from_this());
-    context.emplace_function<each_func>("each", context.shared_from_this());
-    context.emplace_function<all_func>("all", context.shared_from_this());
-    context.emplace_function<any_func>("any", context.shared_from_this());
-    context.emplace_function<sort_func>("sort", context.shared_from_this());
+    context.emplace_function<map_func>("map");
+    context.emplace_function<length_func>("length");
+    context.emplace_function<join_func>("join");
+    context.emplace_function<contains_func>("contains");
+    context.emplace_function<each_func>("each");
+    context.emplace_function<all_func>("all");
+    context.emplace_function<any_func>("any");
+    context.emplace_function<sort_func>("sort");
 
     //Boolean logic
-    context.emplace_function<typed_binary_operator_function<types::BoolType, types::BoolType>>(
-        "and", context.shared_from_this(), std::logical_and<bool>());
-    context.emplace_function<typed_binary_operator_function<types::BoolType, types::BoolType>>(
-        "or", context.shared_from_this(), std::logical_or<bool>());
-    context.emplace_function<typed_binary_operator_function<types::BoolType, types::BoolType>>(
-        "xor", context.shared_from_this(), std::not_equal_to<bool>());
-    context.emplace_function<typed_unary_operator_function<types::BoolType, types::BoolType>>(
-        "not", context.shared_from_this(), std::logical_not<bool>());
+    using binary_bool_func = typed_binary_operator_function<types::BoolType, types::BoolType>;
+    using unary_bool_func = typed_unary_operator_function<types::BoolType, types::BoolType>;
+    context.emplace_function<binary_bool_func>("and", std::logical_and<bool>());
+    context.emplace_function<binary_bool_func>("or", std::logical_or<bool>());
+    context.emplace_function<binary_bool_func>("xor", std::not_equal_to<bool>());
+    context.emplace_function<unary_bool_func>("not", std::logical_not<bool>());
 
-    context.emplace_function<rand_func>("rand", context.shared_from_this());
-    context.emplace_function<rand_str_func>("randstr", context.shared_from_this());
+    context.emplace_function<rand_func>("rand");
+    context.emplace_function<rand_str_func>("randstr");
 
-    //Arithmetic
-    auto add_func = converting_operator_function{context.shared_from_this()};
-    add_func.emplace_impl<string_concatenator>()
-        .emplace_impl<numeric_adder>();
-
-    auto sub_func = converting_operator_function{context.shared_from_this()};
-    sub_func.emplace_impl<numeric_subtractor>();
-
-    auto mul_func = converting_operator_function{context.shared_from_this()};
-    mul_func.emplace_impl<numeric_multiplier>();
-
-    auto div_func = converting_operator_function{context.shared_from_this()};
-    div_func.emplace_impl<numeric_divider>();
-
-    context.emplace_function<converting_operator_function>("add", add_func);
-    context.emplace_function<converting_operator_function>("sub", sub_func);
-    context.emplace_function<converting_operator_function>("mul", mul_func);
-    context.emplace_function<converting_operator_function>("div", div_func);
+    context.emplace_function<AddFunction>("add");
+    context.emplace_function<SubtractFunction>("sub");
+    context.emplace_function<MultiplyFunction>("mul");
+    context.emplace_function<DivideFunction>("div");
 
     //Comparison
-    auto cmp_func = converting_operator_function{context.shared_from_this()};
-    auto cmp_ptr = context.emplace_function<converting_operator_function>("cmp", cmp_func);
-    cmp_ptr->emplace_impl<string_comparator>();
-    cmp_ptr->emplace_impl<numeric_comparator>();
-    context.emplace_function<lt_func>("lt", context.shared_from_this(), cmp_ptr);
-    context.emplace_function<gt_func>("gt", context.shared_from_this(), cmp_ptr);
-    context.emplace_function<eq_func>("eq", context.shared_from_this(), cmp_ptr);
+    context.emplace_function<CompareFunction>("cmp");
+    context.emplace_function<EqualsFunction>("eq");
+    context.emplace_function<LessThanFunction>("lt");
+    context.emplace_function<GreaterThanFunction>("gt");
+    context.emplace_function<LessThanEqualFunction>("lte");
+    context.emplace_function<GreaterThanEqualFunction>("gte");
 
     //Text Editing
-    context.emplace_function<replace_function>("replace", context.shared_from_this());
-    context.emplace_function<pad_end_function>("padEnd", context.shared_from_this());
-    context.emplace_function<pad_start_function>("padStart", context.shared_from_this());
-    context.emplace_function<trim_function>("trim", context.shared_from_this());
-    context.emplace_function<upper_function>("upper", context.shared_from_this());
-    context.emplace_function<lower_function>("lower", context.shared_from_this());
-    context.emplace_function<split_function>("split", context.shared_from_this());
-    context.emplace_function<substr_function>("substr", context.shared_from_this());
+    context.emplace_function<replace_function>("replace");
+    context.emplace_function<pad_end_function>("padEnd");
+    context.emplace_function<pad_start_function>("padStart");
+    context.emplace_function<trim_function>("trim");
+    context.emplace_function<upper_function>("upper");
+    context.emplace_function<lower_function>("lower");
+    context.emplace_function<split_function>("split");
+    context.emplace_function<substr_function>("substr");
 }
-
-} /* stl */
-} /* SIPLUS_NAESPACE */

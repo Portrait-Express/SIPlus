@@ -1,5 +1,4 @@
 #include "siplus/config.h"
-#include "siplus/types/array.hxx"
 
 #include "default_data_retriever.hxx"
 #include "indexer_value_retriever.hxx"

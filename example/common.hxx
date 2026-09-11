@@ -1,11 +1,5 @@
 #include <siplus/siplus.hxx>
 
-#ifndef SIPLUS_EXAMPLE_DONT_NEED_STDLIB
-#ifndef SIPLUS_INCLUDE_STDLIB
-#error "Examples require SIPLUS_INCLUDE_STDLIB=ON"
-#endif
-#endif
-
 struct User {
     int id;
     std::string first_name;
@@ -13,8 +7,10 @@ struct User {
 
 struct UserType : SIPLUS_NAMESPACE::TypeInfo {
     using data_type = User;
+    static const SIPlus::TypeInfoDescriptor *const descriptor;
 
-    std::string name() const override;
+    UserType();
+
     bool is_iterable(const SIPLUS_NAMESPACE::UnknownDataTypeContainer& data) const override;
 
     SIPLUS_NAMESPACE::UnknownDataTypeContainer 

@@ -45,11 +45,29 @@ int language_info_access(SIPlusUnknownDataContainer **result, void *data, void *
     return siplus_error_set(SIPLUS_ERR, buf);
 }
 
+const SIPlusTypeDescriptor *LANGUAGE_INFO_DESCRIPTOR ;
+const SIPlusTypeDescriptor *language_info_descriptor() {
+    if(LANGUAGE_INFO_DESCRIPTOR == NULL) {
+        LANGUAGE_INFO_DESCRIPTOR = siplus_type_descriptor_new("LanguageInfo");
+    }
+
+    return LANGUAGE_INFO_DESCRIPTOR;
+}
+
 SIPlusTypeInfo *langauge_info_type_new() {
     SIPlusTypeInfo *info;
     LanguageInfoType *data = malloc(sizeof(LanguageInfoType));
 
-    siplus_type_new(&info, data, "LanguageInfo", language_info_is_iterable, language_info_access, NULL, NULL, free);
+    info = siplus_type_new(
+        language_info_descriptor(), 
+        data,
+        language_info_is_iterable, 
+        language_info_access, 
+        NULL, 
+        NULL, 
+        free
+    );
+
     return info;
 }
 

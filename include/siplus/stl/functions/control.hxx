@@ -2,13 +2,10 @@
 #ifndef INCLUDE_FUNCTIONS_IF_HXX_
 #define INCLUDE_FUNCTIONS_IF_HXX_
 
-#include "siplus/config.h"
-
-#ifdef SIPLUS_INCLUDE_STDLIB
-
 #include <memory>
 #include <vector>
 
+#include "siplus/config.h"
 #include "siplus/context.hxx"
 
 namespace SIPLUS_NAMESPACE {
@@ -18,37 +15,23 @@ namespace stl {
  * struct if_func - If statement
  */
 struct SIPLUS_EXPORT if_func : Function  {
-    explicit if_func(std::weak_ptr<SIPlusParserContext> context) 
-        : context_(context) { }
-
     std::shared_ptr<ValueRetriever> value(
         std::shared_ptr<ValueRetriever> parent, 
         std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
-
-private:
-    std::weak_ptr<SIPlusParserContext> context_;
 };
 
 /**
  * struct while_func - While loop
  */
 struct SIPLUS_EXPORT while_func : Function  {
-    explicit while_func(std::weak_ptr<SIPlusParserContext> context) 
-        : context_(context) { }
-
     std::shared_ptr<ValueRetriever> value(
         std::shared_ptr<ValueRetriever> parent, 
         std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
-
-private:
-    std::weak_ptr<SIPlusParserContext> context_;
 };
 
 } /* stl */
 } /* SIPLUS_NAMESPACE */
-
-#endif  // SIPLUS_INCLUDE_STDLIB
 
 #endif  // INCLUDE_FUNCTIONS_IF_HXX_

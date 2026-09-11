@@ -1,15 +1,11 @@
-#include "siplus/context.hxx"
-#include "siplus/value_retrievers/literal_retriever.hxx"
-#include "siplus/stl/functions/iterable.hxx"
-#include "siplus/types/array.hxx"
-#include "siplus/types/bool.hxx"
-#include "siplus/types/integer.hxx"
-#include "siplus/types/string.hxx"
-#include "siplus/util.hxx"
 #include <algorithm>
-#include <iostream>
+#include <functional>
 #include <memory>
 #include <sstream>
+
+#include "siplus/context.hxx"
+#include "siplus/stl/functions/iterable.hxx"
+#include "siplus/util.hxx"
 
 namespace SIPLUS_NAMESPACE {
 namespace stl {
@@ -18,63 +14,55 @@ namespace {
 
 struct map_impl : public ValueRetriever {
     map_impl(
-        std::weak_ptr<SIPlusParserContext> context,
         std::shared_ptr<ValueRetriever> input,
         std::shared_ptr<ValueRetriever> expr
-    ) : context_(context), input_(input), map_expr_(expr) {}
+    ) : input_(input), map_expr_(expr) {}
 
     UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
-    std::weak_ptr<SIPlusParserContext> context_;
     std::shared_ptr<ValueRetriever> input_;
     std::shared_ptr<ValueRetriever> map_expr_;
 };
 
 struct length_impl : public ValueRetriever {
     length_impl(
-        std::weak_ptr<SIPlusParserContext> context,
         std::shared_ptr<ValueRetriever> input
-    ) : context_(context), input_(input) {}
+    ) : input_(input) {}
 
     UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
-    std::weak_ptr<SIPlusParserContext> context_;
     std::shared_ptr<ValueRetriever> input_;
 };
 
 struct join_impl : public ValueRetriever {
     join_impl(
-        std::weak_ptr<SIPlusParserContext> context,
         std::shared_ptr<ValueRetriever> input,
         std::shared_ptr<ValueRetriever> delim
-    ) : context_(context), input_(input), delimiter_(delim) {}
+    ) : input_(input), delimiter_(delim) {}
 
     UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
-    std::weak_ptr<SIPlusParserContext> context_;
     std::shared_ptr<ValueRetriever> input_;
     std::shared_ptr<ValueRetriever> delimiter_;
 };
 
 struct contains_impl : public ValueRetriever {
     contains_impl (
-        std::weak_ptr<SIPlusParserContext> context,
         std::shared_ptr<ValueRetriever> input,
         std::shared_ptr<ValueRetriever> value
-    ) : context_(context), input_(input), value_(value) {
+    ) : input_(input), value_(value) {
     }
 
     UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override;
 
 private:
-    std::weak_ptr<SIPlusParserContext> context_;
     std::shared_ptr<ValueRetriever> input_;
     std::shared_ptr<ValueRetriever> value_;
 };
@@ -116,22 +104,19 @@ struct each_impl : public ValueRetriever {
     }
 
 private:
-    std::weak_ptr<SIPlusParserContext> context_;
     std::shared_ptr<ValueRetriever> input_;
     std::shared_ptr<ValueRetriever> expr_;
 };
 
 struct all_impl : public ValueRetriever {
     all_impl (
-        std::weak_ptr<SIPlusParserContext> context,
         std::shared_ptr<ValueRetriever> input,
         std::shared_ptr<ValueRetriever> predicate
-    ) : context_(context), input_(input), predicate_(predicate) {
+    ) : input_(input), predicate_(predicate) {
     }
 
     UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override {
-        auto context = context_.lock();
         UnknownDataTypeContainer iterable = input_->retrieve(value);
         if(!iterable.is_iterable()) {
             throw std::runtime_error{util::to_string(
@@ -150,7 +135,9 @@ struct all_impl : public ValueRetriever {
                 .use_default(current)
                 .build();
 
-            if(!context->convert<types::BoolType>(predicate_->retrieve(*scope)).as<types::BoolType>()) {
+            auto predicateResult = predicate_->retrieve(*scope);
+
+            if(!predicateResult.convert<types::BoolType>().as<types::BoolType>()) {
                 return make_data(false);
             }
         }
@@ -159,22 +146,19 @@ struct all_impl : public ValueRetriever {
     }
 
 private:
-    std::weak_ptr<SIPlusParserContext> context_;
     std::shared_ptr<ValueRetriever> input_;
     std::shared_ptr<ValueRetriever> predicate_;
 };
 
 struct any_impl : public ValueRetriever {
     any_impl (
-        std::weak_ptr<SIPlusParserContext> context,
         std::shared_ptr<ValueRetriever> input,
         std::shared_ptr<ValueRetriever> predicate
-    ) : context_(context), input_(input), predicate_(predicate) {
+    ) : input_(input), predicate_(predicate) {
     }
 
     UnknownDataTypeContainer 
     retrieve(InvocationContext& value) const override {
-        auto context = context_.lock();
         UnknownDataTypeContainer iterable = input_->retrieve(value);
         if(!iterable.is_iterable()) {
             throw std::runtime_error{util::to_string(
@@ -193,7 +177,9 @@ struct any_impl : public ValueRetriever {
                 .use_default(current)
                 .build();
 
-            if(context->convert<types::BoolType>(predicate_->retrieve(*scope)).as<types::BoolType>()) {
+            auto predicateResult = predicate_->retrieve(*scope);
+
+            if(predicateResult.convert<types::BoolType>().as<types::BoolType>()) {
                 return make_data(true);
             }
         }
@@ -202,40 +188,72 @@ struct any_impl : public ValueRetriever {
     }
 
 private:
-    std::weak_ptr<SIPlusParserContext> context_;
     std::shared_ptr<ValueRetriever> input_;
     std::shared_ptr<ValueRetriever> predicate_;
 };
 
+struct sort_impl;
+
+bool do_comparator(const sort_impl& retriever, std::shared_ptr<InvocationContext> context,
+    UnknownDataTypeContainer& lhs, UnknownDataTypeContainer& rhs);
+
+bool do_default(const sort_impl& retriever, std::shared_ptr<InvocationContext> context,
+    UnknownDataTypeContainer& lhs, UnknownDataTypeContainer& rhs);
 
 struct sort_impl : ValueRetriever {
     sort_impl(
-        std::weak_ptr<SIPlusParserContext> context,
         std::shared_ptr<ValueRetriever> list,
         std::shared_ptr<ValueRetriever> comparator
-    ) : context_(context), list_(list), comparator_(comparator) {}
+    ) : list_(list), comparator_(comparator) {}
+
+    friend bool do_comparator(
+        const sort_impl& retriever, 
+        std::shared_ptr<InvocationContext> context,
+        UnknownDataTypeContainer& lhs, 
+        UnknownDataTypeContainer& rhs
+    ) {
+        auto wrapped = wrap_scope(context)
+            .use_default(make_data(types::ArrayType::data_type{lhs, rhs}))
+            .build();
+
+        auto result = retriever.comparator_->retrieve(*wrapped);
+
+        return result < make_data(0);
+    }
+
+    friend bool do_default(
+        const sort_impl& retriever, 
+        std::shared_ptr<InvocationContext> context,
+        UnknownDataTypeContainer& lhs, 
+        UnknownDataTypeContainer& rhs
+    ) {
+        return lhs.compare(rhs) < 0;
+    }
 
     UnknownDataTypeContainer 
     retrieve(InvocationContext &value) const override {
-        auto ctx = context_.lock();
         auto list = list_->retrieve(value);
         auto& input = list.as<types::ArrayType>();
         
         types::ArrayType::data_type arr = input;
 
-        std::sort(arr.begin(), arr.end(), [this, &value, &ctx](UnknownDataTypeContainer& a, UnknownDataTypeContainer& b) {
-            auto wrapped = wrap_scope(value.shared_from_this())
-                .use_default(make_data(types::ArrayType::data_type{a, b}))
-                .build();
-            auto result = comparator_->retrieve(*wrapped);
-            return ctx->convert<types::IntegerType>(result).as<types::IntegerType>() < 0;
-        });
+        std::sort(arr.begin(), arr.end(), 
+                  comparator_ ? bind(do_default, value) : bind(do_comparator, value)
+        );
 
         return make_data(arr);
     }
 
 private:
-    std::weak_ptr<SIPlusParserContext> context_;
+    std::function<bool (UnknownDataTypeContainer&, UnknownDataTypeContainer&)> 
+        
+    bind(
+        std::function<bool (const sort_impl&, std::shared_ptr<InvocationContext>, UnknownDataTypeContainer&, UnknownDataTypeContainer&)> comparator,
+        InvocationContext& context
+    ) const {
+        return std::bind(comparator, *this, context.shared_from_this(), std::placeholders::_1, std::placeholders::_2);
+    }
+
     std::shared_ptr<ValueRetriever> list_;
     std::shared_ptr<ValueRetriever> comparator_;
 };
@@ -248,7 +266,7 @@ map_func::value(
     std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [input, expr] = util::get_parameters_first_parent<2>(parent, parameters);
-    return std::make_shared<map_impl>(context_, input, expr);
+    return std::make_shared<map_impl>(input, expr);
 }
 
 UnknownDataTypeContainer
@@ -257,7 +275,6 @@ map_impl::retrieve(InvocationContext& val) const {
 
     std::unique_ptr<vec_type> ret = std::make_unique<vec_type>();
     UnknownDataTypeContainer iterable = input_->retrieve(val);;
-    auto context = context_.lock();
 
     auto iterator = iterable.iterate();
 
@@ -284,13 +301,12 @@ length_func::value(
     std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [input] = util::get_parameters_first_parent<1>(parent, parameters);
-    return std::make_shared<length_impl>(context_, input);
+    return std::make_shared<length_impl>(input);
 }
 
 UnknownDataTypeContainer
 length_impl::retrieve(InvocationContext& value) const {
     std::stringstream ss;
-    auto context = context_.lock();
     auto iterable = input_->retrieve(value);
 
     auto iterator = iterable.iterate();
@@ -315,16 +331,16 @@ join_func::value(
     std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [input, delim] = util::get_parameters_first_parent<2>(parent, parameters);
-    return std::make_shared<join_impl>(context_, input, delim);
+    return std::make_shared<join_impl>(input, delim);
 }
 
 UnknownDataTypeContainer
 join_impl::retrieve(InvocationContext& value) const {
     std::stringstream ss;
-    auto context = context_.lock();
     auto iterable = input_->retrieve(value);
     auto delimiter_val = delimiter_->retrieve(value);
-    auto delimiter = context->convert<types::StringType>(delimiter_val).as<types::StringType>();
+    
+    delimiter_val.assert_type<types::StringType>("delimiter");
 
     auto iterator = iterable.iterate();
 
@@ -333,11 +349,11 @@ join_impl::retrieve(InvocationContext& value) const {
         iterator->next();
         auto current = iterator->current();
 
-        ss << context->convert<types::StringType>(current).as<types::StringType>();
+        ss << current.convert<types::StringType>().as<types::StringType>();
 
         more = iterator->more();
         if(more) {
-            ss << delimiter;
+            ss << delimiter_val.as<types::StringType>();
         }
     }
 
@@ -350,26 +366,25 @@ contains_func::value(
     std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [input, delim] = util::get_parameters_first_parent<2>(parent, parameters);
-    return std::make_shared<contains_impl>(context_, input, delim);
+    return std::make_shared<contains_impl>(input, delim);
 }
 
 UnknownDataTypeContainer
 contains_impl::retrieve(InvocationContext& value) const {
-    auto context = context_.lock();
+    auto testValue = value_->retrieve(value);
     auto iterable = input_->retrieve(value);
 
     auto iterator = iterable.iterate();
+
 
     bool more = iterator->more();
     while(more) {
         iterator->next();
         auto current = iterator->current();
 
-        auto retriever = std::make_shared<LiteralValueRetriever>(current);
-        auto fn = context->function("eq").value(retriever, {value_});
-        auto val = fn->retrieve(value);
-
-        if(val.is<types::BoolType>() && val.as<types::BoolType>()) return val;
+        if(iterator->current() == testValue) {
+            return make_data(true);
+        }
 
         more = iterator->more();
     }
@@ -392,7 +407,7 @@ all_func::value(
     std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [list, pred] = util::get_parameters_first_parent<2>(parent, parameters);
-    return std::make_shared<all_impl>(context_, list, pred);
+    return std::make_shared<all_impl>(list, pred);
 }
 
 std::shared_ptr<ValueRetriever>
@@ -401,7 +416,7 @@ any_func::value(
     std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
     auto [list, pred] = util::get_parameters_first_parent<2>(parent, parameters);
-    return std::make_shared<any_impl>(context_, list, pred);
+    return std::make_shared<any_impl>(list, pred);
 }
 
 std::shared_ptr<ValueRetriever>
@@ -409,8 +424,8 @@ sort_func::value(
     std::shared_ptr<ValueRetriever> parent, 
     std::vector<std::shared_ptr<ValueRetriever>> parameters
 ) const {
-    auto [list, comparator] = util::get_parameters_first_parent<2>(parent, parameters);
-    return std::make_shared<sort_impl>(context_, list, comparator);
+    auto [list, comparator] = util::get_parameters_first_parent<1, 1>(parent, parameters);
+    return std::make_shared<sort_impl>(list, comparator);
 }
 
 } /* stl */

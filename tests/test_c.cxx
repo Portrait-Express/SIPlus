@@ -1,8 +1,5 @@
 #include "siplus/csiplus.h"
 #include "common.hxx"
-#include "siplus/types/float.hxx"
-#include "siplus/types/integer.hxx"
-#include "siplus/types/string.hxx"
 #include "siplus/util.hxx"
 #include <cstring>
 
@@ -190,13 +187,18 @@ int addon_list_iterate(SIPlusIterator **result, void *data, void *object) {
     LanguageInfo::addon_list *list = reinterpret_cast<LanguageInfo::addon_list*>(object);
     AddonsIteratorData *iteratorData = new AddonsIteratorData(list->count, list->vals);
 
-    return siplus_iterator_new(
-        result, reinterpret_cast<void*>(iteratorData), 
-        addon_iterator_more, addon_iterator_next, addon_iterator_current, 
-        [](void *data) {
-            delete reinterpret_cast<AddonsIteratorData*>(data);
-        });
+    *result = siplus_iterator_new(
+        reinterpret_cast<void*>(iteratorData), 
+        addon_iterator_more, 
+        addon_iterator_next, 
+        addon_iterator_current, 
+        [](void *data) { delete reinterpret_cast<AddonsIteratorData*>(data); }
+    );
+
+    return siplus_error_set(SIPLUS_OK, NULL);
 }
+
+const SIPlusTypeDescriptor *language_info_addons_descriptor = siplus_type_descriptor_new("LanguageInfo.addons(std:string[])");
 
 /**
  * @brief Create a new TypeInfo for LanauageInfo::addons
@@ -207,11 +209,14 @@ SIPlusTypeInfo *addon_list_type_new() {
     SIPlusTypeInfo *info;
     Empty *data = new Empty();
 
-    siplus_type_new(
-        &info, reinterpret_cast<void*>(data), "LanguageInfo.addons(std:string[])", 
-        addon_list_is_iterable, NULL, NULL, addon_list_iterate, [](void* data){
-            delete reinterpret_cast<Empty*>(data);
-        });
+    info = siplus_type_new(
+        language_info_addons_descriptor, 
+        reinterpret_cast<void*>(data),
+        addon_list_is_iterable, 
+        NULL, 
+        NULL, 
+        addon_list_iterate, 
+        [](void* data){ delete reinterpret_cast<Empty*>(data); });
     return info;
 }
 
@@ -272,15 +277,30 @@ int language_info_index(SIPlusUnknownDataContainer **result, void *thisData, SIP
         return siplus_error_set(SIPLUS_OK, NULL);
     } 
 
-    SIPlusTypeInfo *info;
-    char *name;
-    siplus_data_type(&info, indexData);
-    siplus_type_name(&name, info);
+    const SIPlusTypeInfo *info = siplus_data_type(indexData);
+
+    char name[20];
+    siplus_type_name(name, sizeof(name), info);
+
     siplus_data_delete(indexData);
+
     return siplus_error_set(SIPLUS_ERR, util::to_string(
         "Unsure how to index 'LanguageInfo' with '", name, "'"
     ).c_str());
 }
+
+/** @brief Converter implementation */
+int language_info_convert_string(SIPlusUnknownDataContainer **result, void *data, SIPlusUnknownDataContainer *from) {
+    LanguageInfoConverter *converter = reinterpret_cast<LanguageInfoConverter*>(data);
+
+    void* ptr = siplus_data_ptr(from);
+
+    *result = siplus_data_make_string(reinterpret_cast<LanguageInfo*>(ptr)->name.c_str());
+
+    return siplus_error_set(SIPLUS_OK, NULL);
+}
+
+const SIPlusTypeDescriptor *language_info_descriptor = siplus_type_descriptor_new("LanguageInfo");
 
 /**
  * @brief Create a new TypeInfo
@@ -288,67 +308,32 @@ int language_info_index(SIPlusUnknownDataContainer **result, void *thisData, SIP
  * @return New Type Info
  */
 SIPlusTypeInfo *langauge_info_type_new() {
+    const SIPlusUnaryTypeExtensionDescriptor *stringConversionDescriptor
+        = siplus_type_extension_converter(siplus_type_descriptor_string());
+    const SIPlusUnaryTypeExtensionImpl *stringConversionImpl;
     SIPlusTypeInfo *info;
     Empty *data = new Empty();
 
-    siplus_type_new(
-        &info, 
+    info = siplus_type_new(
+        language_info_descriptor,
         reinterpret_cast<void*>(data), 
-        "LanguageInfo", 
         language_info_is_iterable, 
         language_info_access, 
         language_info_index, 
         NULL, 
         [](void* data){ delete reinterpret_cast<Empty*>(data); }
     );
+
+    stringConversionImpl = siplus_type_extension_impl_new_unary(
+        stringConversionDescriptor,
+        /* data ptr */ NULL,
+        language_info_convert_string,
+        /* deleter */ NULL
+    );
+
+    siplus_type_add_extension_unary(info, stringConversionImpl);
+
     return info;
-}
-
-/** @brief can_convert converter implementation */
-int language_info_can_convert(int *result, void *data, SIPlusTypeInfo *from, SIPlusTypeInfo *to) {
-    LanguageInfoConverter *converter = reinterpret_cast<LanguageInfoConverter*>(data);
-
-    *result = siplus_type_is(from, converter->language_info_type) && siplus_type_is(from, converter->language_info_type);
-
-    return siplus_error_set(SIPLUS_OK, NULL);
-}
-
-/** @brief Converter implementation */
-int language_info_convert(SIPlusUnknownDataContainer **result, void *data, SIPlusUnknownDataContainer *from, SIPlusTypeInfo *to) {
-    LanguageInfoConverter *converter = reinterpret_cast<LanguageInfoConverter*>(data);
-
-    if(!siplus_data_is(from, converter->language_info_type) || !siplus_type_is(to, converter->string_type)) {
-        //This will never be true, as this is UB according to the API's contract, but it doesnt hurt to check
-        return siplus_error_set(SIPLUS_INVALID_ARG, NULL);
-    }
-
-    void* ptr;
-    siplus_data_ptr(&ptr, from);
-
-    *result = siplus_data_make_string(reinterpret_cast<LanguageInfo*>(ptr)->name.c_str());
-
-    return siplus_error_set(SIPLUS_OK, NULL);
-}
-
-/**
- * @brief Create a new LanguageInfo to string converter
- *
- * @return Converter
- */
-SIPlusConverter *language_info_converter_new() {
-    SIPlusConverter *converter;
-    LanguageInfoConverter *data = new LanguageInfoConverter{
-        .language_info_type = langauge_info_type_new(),
-        .string_type = siplus_type_string()
-    };
-
-    siplus_converter_new(&converter, reinterpret_cast<void*>(data), language_info_can_convert, language_info_convert, [](void *data) {
-        LanguageInfoConverter *converter = reinterpret_cast<LanguageInfoConverter*>(data);
-        siplus_type_unref(converter->language_info_type);
-        siplus_type_unref(converter->string_type);
-        delete converter;
-    });
-    return converter;
 }
 
 struct TestFunctionRetrieverData { 
@@ -517,10 +502,6 @@ int get_parser(SIPlusParser **parser) {
         return finish(result);
     }
 
-    auto converter = language_info_converter_new();
-    siplus_context_add_converter(context, converter);
-    siplus_converter_unref(converter);
-
     return finish(SIPLUS_OK);
 }
 
@@ -617,16 +598,16 @@ bool test_expression(SIPlusParser *parser, std::string text, T&& expected, bool 
 
     bool is_equal = test_equal(container, std::forward<T>(expected));
     if((expect_fail && is_equal) || (!expect_fail && !is_equal)) {
-        SIPlusTypeInfo *info;
-        char *typeName;
-        siplus_data_type(&info, container);
-        siplus_type_name(&typeName, info);
+        char name[32];
+        const SIPlusTypeInfo *info = siplus_data_type(container);
+
+        siplus_type_name(name, sizeof(name), info);
 
         std::cout << "Value was not equal to expected value " << expected 
-            << ". Got value of type " << std::string{typeName} << std::endl;
+            << ". Got value of type " << std::string{name} << std::endl;
 
-        siplus_string_delete(typeName);
         siplus_type_unref(info);
+
         return finish(SIPLUS_ERR);
     }
     
@@ -696,8 +677,9 @@ int test_c(int argc, char** const argv) {
         }),
 
         test("siplus_type_data_ptr", []() {
-            SIPlusTypeInfo *type;
-            siplus_type_new(&type, (void*)123, "", addon_list_is_iterable, NULL, NULL, NULL, NULL);
+            const SIPlusTypeDescriptor *desc = siplus_type_descriptor_new("");
+
+            SIPlusTypeInfo *type = siplus_type_new(desc, (void*)123, addon_list_is_iterable, NULL, NULL, NULL, NULL);
             raii_clean a{[type]() { siplus_type_unref(type); }};
 
             return (
@@ -707,24 +689,12 @@ int test_c(int argc, char** const argv) {
         }),
 
         test("siplus_iterator_data_ptr", []() {
-            SIPlusIterator *iterator;
-            siplus_iterator_new(&iterator, (void*)123, addon_iterator_more, addon_iterator_next, addon_iterator_current, NULL);
+            SIPlusIterator *iterator = siplus_iterator_new((void*)123, addon_iterator_more, addon_iterator_next, addon_iterator_current, NULL);
             raii_clean a{[iterator]() { siplus_iterator_delete(iterator); }};
 
             return (
                 siplus_iterator_data_ptr(iterator) == (void*)123 &&
                 siplus_iterator_data_ptr(nullptr) == nullptr
-            ) ? 0 : 1;
-        }),
-
-        test("siplus_converter_data_ptr", []() {
-            SIPlusConverter *converter;
-            siplus_converter_new(&converter, (void*)123, language_info_can_convert, language_info_convert, NULL);
-            raii_clean a{[converter]() { siplus_converter_unref(converter); }};
-
-            return (
-                siplus_converter_data_ptr(converter) == (void*)123 &&
-                siplus_converter_data_ptr(nullptr) == nullptr
             ) ? 0 : 1;
         })
     );

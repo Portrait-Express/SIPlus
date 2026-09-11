@@ -2,7 +2,6 @@
 #include <ostream>
 
 #include "../common.hxx"
-#include "siplus/types/string.hxx"
 
 using namespace SIPLUS_NAMESPACE;
 
@@ -38,7 +37,7 @@ private:
             auto input = input_->retrieve(value);
 
             //Get the field name parameter
-            auto fieldName = context_->convert<types::StringType>(fieldName_->retrieve(value));
+            auto fieldName = fieldName_->retrieve(value).convert<types::StringType>();
 
             //Access the field on the object.
             return input.access(fieldName.as<types::StringType>());
@@ -57,7 +56,6 @@ int main(int, char**) {
 
     //Create parser
     Parser p;
-    p.context().use_stl();
     
     //Emplace our custom function
     p.context().emplace_function<access_func>("access", p.context().shared_from_this());

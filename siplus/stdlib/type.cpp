@@ -1,5 +1,4 @@
 #include "siplus/stl/functions/type.hxx"
-#include "siplus/types/string.hxx"
 #include "siplus/util.hxx"
 
 namespace SIPLUS_NAMESPACE {

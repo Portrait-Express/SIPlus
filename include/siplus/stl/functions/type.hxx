@@ -3,9 +3,6 @@
 #define INCLUDE_FUNCTIONS_TYPE_HXX_
 
 #include "siplus/config.h"
-
-#ifdef SIPLUS_INCLUDE_STDLIB
-
 #include "siplus/context.hxx"
 
 namespace SIPLUS_NAMESPACE {
@@ -23,7 +20,5 @@ struct SIPLUS_EXPORT type_function : Function {
     
 } /* stl */
 } /* SIPLUS_NAMESPACE */
-
-#endif
 
 #endif  // INCLUDE_FUNCTIONS_TYPE_HXX_

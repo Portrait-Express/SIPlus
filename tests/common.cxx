@@ -17,6 +17,10 @@ using namespace SIPLUS_NAMESPACE;
 
 int common(int, char** const) { return 0; } //dummy for ctest
 
+const SIPLUS_NAMESPACE::TypeInfoDescriptor *const test_data_type::descriptor = new SIPLUS_NAMESPACE::TypeInfoDescriptor("test_data");
+const SIPLUS_NAMESPACE::TypeInfoDescriptor *const test_data_y_type::descriptor = new SIPLUS_NAMESPACE::TypeInfoDescriptor("test_data::y");
+const SIPLUS_NAMESPACE::TypeInfoDescriptor *const user_type::descriptor = new SIPLUS_NAMESPACE::TypeInfoDescriptor("user");
+
 #ifndef SIPLUS_INCLUDE_STDLIB
 
 struct int_string_converter : text::Converter {
@@ -77,16 +81,6 @@ UnknownDataTypeContainer user_type::access(const UnknownDataTypeContainer& ptr, 
 bool g_parser_init = false;
 Parser& get_test_context() {
     static Parser parser;
-
-    if(!g_parser_init) {
-#ifdef SIPLUS_INCLUDE_STDLIB
-        parser.context().use_stl();
-#else
-        parser.context().emplace_converter<int_string_converter>();
-#endif
-
-        g_parser_init = true;
-    }
 
     return parser;
 }

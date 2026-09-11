@@ -1,16 +1,12 @@
 #include "siplus/csiplus.h"
-#include "siplus/siplus.hxx"
 #include "siplus/context.hxx"
-#include "siplus/types/array.hxx"
-#include "siplus/types/bool.hxx"
-#include "siplus/types/float.hxx"
-#include "siplus/types/integer.hxx"
-#include "siplus/types/string.hxx"
+#include "siplus/parser.hxx"
 #include "siplus/util.hxx"
+#include <cassert>
 #include <cstring>
 #include <exception>
-#include <iostream>
 #include <memory>
+#include <type_traits>
 
 #define __STR(x) #x
 #define STR(x) __STR(x)
@@ -22,8 +18,7 @@
 #define __CONCAT_EX(a, b) a##b
 #define CONCAT_EX(a, b) __CONCAT_EX(a, b)
 
-#define __SIPLUS_NOT_NULL(var) \
-    if(!var) return siplus_error_set(SIPLUS_INVALID_ARG, STR(var) " cannot be NULL");
+#define __SIPLUS_NOT_NULL(var) assert(var != nullptr && STR(var) " cannot be NULL");
 
 #define _SIPLUS_NOT_NULL_9(var,...) _SIPLUS_NOT_NULL_8(__VA_ARGS__) __SIPLUS_NOT_NULL(var)
 #define _SIPLUS_NOT_NULL_8(var,...) _SIPLUS_NOT_NULL_7(__VA_ARGS__) __SIPLUS_NOT_NULL(var)
@@ -71,9 +66,15 @@ std::string error_name(int error) {
     }
 }
 
-struct _SIPlusTypeInfo {
-    std::shared_ptr<const TypeInfo> info;
-};
+void throw_last_error(std::optional<std::string> default_message = std::nullopt) {
+    if(last_error != SIPLUS_OK) {
+        throw std::runtime_error{
+            last_message.value_or(default_message.value_or(util::to_string("Received error ", error_name(last_error))))
+        };
+    }
+}
+
+#define TRY_C(expr) if(auto err = expr; err != SIPLUS_OK) { throw_last_error(); }
 
 struct _SIPlusUnknownDataContainer {
     std::unique_ptr<UnknownDataTypeContainer> container;
@@ -117,17 +118,13 @@ struct _SIPlusFunction {
     std::shared_ptr<Function> function;
 };
 
-struct _SIPlusConverter {
-    std::shared_ptr<Converter> converter;
-};
-
 namespace {
 
 struct CValueRetriever : ValueRetriever {
     CValueRetriever(
         void *data, 
         SIPlusRetrieverImpl impl,
-        SIPlusRetrieverDeleter deleter
+        SIPlusDataDeleterCallback deleter
     ) : data(data), impl(impl), deleter(deleter) {}
 
     UnknownDataTypeContainer retrieve(InvocationContext& value) const override;
@@ -136,7 +133,7 @@ struct CValueRetriever : ValueRetriever {
 
     void *data;
     SIPlusRetrieverImpl impl;
-    SIPlusRetrieverDeleter deleter;
+    SIPlusDataDeleterCallback deleter;
 };
 
 UnknownDataTypeContainer CValueRetriever::retrieve(InvocationContext& value) const {
@@ -163,7 +160,7 @@ struct CFunction : Function {
     CFunction(
         void *data,
         SIPlusFunctionValue impl,
-        SIPlusFunctionDeleter deleter
+        SIPlusDataDeleterCallback deleter
     ) : data(data), impl(impl), deleter(deleter) {}
 
     std::shared_ptr<ValueRetriever> value(
@@ -175,7 +172,7 @@ struct CFunction : Function {
 
     void *data;
     SIPlusFunctionValue impl;
-    SIPlusFunctionDeleter deleter;
+    SIPlusDataDeleterCallback deleter;
 };
 
 std::shared_ptr<ValueRetriever> CFunction::value(
@@ -216,15 +213,15 @@ std::shared_ptr<ValueRetriever> CFunction::value(
 struct CType : TypeInfo {
     CType(
         void *data,
-        std::string name,
+        const TypeInfoDescriptor* descriptor,
         SIPlusTypeIsIterable is_iterable,
         SIPlusTypeAccess access,
         SIPlusTypeIndex index,
         SIPlusTypeIterate iterate,
-        SIPlusTypeDeleter deleter
-    ) : data(data), name_(name), is_iterable_(is_iterable), iterate_(iterate), access_(access), index_(index), deleter_(deleter) { }
+        SIPlusDataDeleterCallback deleter
+    ) : TypeInfo(descriptor),
+        data(data), is_iterable_(is_iterable), iterate_(iterate), access_(access), index_(index), deleter_(deleter) { }
 
-    std::string name() const override;
     bool is_iterable(const UnknownDataTypeContainer &data) const override;
 
     UnknownDataTypeContainer access(const UnknownDataTypeContainer &data, const std::string &name) const override;
@@ -232,22 +229,21 @@ struct CType : TypeInfo {
           UnknownDataTypeContainer& value, UnknownDataTypeContainer& index) const override;
     std::unique_ptr<Iterator> iterate(const UnknownDataTypeContainer &data) const override;
 
+    void add_extension_public(const BaseTypeExtensionImpl *impl) {
+        this->add_extension(impl);
+    }
+
     ~CType() { if(deleter_) deleter_(data); }
 
     void *data;
 
 private:
-    std::string name_;
     SIPlusTypeIsIterable is_iterable_;
     SIPlusTypeIterate iterate_;
     SIPlusTypeAccess access_;
     SIPlusTypeIndex index_;
-    SIPlusTypeDeleter deleter_;
+    SIPlusDataDeleterCallback deleter_;
 };
-
-std::string CType::name() const {
-    return name_;
-}
 
 bool CType::is_iterable(const UnknownDataTypeContainer &value) const {
     return is_iterable_(data, value.ptr);
@@ -323,7 +319,7 @@ struct CIterator : Iterator {
         SIPlusIteratorMore more,
         SIPlusIteratorNext next,
         SIPlusIteratorCurrent current,
-        SIPlusIteratorDeleter deleter
+        SIPlusDataDeleterCallback deleter
     ) : data(data), more_(more), next_(next), current_(current), deleter_(deleter) {}
 
     bool more() override;
@@ -338,7 +334,7 @@ private:
     SIPlusIteratorMore more_;
     SIPlusIteratorNext next_;
     SIPlusIteratorCurrent current_;
-    SIPlusIteratorDeleter deleter_;
+    SIPlusDataDeleterCallback deleter_;
 };
 
 
@@ -371,86 +367,13 @@ UnknownDataTypeContainer CIterator::current() {
     return *ret;
 }
 
-struct CConverter : Converter {
-    CConverter(
-        void *ptr,
-        SIPlusConverterCanConvert can,
-        SIPlusConverterImpl impl,
-        SIPlusConverterDeleter deleter
-    ) : data(ptr), can_convert_(can), impl_(impl), deleter_(deleter) {}
-
-    CConverter(const CConverter &other) = delete;
-    CConverter(CConverter &&other) = default;
-
-    CConverter& operator=(const CConverter &other) = delete;
-    CConverter& operator=(CConverter &&other) = default;
-
-    bool can_convert(const TypeInfo& from, const TypeInfo& to) const override;
-
-    /**
-     * @brief Convert from one type to another
-     *
-     * @param[in] from The data to convert from
-     * @param[in] to The type to convert to
-     * @return The converted object. This MUST be an instance of `to`.
-     */
-    UnknownDataTypeContainer convert(
-        const UnknownDataTypeContainer& from,
-        const TypeInfo& to
-    ) const override;
-
-    ~CConverter() override {
-        if(deleter_) deleter_(data);
-    }
-
-    void *data;
-private:
-    SIPlusConverterCanConvert can_convert_;
-    SIPlusConverterImpl impl_;
-    SIPlusConverterDeleter deleter_;
-};
-
-bool CConverter::can_convert(const TypeInfo& from, const TypeInfo& to) const {
-    _SIPlusTypeInfo ifrom{ from.shared_from_this() };
-    _SIPlusTypeInfo ito{ to.shared_from_this() };
-    int can;
-    int result;
-
-    result = can_convert_(&can, data, &ifrom, &ito);
-    if(result) {
-        throw std::runtime_error{
-          last_message.value_or(util::to_string("can_convert returned error ", error_name(result)))
-        };
-    }
-
-    return can != 0;
-}
-
-UnknownDataTypeContainer CConverter::convert(const UnknownDataTypeContainer& from, const TypeInfo& to) const {
-    _SIPlusUnknownDataContainer value{std::make_unique<UnknownDataTypeContainer>(from)};
-    _SIPlusTypeInfo ito{ to.shared_from_this() };
-    SIPlusUnknownDataContainer *out;
-    int resultCode;
-
-    resultCode = impl_(&out, data, &value, &ito);
-    if(resultCode) {
-        throw std::runtime_error{
-          last_message.value_or(util::to_string("can_convert returned error ", resultCode))
-        };
-    }
-
-    auto result = *out->container;
-    siplus_data_delete(out);
-
-    return result;
-}
 
 template<simple_value_retrievable_type T, typename Out>
 int siplus_data_as(Out *result, SIPlusUnknownDataContainer *value) {
     if(!result) return siplus_error_set(SIPLUS_INVALID_ARG, "result cannot be NULL");
     if(!value) return siplus_error_set(SIPLUS_INVALID_ARG, "value cannot be NULL");
     if(!value->container->is<T>()) {
-        auto msg = util::to_string("value was not an instance of ", T{}.name());
+        auto msg = util::to_string("value was not an instance of ", T::descriptor->name);
         return siplus_error_set(SIPLUS_INVALID_ARG, msg);
     }
 
@@ -459,7 +382,191 @@ int siplus_data_as(Out *result, SIPlusUnknownDataContainer *value) {
 } 
 
 
+
+struct CBinaryOperatorImpl : BinaryOperatorTypeExtensionImpl {
+    CBinaryOperatorImpl(
+        const BinaryOperatorTypeExtension *extension,
+        void *data,
+        SIPlusBinaryTypeExtensionImplCanHandleCallback can_handle,
+        SIPlusBinaryTypeExtensionImplCallback impl,
+        SIPlusDataDeleterCallback deleter
+    ) : BinaryOperatorTypeExtensionImpl(extension),
+        data_(data), can_handle_(can_handle), impl_(impl), deleter_(deleter) { }
+
+    bool can_handle(const UnknownDataTypeContainer &other) const override;
+
+    UnknownDataTypeContainer invoke(bool isLhs, const UnknownDataTypeContainer &thisValue, const UnknownDataTypeContainer &other) const override;
+
+    ~CBinaryOperatorImpl() override {
+        if(deleter_) {
+            deleter_(data_);
+        }
+    }
+
+private:
+    void *data_;
+    SIPlusBinaryTypeExtensionImplCallback impl_;
+    SIPlusBinaryTypeExtensionImplCanHandleCallback can_handle_;
+    SIPlusDataDeleterCallback deleter_;
+};
+
+bool CBinaryOperatorImpl::can_handle(const UnknownDataTypeContainer &other) const {
+    int result;
+    SIPlusUnknownDataContainer cOther{std::make_unique<UnknownDataTypeContainer>(other)};
+
+    TRY_C(can_handle_(&result, data_, &cOther));
+
+    return result;
+}
+
+UnknownDataTypeContainer CBinaryOperatorImpl::invoke(
+    bool isLhs, 
+    const UnknownDataTypeContainer &thisValue, 
+    const UnknownDataTypeContainer &other
+) const {
+    SIPlusUnknownDataContainer *result = nullptr;
+    SIPlusUnknownDataContainer cThisValue{std::make_unique<UnknownDataTypeContainer>(thisValue)};
+    SIPlusUnknownDataContainer cOther{std::make_unique<UnknownDataTypeContainer>(other)};
+
+    TRY_C(impl_(&result, data_, isLhs, &cThisValue, &cOther));
+    if(result == nullptr) {
+        throw std::runtime_error("SIPlusBinaryTypeExtensionImplCallback did not assign to result");
+    }
+
+    auto ret = *result->container;
+    siplus_data_delete(result);
+
+    return ret;
+}
+
+struct CUnaryOperatorImpl : UnaryOperatorTypeExtensionImpl {
+    CUnaryOperatorImpl(
+        const UnaryOperatorTypeExtension *extension,
+        void *data,
+        SIPlusUnaryTypeExtensionImplCallback impl,
+        SIPlusDataDeleterCallback deleter
+    ) : UnaryOperatorTypeExtensionImpl(extension),
+        data_(data), impl_(impl), deleter_(deleter) { }
+
+    UnknownDataTypeContainer invoke(const UnknownDataTypeContainer &thisValue) const override;
+
+    ~CUnaryOperatorImpl() override {
+        if(deleter_) {
+            deleter_(data_);
+        }
+    }
+
+private:
+    void *data_;
+    SIPlusUnaryTypeExtensionImplCallback impl_;
+    SIPlusDataDeleterCallback deleter_;
+};
+
+UnknownDataTypeContainer CUnaryOperatorImpl::invoke(const UnknownDataTypeContainer &thisValue) const {
+    SIPlusUnknownDataContainer *result = nullptr;
+    SIPlusUnknownDataContainer cThisValue{std::make_unique<UnknownDataTypeContainer>(thisValue)};
+
+    TRY_C(impl_(&result, data_, &cThisValue));
+    if(result == nullptr) {
+        throw std::runtime_error("SIPlusUnaryTypeExtensionImplCallback did not assign to result");
+    }
+
+    auto ret = *result->container;
+    siplus_data_delete(result);
+
+    return ret;
+}
+
+template<typename T, typename Base>
+concept maybe_qualified = requires {
+    requires std::same_as<Base, std::remove_cvref_t<T>>;
+};
+
+template<typename T> struct c_type_for {};
+template<typename T> using c_type_for_t = c_type_for<T>::type;
+template<typename T> struct cpp_type_for {};
+template<typename T> using cpp_type_for_t = cpp_type_for<T>::type;
+
+#define MAP_C_PTR_TYPE(cppType, cType) template<> struct c_type_for<cppType> { using type = cType; }; \
+template<> struct cpp_type_for<cType> { using type = cppType; };
+
+template<typename T, typename Out>
+struct copy_const { using type = std::conditional_t<std::is_const_v<T>, const Out, Out>; };
+
+template<typename T, typename Out>
+struct copy_const<T*, Out> : copy_const<T, Out> {};
+
+template<typename T, typename Out> using copy_const_t = copy_const<T, Out>::type;
+
+
+
+MAP_C_PTR_TYPE(TypeInfoDescriptor, SIPlusTypeDescriptor);
+MAP_C_PTR_TYPE(BinaryOperatorTypeExtension, SIPlusBinaryTypeExtensionDescriptor);
+MAP_C_PTR_TYPE(UnaryOperatorTypeExtension, SIPlusUnaryTypeExtensionDescriptor);
+MAP_C_PTR_TYPE(BinaryOperatorTypeExtensionImpl, SIPlusBinaryTypeExtensionImpl);
+MAP_C_PTR_TYPE(UnaryOperatorTypeExtensionImpl, SIPlusUnaryTypeExtensionImpl);
+
+using a = copy_const_t<const int*, float>;
+using b = copy_const_t<int, float>;
+
+template<typename T> concept is_c_type = requires() {
+    typename cpp_type_for<std::remove_cvref_t<T>>::type;
+};
+template<typename T> concept is_cpp_type = requires() {
+    typename c_type_for<std::remove_cvref_t<T>>::type;
+};
+
+template<is_cpp_type T>
+auto cconvert(T *cdescriptor) {
+    using ret_type = copy_const_t<T, c_type_for_t<std::remove_cvref_t<T>>>*;
+    return reinterpret_cast<ret_type>(cdescriptor);
+}
+
+template<is_c_type T>
+auto cconvert(T *descriptor) {
+    using ret_type = copy_const_t<T, cpp_type_for_t<std::remove_cvref_t<T>>>*;
+    return reinterpret_cast<ret_type>(descriptor);
+}
+
+
+//Theres some fuckery here with the consts and you probably could do some weird
+//const casting-away somehow, but I don't think it really matters that much here.
+//Idk, it just feels icky.
+//
+//Specifying SIPlusTypeInfo cconvert overloads manually because of needing  
+//`shared_ptr<const T>` instead of just `const shared_ptr<T>`
+
+/** */
+std::shared_ptr<TypeInfo> *cconvert(SIPlusTypeInfo *info) {
+    return reinterpret_cast<std::shared_ptr<TypeInfo>*>(info);
+}
+
+const std::shared_ptr<const TypeInfo> *cconvert(const SIPlusTypeInfo *info) {
+    return reinterpret_cast<const std::shared_ptr<const TypeInfo>*>(info);
+}
+
+SIPlusTypeInfo *cconvert(std::shared_ptr<TypeInfo> *info) {
+    return reinterpret_cast<SIPlusTypeInfo*>(info);
+}
+
+const SIPlusTypeInfo *cconvert(std::shared_ptr<const TypeInfo> *info) {
+    return reinterpret_cast<const SIPlusTypeInfo*>(info);
+}
+
+/**
+ * @brief Create a new SIPlusTypeInfo instance from a new TypeInfo instance.
+ *
+ * @tparam T The type to create
+ * @return A new SIPlusTypeInfo pointer
+ */
+template<typename T>
+const SIPlusTypeInfo *siplus_type_new_internal() {
+    return cconvert(new std::shared_ptr<TypeInfo>(new T()));
+}
+
 } /* namespace anonymous */
+
+
 
 
 extern "C" {
@@ -552,7 +659,7 @@ void siplus_parser_delete(SIPlusParser *parser) {
 
 
 
-int siplus_value_create(SIPlusValueRetriever **retriever, void* context, SIPlusRetrieverImpl impl, SIPlusRetrieverDeleter deleter) {
+int siplus_value_create(SIPlusValueRetriever **retriever, void* context, SIPlusRetrieverImpl impl, SIPlusDataDeleterCallback deleter) {
     SIPLUS_NOT_NULL(impl);
 
     *retriever = new _SIPlusValueRetriever();
@@ -615,7 +722,7 @@ void siplus_text_unref(SIPlusTextConstructor *parser) {
 
 
 
-int siplus_function_create(SIPlusFunction **function, void *data, SIPlusFunctionValue value, SIPlusFunctionDeleter deleter) {
+int siplus_function_create(SIPlusFunction **function, void *data, SIPlusFunctionValue value, SIPlusDataDeleterCallback deleter) {
     SIPLUS_NOT_NULL(function, value);
 
     auto func = std::make_shared<CFunction>(data, value, deleter);
@@ -671,49 +778,6 @@ void siplus_function_unref(SIPlusFunction *function) {
 
 
 
-int siplus_converter_new(SIPlusConverter **converter, void *data, SIPlusConverterCanConvert can, SIPlusConverterImpl impl, SIPlusConverterDeleter deleter) SIPLUS_TRY({
-    SIPLUS_NOT_NULL(converter, can, impl);
-
-    *converter = new _SIPlusConverter{
-        std::make_shared<CConverter>(data, can ,impl, deleter)
-    };
-
-    return siplus_error_set(SIPLUS_OK);
-})
-
-void *siplus_converter_data_ptr(SIPlusConverter *converter) {
-    if(!converter) return nullptr;
-
-    auto ptr = dynamic_cast<CConverter*>(converter->converter.get());
-    if(ptr != nullptr) {
-        return ptr->data;
-    } else {
-        return nullptr;
-    }
-}
-
-int siplus_converter_can_convert(int *result, SIPlusConverter *converter, SIPlusTypeInfo *from, SIPlusTypeInfo *to) SIPLUS_TRY ({
-    SIPLUS_NOT_NULL(result, converter, from, to);
-
-    *result = converter->converter->can_convert(*from->info, *to->info) ? 1 : 0;
-
-    return siplus_error_set(SIPLUS_OK);
-})
-
-int siplus_converter_convert(SIPlusUnknownDataContainer **result, SIPlusConverter *converter, SIPlusUnknownDataContainer *from, SIPlusTypeInfo *to) SIPLUS_TRY({
-    SIPLUS_NOT_NULL(result, converter, from, to);
-
-    auto converted = converter->converter->convert(*from->container, *to->info);
-    *result = new _SIPlusUnknownDataContainer(std::make_unique<UnknownDataTypeContainer>(converted));
-
-    return siplus_error_set(SIPLUS_OK);
-})
-
-void siplus_converter_unref(SIPlusConverter *converter) {
-    if(!converter) return;
-    delete converter;
-}
-
 
 
 SIPlusParseOpts *siplus_parse_opts_new() {
@@ -743,15 +807,8 @@ int siplus_context_add_function(SIPlusContext *parser, const char *name, SIPlusF
     return siplus_error_set(SIPLUS_OK);
 }
 
-int siplus_context_add_converter(SIPlusContext *context, SIPlusConverter *converter) {
-    context->context->emplace_converter(converter->converter);
-    return siplus_error_set(SIPLUS_OK);
-}
-
 int siplus_context_use_stl(SIPlusContext *context) {
     SIPLUS_NOT_NULL(context);
-
-    context->context->use_stl();
 
     return siplus_error_set(SIPLUS_OK, NULL);
 }
@@ -806,35 +863,140 @@ void siplus_invocation_unref(SIPlusInvocationContext *context) {
 
 
 
-int siplus_type_new_s(SIPlusTypeInfo **type, SIPlusTypeNewParams data) {
-    return siplus_type_new(type, data.data, data.name, data.is_iterable, data.access, data.index, data.iterate, data.deleter);;
+
+
+SIPLUS_EXPORT const SIPlusBinaryTypeExtensionDescriptor *siplus_type_extension_new_binary(const char *name) {
+    return cconvert(new BinaryOperatorTypeExtension(name));
 }
 
-int siplus_type_new(
-    SIPlusTypeInfo **type,
-    void *data, const char *name, 
+SIPLUS_EXPORT const SIPlusUnaryTypeExtensionDescriptor *siplus_type_extension_new_unary(const char *name) {
+    return cconvert(new UnaryOperatorTypeExtension(name));
+}
+
+
+
+SIPLUS_EXPORT const SIPlusBinaryTypeExtensionDescriptor *siplus_type_extension_addable() {
+    return cconvert(TypeInfo::Addable);
+}
+
+SIPLUS_EXPORT const SIPlusBinaryTypeExtensionDescriptor *siplus_type_extension_subtractable() {
+    return cconvert<const BinaryOperatorTypeExtension>(TypeInfo::Subtractable);
+}
+
+SIPLUS_EXPORT const SIPlusBinaryTypeExtensionDescriptor *siplus_type_extension_multiplicable() {
+    return cconvert(TypeInfo::Multiplicable);
+}
+
+SIPLUS_EXPORT const SIPlusBinaryTypeExtensionDescriptor *siplus_type_extension_divisible() {
+    return cconvert(TypeInfo::Divisible);
+}
+
+SIPLUS_EXPORT const SIPlusBinaryTypeExtensionDescriptor *siplus_type_extension_equatable() {
+    return cconvert(TypeInfo::Equatable);
+}
+
+SIPLUS_EXPORT const SIPlusBinaryTypeExtensionDescriptor *siplus_type_extension_comparable() {
+    return cconvert(TypeInfo::Comparable);
+}
+
+SIPLUS_EXPORT const SIPlusUnaryTypeExtensionDescriptor *siplus_type_extension_hashable() {
+    return cconvert(TypeInfo::Hashable);
+}
+
+SIPLUS_EXPORT const SIPlusUnaryTypeExtensionDescriptor *siplus_type_extension_converter(const SIPlusTypeDescriptor *to_type) {
+    return cconvert(make_conversion_descriptor(cconvert(to_type)));
+}
+
+
+SIPLUS_EXPORT SIPlusBinaryTypeExtensionImpl *siplus_type_extension_impl_new_binary(
+    const SIPlusBinaryTypeExtensionDescriptor *extension,
+    void *data, 
+    SIPlusBinaryTypeExtensionImplCanHandleCallback can_handle,
+    SIPlusBinaryTypeExtensionImplCallback impl, 
+    SIPlusDataDeleterCallback deleter
+) {
+    SIPLUS_NOT_NULL(can_handle, impl);
+
+    return cconvert((BinaryOperatorTypeExtensionImpl*)new CBinaryOperatorImpl(cconvert(extension), data, can_handle, impl, deleter));
+}
+
+SIPLUS_EXPORT SIPlusUnaryTypeExtensionImpl *siplus_type_extension_impl_new_unary(
+    const SIPlusUnaryTypeExtensionDescriptor *extension,
+    void *data, 
+    SIPlusUnaryTypeExtensionImplCallback impl, 
+    SIPlusDataDeleterCallback deleter
+) {
+    SIPLUS_NOT_NULL(impl);
+
+    return cconvert((UnaryOperatorTypeExtensionImpl*)new CUnaryOperatorImpl(cconvert(extension), data, impl, deleter));
+}
+
+
+SIPLUS_EXPORT const SIPlusTypeDescriptor *siplus_type_descriptor_array() {
+    return cconvert(types::ArrayType::descriptor);
+}
+
+SIPLUS_EXPORT const SIPlusTypeDescriptor *siplus_type_descriptor_string() {
+    return cconvert(types::StringType::descriptor);
+}
+
+SIPLUS_EXPORT const SIPlusTypeDescriptor *siplus_type_descriptor_float() {
+    return cconvert(types::FloatType::descriptor);
+}
+
+SIPLUS_EXPORT const SIPlusTypeDescriptor *siplus_type_descriptor_integer() {
+    return cconvert(types::IntegerType::descriptor);
+}
+
+SIPLUS_EXPORT const SIPlusTypeDescriptor *siplus_type_descriptor_bool() {
+    return cconvert(types::BoolType::descriptor);
+}
+
+SIPLUS_EXPORT const SIPlusTypeDescriptor *siplus_type_descriptor_null() {
+    return cconvert(types::NullType::descriptor);
+}
+
+
+SIPLUS_EXPORT const SIPlusTypeDescriptor *siplus_type_descriptor_new(const char *name) {
+    return cconvert(new TypeInfoDescriptor(name));
+}
+
+SIPLUS_EXPORT void siplus_type_descriptor_delete(const SIPlusTypeDescriptor *descriptor) {
+    delete cconvert(descriptor);
+}
+
+
+SIPlusTypeInfo *siplus_type_new_s(SIPlusTypeNewParams data) {
+    return siplus_type_new(data.descriptor, data.data, data.is_iterable, data.access, data.index, data.iterate, data.deleter);;
+}
+
+SIPlusTypeInfo *siplus_type_new(
+    const SIPlusTypeDescriptor *descriptor,
+    void *data, 
     SIPlusTypeIsIterable is_iterable, 
     SIPlusTypeAccess access, 
     SIPlusTypeIndex index, 
     SIPlusTypeIterate iterate, 
-    SIPlusTypeDeleter deleter
+    SIPlusDataDeleterCallback deleter
 ) {
-    SIPLUS_NOT_NULL(type, name, is_iterable);
-
-
-    auto ptr = std::make_shared<CType>(
-        data, name, is_iterable, access, index, iterate, deleter
-    );
-
-    *type = new SIPlusTypeInfo{ ptr };
-
-    return siplus_error_set(SIPLUS_OK);
+    return cconvert(new std::shared_ptr<TypeInfo>{new CType{
+        data, 
+        cconvert(descriptor), 
+        is_iterable, access, index, iterate, 
+        deleter
+    }});
 }
 
-void *siplus_type_data_ptr(SIPlusTypeInfo *type) {
+const SIPlusTypeDescriptor *siplus_type_descriptor(const SIPlusTypeInfo *type) {
     if(!type) return nullptr;
 
-    auto ptr = dynamic_cast<const CType*>(type->info.get());
+    return cconvert((*cconvert(type))->descriptor());
+}
+
+void *siplus_type_data_ptr(const SIPlusTypeInfo *type) {
+    if(!type) return nullptr;
+
+    auto ptr = dynamic_cast<const CType*>(cconvert(type)->get());
     if(ptr != nullptr) {
         return ptr->data;
     } else {
@@ -842,102 +1004,116 @@ void *siplus_type_data_ptr(SIPlusTypeInfo *type) {
     }
 }
 
-SIPlusTypeInfo *siplus_type_int() {
-    auto ptr = std::make_shared<types::IntegerType>();
-    return new SIPlusTypeInfo{ ptr };
+const SIPlusTypeInfo *siplus_type_int() {
+    return siplus_type_new_internal<types::IntegerType>();
 }
 
-SIPlusTypeInfo *siplus_type_float() {
-    auto ptr = std::make_shared<types::FloatType>();
-    return new SIPlusTypeInfo{ ptr };
+const SIPlusTypeInfo *siplus_type_float() {
+    return siplus_type_new_internal<types::FloatType>();
 }
 
-SIPlusTypeInfo *siplus_type_string() {
-    auto ptr = std::make_shared<types::StringType>();
-    return new SIPlusTypeInfo{ ptr };
+const SIPlusTypeInfo *siplus_type_string() {
+    return siplus_type_new_internal<types::StringType>();
 }
 
-SIPlusTypeInfo *siplus_type_bool() {
-    auto ptr = std::make_shared<types::BoolType>();
-    return new SIPlusTypeInfo{ ptr };
+const SIPlusTypeInfo *siplus_type_bool() {
+    return siplus_type_new_internal<types::BoolType>();
 }
 
-SIPlusTypeInfo *siplus_type_array() {
-    auto ptr = std::make_shared<types::ArrayType>();
-    return new SIPlusTypeInfo{ ptr };
+const SIPlusTypeInfo *siplus_type_array() {
+    return siplus_type_new_internal<types::ArrayType>();
 }
 
-SIPlusTypeInfo *siplus_type_null() {
-    auto ptr = std::make_shared<types::NullType>();
-    return new SIPlusTypeInfo{ ptr };
+const SIPlusTypeInfo *siplus_type_null() {
+    return siplus_type_new_internal<types::NullType>();
 }
 
-int siplus_type_access(SIPlusUnknownDataContainer **result, SIPlusTypeInfo *type, SIPlusUnknownDataContainer *data, char *property) 
+SIPLUS_EXPORT const SIPlusUnaryTypeExtensionImpl *siplus_type_get_extension_unary(const SIPlusTypeInfo *info, const SIPlusUnaryTypeExtensionDescriptor *extension) {
+    auto impl = (*cconvert(info))->get_extension(cconvert(extension));
+    return cconvert(impl);
+}
+
+SIPLUS_EXPORT const SIPlusBinaryTypeExtensionImpl *siplus_type_get_extension_binary(const SIPlusTypeInfo *info, const SIPlusBinaryTypeExtensionDescriptor *extension) {
+    auto impl = (*cconvert(info))->get_extension(cconvert(extension));
+    return cconvert(impl);
+}
+
+SIPLUS_EXPORT void siplus_type_add_extension_unary(SIPlusTypeInfo *type, const SIPlusUnaryTypeExtensionImpl *impl) {
+    CType *ctype = dynamic_cast<CType*>(cconvert(type)->get());
+    ctype->add_extension_public(cconvert(impl));
+}
+
+SIPLUS_EXPORT void siplus_type_add_extension_binary(SIPlusTypeInfo *type, const SIPlusBinaryTypeExtensionImpl *impl) {
+    CType *ctype = dynamic_cast<CType*>(cconvert(type)->get());
+    ctype->add_extension_public(cconvert(impl));
+}
+
+int siplus_type_access(SIPlusUnknownDataContainer **result, const SIPlusTypeInfo *type, const SIPlusUnknownDataContainer *data, char *property) 
 SIPLUS_TRY({
     SIPLUS_NOT_NULL(result, type, data, property);
 
     *result = new SIPlusUnknownDataContainer{
-        std::make_unique<UnknownDataTypeContainer>(type->info->access(*data->container, property))
+        std::make_unique<UnknownDataTypeContainer>((*cconvert(type))->access(*data->container, property))
     };
 
     return SIPLUS_OK;
 })
 
-int siplus_type_is_iterable(int *result, SIPlusTypeInfo *info, SIPlusUnknownDataContainer *data) 
+int siplus_type_is_iterable(int *result, const SIPlusTypeInfo *info, const SIPlusUnknownDataContainer *data) 
 SIPLUS_TRY({
     SIPLUS_NOT_NULL(info, data);
 
-    *result = info->info->is_iterable(*data->container) ? 1 : 0;
+    *result = (*cconvert(info))->is_iterable(*data->container) ? 1 : 0;
     return SIPLUS_OK;
 })
 
-int siplus_type_iterate(SIPlusIterator **result, SIPlusTypeInfo *typeInfo, SIPlusUnknownDataContainer *container) 
+int siplus_type_iterate(SIPlusIterator **result, const SIPlusTypeInfo *typeInfo, const SIPlusUnknownDataContainer *container) 
 SIPLUS_TRY({
     SIPLUS_NOT_NULL(result, typeInfo, container);
 
-    *result = new SIPlusIterator{ typeInfo->info->iterate(*container->container) };
+    *result = new SIPlusIterator{ (*cconvert(typeInfo))->iterate(*container->container) };
 
     return SIPLUS_OK;
 })
 
-int siplus_type_is(SIPlusTypeInfo *first, SIPlusTypeInfo *second) {
+int siplus_type_is(const SIPlusTypeInfo *first, const SIPlusTypeInfo *second) {
+    SIPLUS_NOT_NULL(first, second);
+
     if(!first) return 0;
     if(!second) return 0;
 
-    return *first->info == *second->info;
+    return **cconvert(first) == **cconvert(second);
 }
 
-int siplus_type_name(char **name, SIPlusTypeInfo *first) {
-    SIPLUS_NOT_NULL(name, first);
+int siplus_type_name(char *buf, size_t size, const SIPlusTypeInfo *first) {
+    auto str = (*cconvert(first))->name();
+    auto min = std::min(size, str.size() + 1); // + 1 for a NUL byte
 
-    auto str = first->info->name();
-    *name = new char[str.size() + 1];
-    strncpy(*name, str.c_str(), str.size());
-    (*name)[str.size()] = 0;
+    if(buf == NULL || size == 0) return str.size();
 
-    return SIPLUS_OK;
+    strncpy(buf, str.c_str(), min);
+
+    return min;
 }
 
-void siplus_type_unref(SIPlusTypeInfo *type) {
+void siplus_type_unref(const SIPlusTypeInfo *type) {
     if(!type) return;
-    delete type;
+    delete cconvert(type);
 }
 
 
 
 
-int siplus_iterator_new(
-    SIPlusIterator **iterator, void *data, 
+SIPlusIterator *siplus_iterator_new(
+    void *data, 
     SIPlusIteratorMore more, SIPlusIteratorNext next, 
-    SIPlusIteratorCurrent current, SIPlusIteratorDeleter deleter
+    SIPlusIteratorCurrent current, SIPlusDataDeleterCallback deleter
 ) {
-    SIPLUS_NOT_NULL(iterator, more, next, current)
+    SIPLUS_NOT_NULL(more, next, current)
 
-    *iterator = new SIPlusIterator{
+    return new SIPlusIterator{
         std::make_unique<CIterator>(data, more, next, current, deleter)
     };
-
-    return siplus_error_set(SIPLUS_OK);
 }
 
 void *siplus_iterator_data_ptr(SIPlusIterator *iterator) {
@@ -1001,15 +1177,15 @@ SIPlusUnknownDataContainer *siplus_data_make_null() {
     return new SIPlusUnknownDataContainer{std::make_unique<UnknownDataTypeContainer>()};
 }
 
-SIPlusUnknownDataContainer *siplus_data_make(SIPlusTypeInfo *type, void *data, SIPlusUnknownDataContainerDeleter deleter) {
+SIPlusUnknownDataContainer *siplus_data_make(const SIPlusTypeInfo *type, void *data, SIPlusDataDeleterCallback deleter) {
     return new SIPlusUnknownDataContainer{
-        std::make_unique<UnknownDataTypeContainer>(type->info, data, deleter)
+        std::make_unique<UnknownDataTypeContainer>(*cconvert(type), data, deleter)
     };
 }
 
-int siplus_data_is(SIPlusUnknownDataContainer *container, SIPlusTypeInfo *type) {
+int siplus_data_is(SIPlusUnknownDataContainer *container, const SIPlusTypeInfo *type) {
     if(!container || !type) return 0;
-    return (*container->container->type == *type->info) ? 1 : 0;
+    return (*container->container->type == **cconvert(type)) ? 1 : 0;
 }
 
 int siplus_data_is_int(SIPlusUnknownDataContainer *container) {
@@ -1042,20 +1218,16 @@ int siplus_data_is_null(SIPlusUnknownDataContainer *container) {
     return container->container->type->is<types::NullType>() ? 1 : 0;
 }
 
-int siplus_data_type(SIPlusTypeInfo **type, SIPlusUnknownDataContainer *container) {
-    SIPLUS_NOT_NULL(container, type);
+const SIPlusTypeInfo *siplus_data_type(SIPlusUnknownDataContainer *container) {
+    SIPLUS_NOT_NULL(container);
 
-    std::shared_ptr<const TypeInfo> ptr = container->container->type;
-    *type = new _SIPlusTypeInfo{ ptr };
-
-    return SIPLUS_OK;
+    return cconvert(new std::shared_ptr{container->container->type});
 }
 
-int siplus_data_ptr(void **data, SIPlusUnknownDataContainer *container) {
-    SIPLUS_NOT_NULL(data, container);
+void *siplus_data_ptr(SIPlusUnknownDataContainer *container) {
+    SIPLUS_NOT_NULL(container);
     
-    *data = container->container->ptr;
-    return SIPLUS_OK;
+    return container->container->ptr;
 }
 
 int siplus_data_as_int(int64_t *result, SIPlusUnknownDataContainer *value) {

@@ -5,7 +5,7 @@
 #include <string>
 
 #include "siplus/config.h"
-#include "siplus/data.hxx"
+#include "siplus/context.hxx"
 
 namespace SIPLUS_NAMESPACE {
 namespace text {

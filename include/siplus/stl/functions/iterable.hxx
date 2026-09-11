@@ -2,13 +2,10 @@
 #ifndef INCLUDE_FUNCTIONS_ITERABLE_HXX_
 #define INCLUDE_FUNCTIONS_ITERABLE_HXX_
 
-#include "siplus/config.h"
-
-#ifdef SIPLUS_INCLUDE_STDLIB
-
 #include <memory>
 #include <vector>
 
+#include "siplus/config.h"
 #include "siplus/context.hxx"
 
 namespace SIPLUS_NAMESPACE {
@@ -25,16 +22,10 @@ namespace stl {
  * @endcode
  */
 struct SIPLUS_EXPORT map_func : Function  {
-    explicit map_func(std::weak_ptr<SIPlusParserContext> context) 
-        : context_(context) { }
-
     std::shared_ptr<ValueRetriever> value(
         std::shared_ptr<ValueRetriever> parent, 
         std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
-
-private:
-    std::weak_ptr<SIPlusParserContext> context_;
 };
 
 /**
@@ -48,16 +39,10 @@ private:
  * @endcode
  */
 struct SIPLUS_EXPORT length_func : Function  {
-    explicit length_func(std::weak_ptr<SIPlusParserContext> context) 
-        : context_(context) { }
-
     std::shared_ptr<ValueRetriever> value(
         std::shared_ptr<ValueRetriever> parent, 
         std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
-
-private:
-    std::weak_ptr<SIPlusParserContext> context_;
 };
 
 /**
@@ -71,17 +56,10 @@ private:
  * @endcode
  */
 struct SIPLUS_EXPORT join_func : Function  {
-    explicit join_func(
-        std::weak_ptr<SIPlusParserContext> context
-    ) : context_(context) { }
-
     std::shared_ptr<ValueRetriever> value(
         std::shared_ptr<ValueRetriever> parent, 
         std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
-
-private:
-    std::weak_ptr<SIPlusParserContext> context_;
 };
 
 /**
@@ -89,17 +67,10 @@ private:
  * Uses `eq` to compare values.
  */
 struct SIPLUS_EXPORT contains_func : Function {
-    explicit contains_func(
-        std::weak_ptr<SIPlusParserContext> context
-    ) : context_(context) { }
-
     std::shared_ptr<ValueRetriever> value(
         std::shared_ptr<ValueRetriever> parent, 
         std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
-
-private:
-    std::weak_ptr<SIPlusParserContext> context_;
 };
 
 /**
@@ -113,16 +84,10 @@ private:
  * @endcode
  */
 struct SIPLUS_EXPORT each_func : Function  {
-    explicit each_func(std::weak_ptr<SIPlusParserContext> context) 
-        : context_(context) { }
-
     std::shared_ptr<ValueRetriever> value(
         std::shared_ptr<ValueRetriever> parent, 
         std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
-
-private:
-    std::weak_ptr<SIPlusParserContext> context_;
 };
 
 /**
@@ -136,16 +101,10 @@ private:
  * @endcode
  */
 struct SIPLUS_EXPORT all_func : Function  {
-    explicit all_func(std::weak_ptr<SIPlusParserContext> context) 
-        : context_(context) { }
-
     std::shared_ptr<ValueRetriever> value(
         std::shared_ptr<ValueRetriever> parent, 
         std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
-
-private:
-    std::weak_ptr<SIPlusParserContext> context_;
 };
 
 /**
@@ -159,16 +118,10 @@ private:
  * @endcode
  */
 struct SIPLUS_EXPORT any_func : Function  {
-    explicit any_func(std::weak_ptr<SIPlusParserContext> context) 
-        : context_(context) { }
-
     std::shared_ptr<ValueRetriever> value(
         std::shared_ptr<ValueRetriever> parent, 
         std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
-
-private:
-    std::weak_ptr<SIPlusParserContext> context_;
 };
 
 /**
@@ -182,21 +135,13 @@ private:
  * @endcode
  */
 struct SIPLUS_EXPORT sort_func : Function  {
-    explicit sort_func(std::weak_ptr<SIPlusParserContext> context) 
-        : context_(context) { }
-
     std::shared_ptr<ValueRetriever> value(
         std::shared_ptr<ValueRetriever> parent, 
         std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
-
-private:
-    std::weak_ptr<SIPlusParserContext> context_;
 };
 
 } /* stl */
 } /* SIPLUS_NAMESPACE */
-
-#endif  // SIPLUS_INCLUDE_STDLIB
 
 #endif  // INCLUDE_FUNCTIONS_ITERABLE_HXX_

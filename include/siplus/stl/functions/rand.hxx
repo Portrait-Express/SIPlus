@@ -2,13 +2,10 @@
 #ifndef INCLUDE_FUNCTIONS_RAND_HXX_
 #define INCLUDE_FUNCTIONS_RAND_HXX_
 
-#include "siplus/config.h"
-
-#ifdef SIPLUS_INCLUDE_STDLIB
-
 #include <memory>
 #include <vector>
 
+#include "siplus/config.h"
 #include "siplus/context.hxx"
 
 namespace SIPLUS_NAMESPACE {
@@ -18,37 +15,23 @@ namespace stl {
  * struct rand_func - Generate a random number
  */
 struct SIPLUS_EXPORT rand_func : Function  {
-    explicit rand_func(std::weak_ptr<SIPlusParserContext> context) 
-        : context_(context) { }
-
     std::shared_ptr<ValueRetriever> value(
         std::shared_ptr<ValueRetriever> parent, 
         std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
-
-private:
-    std::weak_ptr<SIPlusParserContext> context_;
 };
 
 /**
  * struct rand_str_func - Generate a random string following a template
  */
 struct SIPLUS_EXPORT rand_str_func : Function {
-    explicit rand_str_func (std::weak_ptr<SIPlusParserContext> context) 
-        : context_(context) { }
-
     std::shared_ptr<ValueRetriever> value(
         std::shared_ptr<ValueRetriever> parent, 
         std::vector<std::shared_ptr<ValueRetriever>> parameters
     ) const override;
-
-private:
-    std::weak_ptr<SIPlusParserContext> context_;
 };
 
 } /* stl */
 } /* SIPLUS_NAMESPACE */
-
-#endif  // SIPLUS_INCLUDE_STDLIB
 
 #endif  // INCLUDE_FUNCTIONS_RAND_HXX_

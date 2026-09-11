@@ -1,56 +1,11 @@
 #include "siplus/context.hxx"
 #include "siplus/range_iterator.hxx"
-#include "siplus/types/integer.hxx"
-#include "siplus/value_retrievers/lambda_value_retriever.hxx"
 #include "siplus/stl/functions/set.hxx"
-#include "siplus/types/bool.hxx"
-#include "siplus/types/float.hxx"
-#include "siplus/types/string.hxx"
 #include "siplus/util.hxx"
+
 #include <unordered_set>
 
 using namespace SIPLUS_NAMESPACE;
-
-namespace std {
-
-std::uint64_t hash<UnknownDataTypeContainer>::operator()(
-    const UnknownDataTypeContainer& container
-) const {
-    if(container.is<types::IntegerType>()) {
-        return long_(container.as<types::IntegerType>());
-    } else if(container.is<types::FloatType>()) {
-        return double_(container.as<types::FloatType>());
-    } else if(container.is<types::StringType>()) {
-        return string_(container.as<types::StringType>());
-    } else {
-        throw runtime_error{"Unsure how to hash " + container.type->name()}; 
-    }
-}
-
-equal_to<UnknownDataTypeContainer>::equal_to(
-    shared_ptr<SIPlusParserContext> context,
-    shared_ptr<ValueRetriever> comparator
-) : context_(context), comparator_(comparator) { }
-
-bool equal_to<UnknownDataTypeContainer>::operator()(
-    const UnknownDataTypeContainer& lhs,
-    const UnknownDataTypeContainer& rhs
-) const {
-    auto ctx = context_->builder()
-        .with("*lhs", lhs)
-        .with("*rhs", rhs)
-        .build();
-
-    auto result = comparator_->retrieve(*ctx);
-
-    if(!result.is<types::BoolType>()) {
-        throw runtime_error{"eq didnt return bool"};
-    }
-
-    return result.as<types::BoolType>();
-}
-
-} /* std */
 
 namespace SIPLUS_NAMESPACE {
 namespace stl {
@@ -58,42 +13,17 @@ namespace stl {
 namespace {
 
 struct set_new_impl : ValueRetriever {
-    set_new_impl(
-        std::shared_ptr<SIPlusParserContext> context
-    ) : context_(context) {}
-
     UnknownDataTypeContainer 
     retrieve(InvocationContext &value) const override;
 
 private:
     std::shared_ptr<ValueRetriever> hasher_;
     std::shared_ptr<ValueRetriever> equality_;
-    std::shared_ptr<SIPlusParserContext> context_;
 };
 
 UnknownDataTypeContainer
 set_new_impl::retrieve(InvocationContext& value) const {
-    std::shared_ptr<ValueRetriever> lhs = 
-        std::make_shared<LambdaValueRetriever>([](InvocationContext& ctx) {
-            return ctx.variable("*lhs");
-        });
-
-    std::shared_ptr<ValueRetriever> rhs = 
-        std::make_shared<LambdaValueRetriever>([](InvocationContext& ctx) {
-            return ctx.variable("*rhs");
-        });
-
-    auto eq = context_->function("eq").value(
-        std::shared_ptr<ValueRetriever>{}, 
-        std::vector<std::shared_ptr<ValueRetriever>>{ lhs, rhs }
-    );
-
-    SetType::data_type *set = new SetType::data_type{
-        1, 
-        std::hash<UnknownDataTypeContainer>{},
-        std::equal_to<UnknownDataTypeContainer>{ context_, eq }
-    };
-
+    SetType::data_type *set = new SetType::data_type{};
     return make_data<SetType>(set);
 }
 
@@ -160,7 +90,7 @@ std::shared_ptr<ValueRetriever> set_new_func::value(
     if(parent || arguments.size() > 0) {
         throw std::runtime_error{"set_new does not expect any arguments"};
     }
-    return std::make_shared<set_new_impl>(context_.lock());
+    return std::make_shared<set_new_impl>();
 }
 
 std::shared_ptr<ValueRetriever> set_add_func::value(
@@ -180,9 +110,9 @@ std::shared_ptr<ValueRetriever> set_has_func::value(
 }
 
 
-std::string SetType::name() const {
-    return "set";
-}
+const TypeInfoDescriptor *const SetType::descriptor = new TypeInfoDescriptor("set");
+
+SetType::SetType() : TypeInfo(descriptor) {}
 
 bool SetType::is_iterable(const UnknownDataTypeContainer& data) const {
     return true;

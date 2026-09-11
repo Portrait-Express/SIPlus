@@ -1,10 +1,6 @@
 #include "common.hxx"
 #include "siplus/context.hxx"
 #include "siplus/parser.hxx"
-#include "siplus/types/array.hxx"
-#include "siplus/types/float.hxx"
-#include "siplus/types/integer.hxx"
-#include "siplus/types/string.hxx"
 
 using namespace SIPLUS_NAMESPACE;
 

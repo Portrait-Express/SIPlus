@@ -2,7 +2,9 @@
 
 using namespace SIPLUS_NAMESPACE;
 
-std::string UserType::name() const { return "User"; }
+const TypeInfoDescriptor *const UserType::descriptor = new TypeInfoDescriptor("User");
+UserType::UserType() : TypeInfo(descriptor) { }
+
 bool UserType::is_iterable(const SIPLUS_NAMESPACE::UnknownDataTypeContainer& data) const { return false; }
 
 SIPLUS_NAMESPACE::UnknownDataTypeContainer 

@@ -5,7 +5,35 @@
 #include <string>
 #include <vector>
 
+#include "siplus/context.hxx"
 #include "siplus/siplus.hxx"
+
+namespace std {
+
+template<typename _OStream, typename T>
+_OStream& operator<<(_OStream& stream, std::function<T> func) {
+    stream << "(function)";
+    return stream;
+}
+
+template<typename _OStream, typename T>
+_OStream& operator<<(_OStream& out, const std::vector<T>& val) {
+    out << "std::vector{";
+
+    for(int i = 0; i < val.size(); i++) {
+        out << val[i];
+
+        if(i < val.size() - 1) {
+            out << ", ";
+        }
+    }
+
+    out << '}';
+
+    return out;
+}
+
+}
 
 struct User {
     int id;
@@ -29,7 +57,10 @@ struct test_data {
 
 struct test_data_type : SIPLUS_NAMESPACE::TypeInfo {
     using data_type = test_data;
-    std::string name() const override { return "test_data"; }
+    static const SIPLUS_NAMESPACE::TypeInfoDescriptor *const descriptor;
+
+    test_data_type() : SIPLUS_NAMESPACE::TypeInfo(descriptor) {}
+
     bool is_iterable(const SIPLUS_NAMESPACE::UnknownDataTypeContainer& data) const override { return false; }
 
     SIPLUS_NAMESPACE::UnknownDataTypeContainer 
@@ -38,7 +69,10 @@ struct test_data_type : SIPLUS_NAMESPACE::TypeInfo {
 
 struct test_data_y_type : SIPLUS_NAMESPACE::TypeInfo {
     using data_type = struct test_data::y;
-    std::string name() const override { return "test_data::y"; }
+    static const SIPLUS_NAMESPACE::TypeInfoDescriptor *const descriptor;
+
+    test_data_y_type() : SIPLUS_NAMESPACE::TypeInfo(descriptor) {}
+
     bool is_iterable(const SIPLUS_NAMESPACE::UnknownDataTypeContainer& data) const override { return false; }
 
     SIPLUS_NAMESPACE::UnknownDataTypeContainer 
@@ -47,7 +81,10 @@ struct test_data_y_type : SIPLUS_NAMESPACE::TypeInfo {
 
 struct user_type : SIPLUS_NAMESPACE::TypeInfo {
     using data_type = User;
-    std::string name() const override { return "user"; }
+    static const SIPLUS_NAMESPACE::TypeInfoDescriptor *const descriptor;
+
+    user_type() : SIPLUS_NAMESPACE::TypeInfo(descriptor) {}
+
     bool is_iterable(const SIPLUS_NAMESPACE::UnknownDataTypeContainer& data) const override { return false; }
 
     SIPLUS_NAMESPACE::UnknownDataTypeContainer 
@@ -335,27 +372,30 @@ inline int expect_throw(std::function<void ()> func) {
 }
 
 template<
-    typename T, 
-    SIPLUS_NAMESPACE::simple_value_retrievable_type To
-> requires std::is_base_of_v<SIPLUS_NAMESPACE::Converter, T>
+    SIPLUS_NAMESPACE::simple_value_retrievable_type To,
+    typename From
+> 
 int test_conversion(
-    const T& converter, 
-    const SIPLUS_NAMESPACE::UnknownDataTypeContainer& from,
+    const From& from,
     const typename To::data_type& result
 ) {
-    auto to_type = To{};
+    SIPLUS_NAMESPACE::UnknownDataTypeContainer data;
+    if constexpr (std::same_as<From, SIPlus::UnknownDataTypeContainer>) {
+        data = from;
+    } else {
+        data = SIPLUS_NAMESPACE::make_data(from);
+    }
 
-    if(!converter.can_convert(*from.type, to_type)) {
-        std::cout 
-            << typeid(T).name() << " cannot convert from " 
-            << from.type->name() << " to " << to_type.name() << std::endl;
+    if(!data.can_convert<To>()) {
+        std::cout << "cannot convert data " << data.type->name() << " to " 
+            << To::descriptor->name << std::endl;
         return 1;
     }
 
-    auto container = converter.convert(from, to_type);
+    auto container = data.convert<To>();
 
     if(!container.template is<To>()) {
-        std::cout << "Expected type " << to_type.name()
+        std::cout << "Expected type " << To::descriptor->name
             << ". Recieved " << container.type->name() << std::endl;
         return 1;
     }
@@ -371,16 +411,6 @@ int test_conversion(
     }
 }
 
-template<typename T, typename V, typename To> requires std::is_base_of_v<SIPLUS_NAMESPACE::Converter, T>
-int test_conversion(const T& converter, const V& val, const To& result) {
-    auto container = SIPLUS_NAMESPACE::make_data(val);
-    return test_conversion<T, SIPLUS_NAMESPACE::type_info_for_t<To>>(converter, container, result);
-}
-
-template<typename T, typename V, typename To> requires std::is_base_of_v<SIPLUS_NAMESPACE::Converter, T>
-int test_conversion(const V& val, const To& result) {
-    T converter;
-    return test_conversion<T, V, To>(converter, val, result);
-}
-
 void common_initialize();
+
+

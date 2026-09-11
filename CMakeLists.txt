@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
 
-option(SIPLUS_INCLUDE_STDLIB "Include standard library base for siplus. Can be disabled to reduce binary size" ON)
-option(SIPLUS_SANITIZE_ADDRESS "Set -fsanitize=address for memory leak testing" OFF)
 option(SIPLUS_BUILD_EXAMPLES "Build Examples" On)
 option(WITH_STATIC_CRT "(MSVC Visual C++) Enable to statically link CRT, which avoids requiring users to install the redistribution package.
  To disable with: -DWITH_STATIC_CRT=Off" On)
@@ -38,6 +36,14 @@ set(SIPLUS_SOURCES
     siplus/visitors/siplus_visitor.cpp
     siplus/visitors/visitor.cpp
 
+    siplus/types/array.cpp
+    siplus/types/bool.cpp
+    siplus/types/float.cpp
+    siplus/types/integer.cpp
+    siplus/types/integral.cpp
+    siplus/types/null.cpp
+    siplus/types/string.cpp
+
     siplus/build_context.cpp
     siplus/c.cpp
     siplus/context.cpp
@@ -45,22 +51,17 @@ set(SIPLUS_SOURCES
     siplus/invocation_context.cpp
     siplus/parser_impl.cpp
     siplus/text.cpp
-    siplus/types.cpp
-)
 
-if(SIPLUS_INCLUDE_STDLIB)
-    set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/arithmetic.cpp)
-    set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/comparison.cpp)
-    set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/control.cpp)
-    set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/converting_operator.cpp)
-    set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/converters.cpp)
-    set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/iterable.cpp)
-    set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/set.cpp)
-    set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/standardlib.cpp)
-    set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/text.cpp)
-    set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/type.cpp)
-    set(SIPLUS_SOURCES ${SIPLUS_SOURCES} siplus/stdlib/rand.cpp)
-endif()
+    siplus/stdlib/arithmetic.cpp
+    siplus/stdlib/comparison.cpp
+    siplus/stdlib/control.cpp
+    siplus/stdlib/iterable.cpp
+    siplus/stdlib/set.cpp
+    siplus/stdlib/standardlib.cpp
+    siplus/stdlib/text.cpp
+    siplus/stdlib/type.cpp
+    siplus/stdlib/rand.cpp
+)
 
 if(BUILD_SHARED_LIBS) 
     message("Building in shared library mode")
@@ -106,15 +107,6 @@ if(SIPLUS_BUILD_EXAMPLES)
         message("WARNING: Examples cannot be built when building WASM. Disabling examples.")
     else()
         add_subdirectory(example)
-    endif()
-endif()
-
-if(SIPLUS_SANITIZE_ADDRESS)
-    if(MSVC)
-        message("WARNING: Due to limitations with MSVC, ASAN on Windows is currently not supported")
-    else()
-        target_compile_options(siplus PUBLIC -fsanitize=address)
-        target_link_options(siplus PUBLIC -fsanitize=address)
     endif()
 endif()
 
