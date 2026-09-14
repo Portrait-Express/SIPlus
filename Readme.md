@@ -17,7 +17,7 @@ set(SIPLUS_BUILD_TESTS OFF)
 FetchContent_Declare(
   siplus
   GIT_REPOSITORY https://github.com/Portrait-Express/siplus
-  GIT_TAG        1.2.0
+  GIT_TAG        2.2.0
 )
 
 FetchContent_MakeAvailable(siplus)
