@@ -1,3 +1,14 @@
+# 2.2.0
+- Added Type Extensions
+- Added Type Descriptors
+- Added `find`, `filter`, `gte`, `lte`
+- Added Array to String Converter
+- Changed `if` to consider bool-convertible values as their value, `null` as false,
+  and other types as true.
+
+# 2.1.0
+- Add indexer function to TypeInfo
+
 # 2.0.4
 - Refactored visitors
 - Allow expressions as array indexers

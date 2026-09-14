@@ -405,9 +405,58 @@ Check if any item in a list matches a condition
 Create a new version of `list` sorted according to `comp`
 
 - `list` The list to sort
-- `comp` Comparator expression. This will be called with a default data 
-containing a tuple of the first and second items to compare.
+- `[comp]` Comparator expression. This will be called with a default data 
+containing a tuple of the first and second items to compare. If not specified,
+will sort by using default Comparable implementation.
 
 ```
 [2, 3, 1] | sort (sub .[0] .[1]) // [1, 2, 3]
 ```
+
+## gte (2.2.0)
+Greater than or equal to.
+
+- `lhs` Left hand side
+- `rhs` Right hand side
+
+```
+1 | gte 2 // false
+2 | gte 2 // true
+3 | gte 2 // true
+```
+
+## lte (2.2.0)
+Less than or equal to.
+
+- `lhs` Left hand side
+- `rhs` Right hand side
+
+```
+1 | lte 2 // true
+2 | lte 2 // true
+3 | lte 2 // false
+```
+
+## find (2.2.0)
+Search for an item in a list. Returns the first item matching `test`, or returns
+null if `test` never returns `true`.
+
+- `list` The list to search
+- `test` Test expression
+
+```
+[2, 3, 1] | find (eq . 2) // 2
+[2, 3, 1] | find (eq . 4) // null
+```
+
+## filter (2.2.0)
+Create a new version of `list` filtered with `test`
+
+- `list` The list to sort
+- `test` Test expression
+
+```
+[2, 3, 1] | filter (. | gt 2) // [3]
+[2, 3, 1] | filter (. | gt 2 | not) // [1, 2]
+```
+
