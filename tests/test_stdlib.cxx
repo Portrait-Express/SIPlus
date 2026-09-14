@@ -183,17 +183,29 @@ TEST(Cmp, Functions) {
     expect::expression(R"(cmp "a" "b")", -1L);
 }
 
-TEST(LT, Functions) {
+TEST(Lt, Functions) {
     expect::expression(R"(lt 2 1)", false);
     expect::expression(R"(lt "a" "b")", true);
 }
 
-TEST(GT, Functions) {
-    test_expression(R"(gt 1 2)", false);
-    test_expression(R"(gt "b" "a")", true);
+TEST(Lte, Functions) {
+    expect::expression(R"(1 | lte 2)", true);
+    expect::expression(R"(2 | lte 2)", true);
+    expect::expression(R"(3 | lte 2)", false);
 }
 
-TEST(EQ, Functions) {
+TEST(Gt, Functions) {
+    expect::expression(R"(gt 1 2)", false);
+    expect::expression(R"(gt "b" "a")", true);
+}
+
+TEST(Gte, Functions) {
+    expect::expression(R"(1 | gte 2)", false);
+    expect::expression(R"(2 | gte 2)", true);
+    expect::expression(R"(3 | gte 2)", true);
+}
+
+TEST(Eq, Functions) {
     expect::expression(R"(eq 1 1)", true);
     expect::expression(R"(eq "a" "b")", false);
     expect::expression(R"(eq 1.0 1)", true);
