@@ -26,10 +26,16 @@ UnknownDataTypeContainer
 if_impl::retrieve(InvocationContext& value) const {
     auto cond = condition->retrieve(value);
 
-    if(cond.convert<types::BoolType>().as<types::BoolType>()) {
-        return tVal->retrieve(value);
-    } else {
+    if(cond.can_convert<types::BoolType>()) {
+        if(cond.convert<types::BoolType>().as<types::BoolType>()) {
+            return tVal->retrieve(value);
+        } else {
+            return fVal->retrieve(value);
+        }
+    } else if(cond.is<types::NullType>()) {
         return fVal->retrieve(value);
+    } else {
+        return tVal->retrieve(value);
     }
 }
 

@@ -116,6 +116,7 @@ TEST(RandStr, Functions) {
 
 TEST(If, Functions) {
     expect::expression(R"(if (.x) (.y) "" | .b)", 1);
+    expect::expression(R"(if (null) (.y) (4))", 4);
 }
 
 TEST(While, Functions) {
