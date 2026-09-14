@@ -65,6 +65,17 @@ TEST(Each, Functions) {
     expect::expression(R"(var $set = set_new; [1, 2, 3] | each (set_add $set .); set_has $set 2)", true);
 }
 
+TEST(Find, Functions) {
+    expect::expression(R"([1, 2, 3] | find (eq . 2))", 2);
+    expect::expression(R"(.users | find (eq .id 2) | .email)", "admin@example.com");
+}
+
+TEST(Filter, Functions) {
+    expect::expression(R"([1, 2, 3] | filter (eq . 2))", std::vector<long>{2});
+    expect::expression(R"(.users | filter (true) | map .id)", std::vector<long>{1, 2});
+    expect::expression(R"(.users | filter (false))", std::vector<User>{});
+}
+
 TEST(All, Functions) {
     expect::expression(R"([false, true, true] | all .)", false);
     expect::expression(R"([true, true, true] | all .)", true);

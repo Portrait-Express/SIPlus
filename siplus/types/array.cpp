@@ -57,12 +57,39 @@ struct ArrayEqualsImpl : BinaryOperatorTypeExtensionImpl {
     }
 };
 
+struct ArrayStringConverter : UnaryOperatorTypeExtensionImpl {
+    ArrayStringConverter() : UnaryOperatorTypeExtensionImpl(make_conversion_descriptor<StringType>()) {}
+
+    UnknownDataTypeContainer invoke(const UnknownDataTypeContainer &thisValue) const override {
+        std::stringstream ss;
+        auto it = thisValue.iterate();
+
+        ss << "{ ";
+
+        while(it->more()) {
+            it->next();
+            auto val = it->current();
+
+            ss << val;
+
+            if(it->more()) {
+                ss << ", ";
+            }
+        }
+
+        ss << " }";
+
+        return make_data(ss.str());
+    }
+};
+
 } /* namespace anonymous */
 
 const TypeInfoDescriptor *const ArrayType::descriptor = new TypeInfoDescriptor("array");
 
 ArrayType::ArrayType() : TypeInfo(descriptor) {
     add_extension(new ArrayEqualsImpl());
+    add_extension(new ArrayStringConverter());
 }
 
 bool ArrayType::is_iterable(const UnknownDataTypeContainer& data) const { 

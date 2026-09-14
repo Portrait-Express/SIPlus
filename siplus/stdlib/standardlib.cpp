@@ -1,3 +1,5 @@
+#include "siplus/context.hxx"
+#include "siplus/util.hxx"
 #include "stl.hxx"
 #include "siplus/stl/functions/comparison.hxx"
 #include "siplus/stl/functions/control.hxx"
@@ -14,11 +16,24 @@
 using namespace SIPLUS_NAMESPACE;
 using namespace SIPLUS_NAMESPACE::stl;
 
-//----------------------------
-// Free Functions
-//----------------------------
+struct FindFunction : Function {
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent, 
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
+    ) const override;
+};
+
+struct FilterFunction : Function {
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent, 
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
+    ) const override;
+};
+
 
 void attach_stl(SIPlusParserContext& context) {
+
+
     //Misc
     context.emplace_function<str_func>("str");
     context.emplace_function<if_func>("if");
@@ -39,6 +54,8 @@ void attach_stl(SIPlusParserContext& context) {
     context.emplace_function<all_func>("all");
     context.emplace_function<any_func>("any");
     context.emplace_function<sort_func>("sort");
+    context.emplace_function<FindFunction>("find");
+    context.emplace_function<FilterFunction>("filter");
 
     //Boolean logic
     using binary_bool_func = typed_binary_operator_function<types::BoolType, types::BoolType>;
@@ -73,4 +90,94 @@ void attach_stl(SIPlusParserContext& context) {
     context.emplace_function<lower_function>("lower");
     context.emplace_function<split_function>("split");
     context.emplace_function<substr_function>("substr");
+}
+
+struct FindFunctionImpl : ValueRetriever {
+    FindFunctionImpl(
+        std::shared_ptr<ValueRetriever> list,
+        std::shared_ptr<ValueRetriever> test
+    ) : list_(list), test_(test) {}
+
+    UnknownDataTypeContainer retrieve(InvocationContext &value) const override;
+
+private:
+    std::shared_ptr<ValueRetriever> list_;
+    std::shared_ptr<ValueRetriever> test_;
+};
+
+UnknownDataTypeContainer FindFunctionImpl::retrieve(InvocationContext& value) const {
+    auto list = list_->retrieve(value);
+    auto iterator = list.iterate();
+
+    while(iterator->more()) {
+        iterator->next();
+
+        auto val = iterator->current();
+        auto scope = wrap_scope(value.shared_from_this())
+            .use_default(val)
+            .build();
+
+        auto result = test_->retrieve(*scope);
+
+        if(result.convert<types::BoolType>().as<types::BoolType>()) {
+            return val;
+        }
+    }
+
+    return UnknownDataTypeContainer{};
+}
+
+std::shared_ptr<ValueRetriever> 
+FindFunction::value(
+    std::shared_ptr<ValueRetriever> parent, 
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
+) const {
+    auto [list, test] = util::get_parameters_first_parent<2>(parent, parameters);
+    return std::make_shared<FindFunctionImpl>(list, test);
+}
+
+
+
+struct FilterFunctionImpl : ValueRetriever {
+    FilterFunctionImpl(
+        std::shared_ptr<ValueRetriever> list,
+        std::shared_ptr<ValueRetriever> test
+    ) : list_(list), test_(test) {}
+
+    UnknownDataTypeContainer retrieve(InvocationContext &value) const override;
+
+private:
+    std::shared_ptr<ValueRetriever> list_;
+    std::shared_ptr<ValueRetriever> test_;
+};
+
+UnknownDataTypeContainer FilterFunctionImpl::retrieve(InvocationContext& value) const {
+    auto ret = make_data<types::ArrayType>(std::vector<UnknownDataTypeContainer>{});
+    auto list = list_->retrieve(value);
+    auto iterator = list.iterate();
+
+    while(iterator->more()) {
+        iterator->next();
+
+        auto val = iterator->current();
+        auto scope = wrap_scope(value.shared_from_this())
+            .use_default(val)
+            .build();
+
+        auto result = test_->retrieve(*scope);
+
+        if(result.convert<types::BoolType>().as<types::BoolType>()) {
+            ret.as<types::ArrayType>().emplace_back(val);
+        }
+    }
+
+    return ret;
+}
+
+std::shared_ptr<ValueRetriever> FilterFunction::value(
+    std::shared_ptr<ValueRetriever> parent, 
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
+) const {
+    auto [list, test] = util::get_parameters_first_parent<2>(parent, parameters);
+    return std::make_shared<FilterFunctionImpl>(list, test);
 }

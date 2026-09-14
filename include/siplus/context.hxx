@@ -880,7 +880,7 @@ bool operator(T&& value) { \
      *
      * @return A new iterator
      */
-    std::unique_ptr<Iterator> iterate();
+    std::unique_ptr<Iterator> iterate() const;
 
     /**
      * @brief See TypeInfo::is_iterable

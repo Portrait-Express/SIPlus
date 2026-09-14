@@ -284,7 +284,7 @@ UnknownDataTypeContainer UnknownDataTypeContainer::index(
     return type->index(context, *this, index);
 }
 
-std::unique_ptr<Iterator> UnknownDataTypeContainer::iterate() {
+std::unique_ptr<Iterator> UnknownDataTypeContainer::iterate() const {
     return type->iterate(*this);
 }
 
