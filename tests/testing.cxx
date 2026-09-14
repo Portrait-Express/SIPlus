@@ -1,6 +1,10 @@
 #include "testing.hxx"
+#include "siplus/parser.hxx"
+#include "siplus/util.hxx"
+#include <concepts>
 #include <exception>
-#include <iostream>
+
+using namespace SIPLUS_NAMESPACE;
 
 TestLogEntryBuilder::TestLogEntryBuilder(TestLoggerChannel* channel, TestLoggerSeverity severity) 
     : channel_(channel), severity_() { }
@@ -72,27 +76,29 @@ const TestCategory* TestDescriptor::category() const {
 }
 
 std::string TestDescriptor::name() const {
-    return category_->name + "/" + name_;
+    return category_->name() + "/" + name_;
 }
 
 TestResult TestDescriptor::invoke() const noexcept {
+    bool passed = true;
+    std::optional<std::exception_ptr> exception;
     auto context = TestingContext{this};
+    auto start = std::chrono::system_clock::now();
 
     try {
-        bool success = impl_(&context);
-        return TestResult{
-            .test = this,
-            .passed = success,
-            .log = context.log()
-        };
+        impl_(&context);
     } catch(...) {
-        return TestResult{
-            .test = this,
-            .passed = false,
-            .log = context.log(),
-            .exception = std::current_exception(),
-        };
+        passed = false;
+        exception = std::current_exception();
     }
+
+    return TestResult{
+        .test = this,
+        .passed = passed,
+        .log = context.log(),
+        .exception = exception,
+        .runtime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - start)
+    };
 }
 
 
@@ -101,17 +107,36 @@ void TestCategory::register_test(TestDescriptor *test) noexcept {
     tests_.emplace_back(test);
 }
 
-CategoryResult TestCategory::run_all() {
+std::string TestCategory::name() const {
+    if(parent_ != nullptr) {
+        return parent_->name() + "/" + name_;
+    } else {
+        return name_;
+    }
+}
+
+CategoryResult TestCategory::run_all() const {
     std::list<TestResult> results;
+    auto startTime = std::chrono::system_clock::now();
 
     for(auto test : tests_) {
         auto result = test->invoke();
         results.emplace_back(result);
     }
 
+    for(auto category : categories_) {
+        auto result = category->run_all();
+
+        for(auto result : result.results) {
+            results.emplace_back(result);
+        }
+    }
+
+    using namespace std::chrono;
     return CategoryResult{
         .category = this,
-        .results = results
+        .results = results,
+        .duration = duration_cast<milliseconds>(system_clock::now() - startTime)
     };
 }
 
@@ -141,8 +166,32 @@ inline void throw_expect_failed(std::optional<std::string> message, std::string 
     throw TestFailure{message.value_or(defaultMessage)};
 }
 
-void expect::assert(bool condition, std::string message) {
+SIPLUS_NAMESPACE::UnknownDataTypeContainer do_expression(
+    const std::string& expression, 
+    const SIPLUS_NAMESPACE::UnknownDataTypeContainer& defaultData
+) {
+    Parser parser;
+
+    auto retriever = parser.get_expression(expression);
+    return retriever->retrieve(*parser.context().builder().use_default(defaultData).build());
+}
+
+void expect::expect(bool condition, std::string message) {
     if(!condition) {
         throw_expect_failed(message);
+    }
+}
+
+void expect::expression(
+    const std::string& expression, 
+    const SIPlus::UnknownDataTypeContainer& expected,
+    const SIPlus::UnknownDataTypeContainer& defaultData = UnknownDataTypeContainer{}
+) {
+    auto result = do_expression(expression, defaultData);
+    if(result != expected) {
+        throw TestFailure{util::to_string(
+            "Expected the result of '", expression, "' to equal ", expected, ". "
+            "Recieved ", result, "."
+        )};
     }
 }

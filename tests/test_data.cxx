@@ -12,8 +12,6 @@ TEST(IntegerEquatable, DataContainerEquatable) {
 
     EXPECT_TRUE_S(foo == bar, "Expected foo(IntegerType 1) to equal bar(IntegerType 1).");
     EXPECT_TRUE_S(foo != baz, "Expected foo(IntegerType 1) to not equal baz(IntegerType 3).");
-
-    return true;
 }
 
 int test_data(int argc, char **argv) {

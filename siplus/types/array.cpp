@@ -19,7 +19,41 @@ struct ArrayEqualsImpl : BinaryOperatorTypeExtensionImpl {
         const UnknownDataTypeContainer &thisValue, 
         const UnknownDataTypeContainer &other
     ) const override {
-        
+        int iterCountGuard = 0;
+
+        auto thisIt = thisValue.type->iterate(thisValue);
+        auto otherIt = other.type->iterate(other);
+
+        while(true) {
+            if(iterCountGuard > 200000) {
+                throw std::runtime_error{
+                    "ArrayType Equatable ran >200000 times. Assuming infinite loop."
+                };
+            }
+
+            iterCountGuard++;
+
+            bool thisMore = thisIt->more();
+            bool otherMore = otherIt->more();
+
+            // Different lengths if false
+            if(thisMore != otherMore) {
+                return make_data(false);
+            }
+
+            if(!thisMore) {
+                return make_data(true);
+            }
+
+            thisIt->next();
+            otherIt->next();
+
+            if(thisIt->current() != otherIt->current()) {
+                return make_data(false);
+            }
+        }
+
+        throw std::runtime_error{"unreachable (ArrayEqualsImpl::invoke)"};
     }
 };
 

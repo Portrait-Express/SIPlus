@@ -47,8 +47,10 @@ static void initialize(int* pargc, char*** pargv) {
     act.sa_flags = SA_SIGINFO;
     sigaction(SIGSEGV, &act, NULL);
     sigaction(SIGABRT, &act, NULL);
+    sigaction(SIGILL, &act, NULL);
 #else
     std::signal(SIGSEGV, std_segv_handler);
     std::signal(SIGABRT, std_segv_handler);
+    std::signal(SIGILL, std_segv_handler);
 #endif
 }

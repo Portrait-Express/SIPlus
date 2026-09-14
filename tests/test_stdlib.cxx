@@ -1,530 +1,288 @@
 #include <cassert>
+#include <iostream>
 #include <vector>
 
 #include "siplus/context.hxx"
 #include "siplus/parser.hxx"
-
-#include "common.hxx"
+#include "testing.hxx"
 
 using namespace SIPLUS_NAMESPACE;
 
-int test_add() {
-    return test("add", [](const Parser& parser) {
-        return tests(
-            test_expression("add (.x) (.y.b)", 3L),
-            test_expression("add .x 2.3", 4.3),
-            test_expression(R"(add .x "ab")", "2ab"),
-            test_expression(R"(add "a" "b")", "ab"),
-            test_expression(R"("a" | add "b")", "ab")
-        );
-    });
+CATEGORY(Stdlib);
+
+CATEGORY_SUB(Functions, Stdlib);
+
+TEST(Add, Functions) {
+    expect::expression("add (.x) (.y.b)", 3L);
+    expect::expression("add .x 2.3", 4.3);
+    expect::expression(R"(add .x "ab")", "2ab");
+    expect::expression(R"(add "a" "b")", "ab");
+    expect::expression(R"("a" | add "b")", "ab");
 }
 
-int test_sub() {
-    return test("sub", [](const Parser& parser) {
-        return tests(
-            test_expression("sub 1.2 2", -0.8),
-            test_expression("sub 10 4", 6L)
-        );
-    });
+TEST(Sub, Functions) {
+    expect::expression("sub 1.2 2", -0.8);
+    expect::expression("sub 10 4", 6L);
 }
 
-int test_mul() {
-    return test("mul", [](const Parser& parser) {
-        return tests(
-            test_expression("mul 2 3", 6L),
-            test_expression("mul 2.2 5", 11.0)
-        );
-    });
+TEST(Multiply, Functions) {
+    expect::expression("mul 2 3", 6L);
+    expect::expression("mul 2.2 5", 11.0);
 }
 
-int test_div() {
-    return test("div", [](const Parser& parser) {
-        return tests(
-            test_expression("div 6 2", 3.0),
-            test_expression("div 10 4", 2.5)
-        );
-    });
+TEST(Div, Functions) {
+    expect::expression("div 6 2", 3.0);
+    expect::expression("div 10 4", 2.5);
 }
 
-int test_str() {
-    return test("str", [](const Parser& parser) {
-        return tests(
-            test_expression(".x | str", "2")
-        );
-    });
+TEST(Str, Functions) {
+    expect::expression(".x | str", "2");
 }
 
-int test_map() {
-    return test("map", [](const Parser& parser) {
-        return tests(
-            test_expression<types::ArrayType, std::vector<int>>(R"(.users | map .id)", {1,2})
-        );
-    });
+TEST(Map, Functions) {
+    expect::expression(R"(.users | map .id)", std::vector<int>{1,2});
 }
 
-int test_length() {
-    return test("length", [](const Parser& parser) {
-        return tests(
-            test_expression<types::IntegerType>(". | length", std::vector{1,2,3}, 3L),
-            test_expression<types::IntegerType>(". | length", std::vector<int>{}, 0L),
-            test_expression<types::IntegerType>(". | length", std::vector<std::string>{"1"}, 1L),
-            test_expression<types::IntegerType>(". | length", "Hello", 5L)
-        );
-    });
+TEST(Length, Functions) {
+    expect::expression(". | length", 3L, std::vector{1,2,3});
+    expect::expression(". | length", 1L, std::vector<std::string>{"1"});
+    expect::expression(". | length", 5L, "Hello");
 }
 
-int test_join() {
-    return test("join", [](const Parser& parser) {
-        return tests(
-            test_expression<std::string>(R"(. | join ", ")", std::vector{1,2,3}, "1, 2, 3"),
-            test_expression<std::string>(R"(. | join "some text")", std::vector<int>{}, ""),
-            test_expression<std::string>(R"(. | join " ")", std::vector<std::string>{"1"}, "1")
-        );
-    });
+TEST(Join, Functions) {
+    expect::expression(R"(. | join ", ")", "1, 2, 3", std::vector{1,2,3});
+    expect::expression(R"(. | join "some text")", "", std::vector<int>{});
+    expect::expression(R"(. | join " ")", "1", std::vector<std::string>{"1"});
 }
 
-int test_contains() {
-    return test("contains", [](const Parser& parser) {
-        return tests(
-            test_expression(R"([1,2,3] | contains 2)", true),
-            test_expression(R"([1,2,3] | contains 4)", false),
-            test_expression(R"(["apple", "banana", "cherry"] | contains "apple")", true)
-        );
-    });
+TEST(Contains, Functions) {
+    expect::expression(R"([1,2,3] | contains 2)", true);
+    expect::expression(R"([1,2,3] | contains 4)", false);
+    expect::expression(R"(["apple", "banana", "cherry"] | contains "apple")", true);
 }
 
-int test_each() {
-    return test("each", [](const Parser& parser) {
-        return tests(
-            test_expression(R"(var $set = set_new; [1, 2, 3] | each (set_add $set .); set_has $set 2)", true)
-        );
-    });
+TEST(Each, Functions) {
+    expect::expression(R"(var $set = set_new; [1, 2, 3] | each (set_add $set .); set_has $set 2)", true);
 }
 
-int test_all() {
-    return test("all", [](const Parser& parser) {
-        return tests(
-            test_expression(R"([false, true, true] | all .)", false),
-            test_expression(R"([true, true, true] | all .)", true)
-        );
-    });
+TEST(All, Functions) {
+    expect::expression(R"([false, true, true] | all .)", false);
+    expect::expression(R"([true, true, true] | all .)", true);
 }
 
-int test_any() {
-    return test("any", [](const Parser& parser) {
-        return tests(
-            test_expression(R"([false, true, true] | any .)", true),
-            test_expression(R"([false, false, false] | any .)", false)
-        );
-    });
+TEST(Any, Functions) {
+    expect::expression(R"([false, true, true] | any .)", true);
+    expect::expression(R"([false, false, false] | any .)", false);
 }
 
-int test_sort() {
-    return test("sort", [](const Parser& parser) {
-        return tests(
-            test_expression<types::ArrayType>(R"([1, 2, 3] | sort (sub .[0] .[1]))", std::vector<int>{1, 2, 3}),
-            test_expression<types::ArrayType>(R"([2, 4, 1, 6, 3, 7, 5, 2] | sort (sub .[0] .[1]))", 
-                                              std::vector<int>{1, 2, 2, 3, 4, 5, 6, 7})
-        );
-    });
+TEST(Sort, Functions) {
+    expect::expression(R"([1, 2, 3] | sort (sub .[0] .[1]))", std::vector<int>{1, 2, 3});
+    expect::expression(R"([2, 4, 1, 6, 3, 7, 5, 2] | sort (sub .[0] .[1]))", std::vector<int>{1, 2, 2, 3, 4, 5, 6, 7});
 }
 
-int test_and() {
-    return test("and", [](const Parser& parser) {
-        return tests(
-            test_expression("and true false", false),
-            test_expression("and true true", true),
-            test_expression("and false false", false)
-        );
-    });
+TEST(And, Functions) {
+    expect::expression("and true false", false);
+    expect::expression("and true true", true);
+    expect::expression("and false false", false);
 }
 
-int test_or() {
-    return test("or", [](const Parser& parser) {
-        return tests(
-            test_expression("or true false", true),
-            test_expression("or true true", true),
-            test_expression("or false false", false)
-        );
-    });
+TEST(Or, Functions) {
+    expect::expression("not true", false);
+    expect::expression("not false", true);
 }
 
-int test_xor() {
-    return test("xor", [](const Parser& parser) {
-        return tests(
-            test_expression("xor true false", true),
-            test_expression("xor true true", false),
-            test_expression("xor false false", false)
-        );
-    });
+TEST(RandStr, Functions) {
+    auto first = do_expression(R"(randstr "0123456789abcdef" 3)");
+    auto second = do_expression(R"(randstr "abcdefghijklmnopqrstuvwxyz" 12)");
+
+    expect::expect(first.is<types::StringType>() && first.as<types::StringType>().length() == 3,
+                  "Expected randstr to generate a string of length 3");
+
+    expect::expect(second.is<types::StringType>() && second.as<types::StringType>().length() == 12,
+                  "Expected randstr to generate a string of length 12, generated "
+                   + std::to_string(second.as<types::StringType>().length()));
 }
 
-int test_not() {
-    return test("not", [](const Parser& parser) {
-        return tests(
-            test_expression("not true", false),
-            test_expression("not false", true)
-        );
-    });
+TEST(If, Functions) {
+    expect::expression(R"(if (.x) (.y) "" | .b)", 1);
 }
 
-int test_rand() {
-    return test("rand", [](const Parser& parser) {
-        return tests(
-            test_expression<types::FloatType>(
-                "rand", 
-                [](const double& v) { return v > 0 && v < 1; }
-            ),
-            test_expression<types::IntegerType>(
-                "rand 1 3", 
-                [](const long& v) { return v >= 1 && v <= 3; }
-            ),
-            expect_throw([]() {
-                test_expression<types::IntegerType>(
-                    "rand 1", 
-                    [](const long& v) { return false; }
-                );
-            })
-        );
-    });
+TEST(While, Functions) {
+    expect::expression(R"(var $v = 0; while (lt $v 3) ($v = add $v 1; 0); $v)", 3);
+    expect::expression(R"(while false 12 | and true)", false);
 }
 
-int test_rand_str() {
-    return test("randstr", [](const Parser &parser) {
-        return tests(
-            test_expression<types::StringType, std::function<bool (const std::string&)>>(
-                R"(randstr "0123456789abcdef" 3)", 
-                [](const std::string &v) { return v.length() == 3; }
-            ),
-            test_expression<types::StringType, std::function<bool (const std::string&)>>(
-                R"(randstr "abcdefghijklmnopqrstuvwxyz" 12)", 
-                [](const std::string &v) { return v.length() == 12; }
-            )
-        );
-    });
+TEST(Type, Functions) {
+    expect::expression(R"(2 | type)", "long");
+    expect::expression(R"(2.4 | type)", "double");
+    expect::expression(R"(false | type)", "boolean");
+    expect::expression(R"([1,2] | type)", "array");
+    expect::expression(R"(null | type)", "null");
 }
 
-int test_if() {
-    return test("if", [](const Parser& parser) {
-        return tests(
-            test_expression<short>(R"(if (.x) (.y) "" | .b)", 1)
-        );
-    });
+TEST(Replace, Functions) {
+    expect::expression(R"(replace "Hello" "e" "a")", "Hallo");
+    expect::expression(R"("test" | replace "test" "something")", "something");
+    expect::expression(R"(replace "AAAAAa" "A" "BA")", "BABABABABAa");
 }
 
-int test_while() {
-    return test("while", [](const Parser& parser) {
-        return tests(
-            test_expression<long>(R"(var $v = 0; while (lt $v 3) ($v = add $v 1; 0); $v)", 3),
-            test("Uninitialized return value", []() {
-                return tests(
-                    test_expression(R"(while false 12 | and true)", false)
-                );
-            })
-        );
-    });
+TEST(PadEnd, Functions) {
+    expect::expression<std::string>(R"(padEnd "Hello" 8 "o")", "Helloooo");
+    expect::expression(R"(padEnd "Long Text" 2 "-")", "Long Text");
+    expect::expression(R"(padEnd "" 3 "0")", "000");
 }
 
-int test_type() {
-    return test("type", []() {
-        return tests(
-            test_expression(R"(2 | type)", "long"),
-            test_expression(R"(2.4 | type)", "double"),
-            test_expression(R"(false | type)", "boolean"),
-            test_expression(R"([1,2] | type)", "array"),
-            test_expression(R"(null | type)", "null")
-        );
-    });
+TEST(PadStart, Functions) {
+    expect::expression(R"(padStart "2" 2 "0")", "02");
+    expect::expression(R"(padStart "Long Text" 2 "-")", "Long Text");
+    expect::expression(R"(padStart "" 3 "0")", "000");
 }
 
-int test_replace() { 
-    return test("replace", [](const Parser& parser) {
-        return tests(
-            test_expression<std::string>(R"(replace "Hello" "e" "a")", "Hallo"),
-            test_expression<std::string>(R"("test" | replace "test" "something")", "something"),
-            test_expression<std::string>(R"(replace "AAAAAa" "A" "BA")", "BABABABABAa")
-        );
-    });
+TEST(Trim, Functions) {
+    expect::expression(R"("  test  " | trim)", "test");
+    expect::expression(R"("  " | trim)", "");
+    expect::expression(R"("test" | trim)", "test");
 }
 
-int test_padEnd() { 
-    return test("padEnd", [](const Parser& parser) {
-        return tests(
-            test_expression<std::string>(R"(padEnd "Hello" 8 "o")", "Helloooo"),
-            test_expression<std::string>(R"(padEnd "Long Text" 2 "-")", "Long Text"),
-            test_expression<std::string>(R"(padEnd "" 3 "0")", "000")
-        );
-    });
+TEST(Upper, Functions) {
+    expect::expression(R"("Test" | upper)", "TEST");
+    expect::expression(R"("" | upper)", "");
 }
 
-int test_padStart() { 
-    return test("padStart", [](const Parser& parser) {
-        return tests(
-            test_expression<std::string>(R"(padStart "2" 2 "0")", "02"),
-            test_expression<std::string>(R"(padStart "Long Text" 2 "-")", "Long Text"),
-            test_expression<std::string>(R"(padStart "" 3 "0")", "000")
-        );
-    });
+TEST(Lower, Functions) {
+    expect::expression(R"("Test" | lower)", "test");
+    expect::expression(R"("" | lower)", "");
 }
 
-int test_trim() { 
-    return test("trim", [](const Parser& parser) {
-        return tests(
-            test_expression<std::string>(R"("  test  " | trim)", "test"),
-            test_expression<std::string>(R"("  " | trim)", ""),
-            test_expression<std::string>(R"("test" | trim)", "test")
-        );
-    });
+TEST(Split, Functions) {
+    expect::expression(R"("2.2.1" | split ".")", std::vector<std::string>{"2", "2", "1"});
+    expect::expression(R"("test" | split "")", std::vector<std::string>{"t","e","s","t"});
+    expect::expression(R"("banana and orange" | split " and ")", std::vector<std::string>{"banana", "orange"});
+    expect::expression(R"("" | split "value")", std::vector<std::string>{""});
 }
 
-int test_upper() { 
-    return test("upper", [](const Parser& parser) {
-        return tests(
-            test_expression<std::string>(R"("Test" | upper)", "TEST"),
-            test_expression<std::string>(R"("" | upper)", "")
-        );
-    });
+TEST(Substr, Functions) {
+    expect::expression(R"("abcd" | substr 2 4)", "cd");
+    expect::expression(R"("Johnathan" | substr 4)", "athan");
 }
 
-int test_lower() { 
-    return test("lower", [](const Parser& parser) {
-        return tests(
-            test_expression<std::string>(R"("Test" | lower)", "test"),
-            test_expression<std::string>(R"("" | lower)", "")
-        );
-    });
+TEST(Cmp, Functions) {
+    expect::expression(R"(cmp 1 0)", 1L);
+    expect::expression(R"(cmp "a" "b")", -1L);
 }
 
-int test_split() { 
-    return test("split", [](const Parser& parser) {
-        return tests(
-            test_expression<types::ArrayType, std::vector<std::string>>(R"("2.2.1" | split ".")", {"2", "2", "1"}),
-            test_expression<types::ArrayType, std::vector<std::string>>(R"("test" | split "")", {"t","e","s","t"}),
-            test_expression<types::ArrayType, std::vector<std::string>>(R"("banana and orange" | split " and ")", {"banana", "orange"}),
-            test_expression<types::ArrayType, std::vector<std::string>>(R"("" | split "value")", {""})
-        );
-    });
+TEST(LT, Functions) {
+    expect::expression(R"(lt 2 1)", false);
+    expect::expression(R"(lt "a" "b")", true);
 }
 
-int test_substr() { 
-    return test("substr", [](const Parser& parser) {
-        return tests(
-            test_expression<std::string>(R"("abcd" | substr 2 4)", "cd"),
-            test_expression<std::string>(R"("Johnathan" | substr 4)", "athan")
-        );
-    });
+TEST(GT, Functions) {
+    test_expression(R"(gt 1 2)", false);
+    test_expression(R"(gt "b" "a")", true);
 }
 
-int test_cmp() { 
-    return test("cmp", [](const Parser& parser) {
-        return tests(
-            test_expression(R"(cmp 1 0)", 1L),
-            test_expression(R"(cmp "a" "b")", -1L)
-        );
-    });
-}
-
-int test_lt() { 
-    return test("lt", [](const Parser& parser) {
-        return tests(
-            test_expression(R"(lt 2 1)", false),
-            test_expression(R"(lt "a" "b")", true)
-        );
-    });
-}
-
-int test_gt() { 
-    return test("gt", [](const Parser& parser) {
-        return tests(
-            test_expression(R"(gt 1 2)", false),
-            test_expression(R"(gt "b" "a")", true)
-        );
-    });
-}
-
-int test_eq() { 
-    return test("eq", [](const Parser& parser) {
-        return tests(
-            test_expression(R"(eq 1 1)", true),
-            test_expression(R"(eq "a" "b")", false),
-            test_expression(R"(eq 1.0 1)", true),
-            test_expression(R"(eq 1 1.0)", true)
-        );
-    });
+TEST(EQ, Functions) {
+    expect::expression(R"(eq 1 1)", true);
+    expect::expression(R"(eq "a" "b")", false);
+    expect::expression(R"(eq 1.0 1)", true);
+    expect::expression(R"(eq 1 1.0)", true);
 }
 
 /**
  * @brief Tests all set-related functions.
  */
-int test_set() {
-    return test("set", [](const Parser& parser) {
-        auto expr = parser.get_expression(
-            "persist var $set = set_new; set_add $set .; set_has $set 5", 
-            ParseOpts{});
+TEST(Set, Functions) {
+    Parser parser;
 
-        auto ctx = parser.context().builder().use_default(make_data<std::string>("test")).build();
-        auto value = expr->retrieve(*ctx);
-        expect_equal<types::BoolType>(value, false);
+    auto expr = parser.get_expression(
+        "persist var $set = set_new; set_add $set .; set_has $set 5", 
+        ParseOpts{});
 
-        ctx = parser.context().builder().use_default(make_data(5)).build();
-        value = expr->retrieve(*ctx);
-        expect_equal<types::BoolType>(value, true);
+    auto ctx = parser.context().builder().use_default(make_data<std::string>("test")).build();
+    auto value = expr->retrieve(*ctx);
+    expect_equal<types::BoolType>(value, false);
 
-        ctx = parser.context().builder().use_default(make_data(7)).build();
-        value = expr->retrieve(*ctx);
-        expect_equal<types::BoolType>(value, true);
+    ctx = parser.context().builder().use_default(make_data(5)).build();
+    value = expr->retrieve(*ctx);
+    expect_equal<types::BoolType>(value, true);
 
-        //Test for no default data. This was causing variable 0 not defined earlier.
-        expr = parser.get_expression(
-            "const var $s = set_new; set_add $s 1; set_add $s 2; set_add $s 2; $s | map .", 
-            ParseOpts{});
+    ctx = parser.context().builder().use_default(make_data(7)).build();
+    value = expr->retrieve(*ctx);
+    expect_equal<types::BoolType>(value, true);
 
-        ctx = parser.context().builder().build();
-        value = expr->retrieve(*ctx);
+    //Test for no default data. This was causing variable 0 not defined earlier.
+    expr = parser.get_expression(
+        "const var $s = set_new; set_add $s 1; set_add $s 2; set_add $s 2; $s | map .", 
+        ParseOpts{});
 
-        return tests(
-            test_expression(R"(set_new | set_add 143 | set_has 143)", true),
-            test_expression(R"(set_new | set_add 143 | set_add "test" | set_has 420)", false),
-            test_expression(R"(set_new | set_add "test" | set_add 143 | set_has "test")", true),
-            test_expression(R"(set_new | set_add "test" | set_add 143 | set_has "test")", true),
-            test_expression(R"(set_new | set_add "test" | set_add 143 | map (1) | length)", 2),
-            test_expression(R"(
-                            var $set = set_new;
-                            var $i = 0;
-                            while (lt $i 10) (
-                                set_add $set $i;
-                                $i = add $i 1; 0
-                            );
-                            set_has $set 5
-                            )", true)
-        );
-    });
-}
+    ctx = parser.context().builder().build();
+    value = expr->retrieve(*ctx);
 
-int test_numeric_string_converter() {
-    return test("numeric_string_converter", [](const Parser& parser) {
-        return tests(
-            test_conversion<types::StringType>(1, std::string{"1"}),
-            test_conversion<types::StringType>(1.4, std::string{"1.4"})
-        );
-    });
-}
-
-int test_numeric_bool_converter() {
-    return test("numeric_bool_converter", [](const Parser& parser) {
-        return tests(
-            test_conversion<types::BoolType>(1, true),
-            test_conversion<types::BoolType>(0, false),
-            test_conversion<types::BoolType>(11212521L, true),
-            test_conversion<types::BoolType>(0, false),
-            test_conversion<types::BoolType>(1.3, true),
-            test_conversion<types::BoolType>(0, false)
-        );
-    });
-}
-
-int test_string_bool_converter() {
-    return test("string_bool_converter", [](const Parser& parser) {
-        return tests(
-            test_conversion<types::BoolType>(" ", true),
-            test_conversion<types::BoolType>("Hello, World", true),
-            test_conversion<types::BoolType>("", false)
-        );
-    });
-}
-
-int test_bool_string_converter() {
-    return test("bool_string_converter", [](const Parser& parser) {
-        return tests(
-            test_conversion<types::StringType>(true, "true"),
-            test_conversion<types::StringType>(false, "false")
-        );
-    });
-}
-
-int test_functions() {
-    return group("functions", []() {
-        return tests(
-            test_str(),
-            test_if(),
-            test_while(),
-            test_type(),
-
-            test_set(),
-
-            test_add(),
-            test_sub(),
-            test_mul(),
-            test_div(),
-
-            test_length(),
-            test_join(),
-            test_map(),
-            test_contains(),
-            test_each(),
-            test_all(),
-            test_any(),
-            test_sort(),
-
-            test_and(),
-            test_xor(),
-            test_or(),
-            test_not(),
-
-            test_rand(),
-            test_rand_str(),
-
-            test_replace(),
-            test_padEnd(),
-            test_padStart(),
-            test_trim(),
-            test_lower(),
-            test_upper(),
-            test_split(),
-            test_substr(),
-
-            test_cmp(),
-            test_lt(),
-            test_gt(),
-            test_eq()
-        );
-    });
+    expect::expression(R"(set_new | set_add 143 | set_has 143)", true);
+    expect::expression(R"(set_new | set_add 143 | set_add "test" | set_has 420)", false);
+    expect::expression(R"(set_new | set_add "test" | set_add 143 | set_has "test")", true);
+    expect::expression(R"(set_new | set_add "test" | set_add 143 | set_has "test")", true);
+    expect::expression(R"(set_new | set_add "test" | set_add 143 | map (1) | length)", 2);
+    expect::expression(R"(
+                    var $set = set_new;
+                    var $i = 0;
+                    while (lt $i 10) (
+                        set_add $set $i;
+                        $i = add $i 1; 0
+                    );
+                    set_has $set 5
+                    )", true);
 }
 
 
-int test_converters() {
-    return group("converters", []() {
-        return tests(
-            test_numeric_string_converter(),
-            test_numeric_bool_converter(),
-            test_string_bool_converter(),
-            test_bool_string_converter()
-        );
-    });
+
+CATEGORY_SUB(Converters, Stdlib);
+
+TEST(IntegerString, Converters) {
+    expect::conversion<types::StringType>(1, std::string{"1"});
+    expect::conversion<types::StringType>(1.4, std::string{"1.4"});
 }
+
+TEST(IntegerBool, Converters) {
+    test_conversion<types::BoolType>(1, true);
+    test_conversion<types::BoolType>(0, false);
+    test_conversion<types::BoolType>(11212521L, true);
+    test_conversion<types::BoolType>(0, false);
+    test_conversion<types::BoolType>(1.3, true);
+    test_conversion<types::BoolType>(0, false);
+}
+
+TEST(StringBool, Converters) {
+    test_conversion<types::BoolType>(" ", true);
+    test_conversion<types::BoolType>("Hello, World", true);
+    test_conversion<types::BoolType>("", false);
+}
+
+TEST(BoolString, Converters) {
+    test_conversion<types::StringType>(true, "true");
+    test_conversion<types::StringType>(false, "false");
+}
+
+
+
+TEST(Misc, Stdlib) {
+    expect::expression(
+        R"(
+        var $i = 0; 
+        var $str = "a"; 
+        while (lt $i 3) ( 
+            $i = add $i 1; 
+            $str = add $str "a"; 
+            $str
+        ))", 
+        "aaaa");
+}
+
+
 
 int test_stdlib(int, char** const) {
-    auto ctx = get_test_context().context().shared_from_this();
-    auto res = group("stdlib", []() {
-        return tests(
-            test_functions(),
-            test_converters(),
-            test("Misc", [](const Parser& parser) {
-                return tests(
-                    test_expression<std::string>(
-                        R"(
-                        var $i = 0; 
-                        var $str = "a"; 
-                        while (lt $i 3) ( 
-                            $i = add $i 1; 
-                            $str = add $str "a"; 
-                            $str
-                        ))", 
-                        "aaaa")
-                );
-            })
-        );
-    });
-    return res;
+    auto result = RUN_CATEGORY(Stdlib);
+    std::cout << result << std::endl;
+
+    return result.passed() ? 0 : 1;
 }

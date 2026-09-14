@@ -1,10 +1,12 @@
 #pragma once
+#include <utility>
 #ifndef INCLUDE_TESTS_TESTING_HXX_
 #define INCLUDE_TESTS_TESTING_HXX_
 
+#include "siplus/context.hxx"
+#include "common.hxx"
 
 #include <exception>
-#include <numeric>
 #include <stacktrace>
 #include <chrono>
 #include <functional>
@@ -15,17 +17,29 @@
 #include <streambuf>
 #include <string>
 
-#define CATEGORY(name) namespace test_detail { \
+#define _MAKE_CATEGORY(name, parent) namespace test_detail { \
 TestCategory *Category##name = nullptr; \
 TestCategory *make_category_##name() {  \
-    if(Category##name == nullptr) Category##name = new TestCategory(#name); \
+    if(Category##name == nullptr) Category##name = new TestCategory(parent, #name); \
     return Category##name; \
 } \
-} /* namespace test_detail */ \
+} /* namespace test_detail */
 
-#define TEST(name, category) bool Test##name##Impl(TestingContext *ctx); \
+
+#define CATEGORY(name) _MAKE_CATEGORY(name, nullptr)
+#define CATEGORY_SUB(name, parent) _MAKE_CATEGORY(name, make_category_##parent())
+
+#define TEST(name, category) void Test##name##Impl(TestingContext *t); \
 TestDescriptor *Test##name = new TestDescriptor(test_detail::make_category_##category(), #name, TestDescriptor::impl_type{Test##name##Impl}); \
-bool Test##name##Impl(TestingContext *ctx)
+void Test##name##Impl(TestingContext *t)
+
+#define RUN_CATEGORY(name) test_detail::make_category_##name()->run_all()
+
+#define STR(x) #x
+#define EXPECT_TRUE_S(expr, msg) ::expect::expect(expr, msg);
+#define EXPECT_TRUE(expr) ::expect::expect(expr, "Expected '" #expr "' to be true. Was false.");
+#define EXPECT_EQUAL(expected, actual) auto result = actual; \
+::expect::expect(expr, "Expected '" STR(actual) "' to be == to '" STR(expected) ". Got: '" + ::SIPLUS_NAMESPACE::util::to_string(result) + "'");
 
 class TestDescriptor;
 class TestCategory;
@@ -43,11 +57,15 @@ class TestFailure;
 
 
 class IndentStreambuf : public std::streambuf {
-private:
-    std::streambuf* dest_buf;
-    bool is_at_start_of_line;
-    int indent_index;
-    std::ostream& stream;
+public:
+    IndentStreambuf(std::ostream& os, int idx) 
+        : dest_buf(os.rdbuf()), is_at_start_of_line(true), indent_index(idx), stream(os) {
+        os.rdbuf(this); 
+    }
+
+    ~IndentStreambuf() override {
+        stream.rdbuf(dest_buf); 
+    }
 
 protected:
     int overflow(int ch) override {
@@ -70,15 +88,11 @@ protected:
         return dest_buf->sputc(ch);
     }
 
-public:
-    IndentStreambuf(std::ostream& os, int idx) 
-        : dest_buf(os.rdbuf()), is_at_start_of_line(true), indent_index(idx), stream(os) {
-        os.rdbuf(this); 
-    }
-
-    ~IndentStreambuf() override {
-        stream.rdbuf(dest_buf); 
-    }
+private:
+    std::streambuf* dest_buf;
+    bool is_at_start_of_line;
+    int indent_index;
+    std::ostream& stream;
 };
 
 struct streambuf_indent {
@@ -107,6 +121,7 @@ inline streambuf_indent indent(int s) { return streambuf_indent{s}; }
 
 
 using TestTimestamp = std::chrono::time_point<std::chrono::system_clock>;
+using TestDuration = std::chrono::microseconds;
 
 class TestFailure : public std::runtime_error {
 public:
@@ -141,6 +156,7 @@ public:
     template<typename T>
     friend TestLogEntryBuilder& operator<<(TestLogEntryBuilder& builder, const T& result) {
         builder.ss_ << result;
+        return builder;
     }
 
     friend void swap(TestLogEntryBuilder& first, TestLogEntryBuilder& other);
@@ -190,17 +206,17 @@ private:
 
 class TestDescriptor {
 public:
-    using impl_type = std::function<bool (TestingContext *)>;
+    using impl_type = std::function<void (TestingContext *)>;
 
     TestDescriptor(TestCategory *category, std::string name, impl_type implementation) noexcept;
 
-    const TestCategory* category() const;
+    const TestCategory *category() const;
     std::string name() const;
 
     TestResult invoke() const noexcept;
 
 private:
-    TestCategory *category_;
+    const TestCategory *const category_;
     std::string name_;
     impl_type impl_;
 };
@@ -209,16 +225,25 @@ class TestCategory {
 public:
     friend class TestDescriptor;
 
-    TestCategory(std::string name) : name(name) {}
+    TestCategory(std::string name) : TestCategory(nullptr, name) {}
+    TestCategory(TestCategory *parent, std::string name) : name_(name), parent_(parent) {
+        if(parent != nullptr) {
+            parent->categories_.emplace_back(this);
+        }
+    }
+
+    std::string name() const;
     std::list<TestDescriptor*> tests();
+    const TestCategory *parent() { return parent_; }
 
-    CategoryResult run_all();
-
-    const std::string name;
+    CategoryResult run_all() const;
 
 private:
     void register_test(TestDescriptor *test) noexcept;
 
+    const std::string name_;
+    const TestCategory *const parent_;
+    std::list<TestCategory*> categories_;
     std::list<TestDescriptor*> tests_;
 };
 
@@ -229,6 +254,7 @@ struct TestResult {
     bool passed;
     std::list<TestLogEntry> log;
     std::optional<std::exception_ptr> exception = std::nullopt;
+    std::chrono::microseconds runtime;
 
     template<typename OStream>
     friend OStream& operator<<(OStream& out, const TestResult& result) {
@@ -238,7 +264,7 @@ struct TestResult {
             out << "❌ FAILED";
         }
 
-        out << ' ' << result.test->name();
+        out << ' ' << result.test->name() << ' ' << result.runtime;
 
         if(result.exception) {
             auto oldIndent = indent(out);
@@ -253,6 +279,7 @@ struct TestResult {
 struct CategoryResult {
     const TestCategory *category;
     std::list<TestResult> results;
+    std::chrono::milliseconds duration;
 
     bool passed() {
         bool passed = true;
@@ -266,7 +293,7 @@ struct CategoryResult {
 
     template<typename OStream>
     friend OStream& operator<<(OStream& out, const CategoryResult& result) {
-        out << "Category " << result.category->name;
+        out << "Category " << result.category->name();
 
         auto oldIndent = indent(out);
         auto count = 0;
@@ -280,7 +307,7 @@ struct CategoryResult {
             out << "\n" << count << ". " << testResult;
         }
 
-        out << "\n\n" << passed << '/' << count << " passed" 
+        out << "\n\n" << passed << '/' << count << " passed in " << result.duration
             << indent(oldIndent);
 
         return out;
@@ -289,14 +316,112 @@ struct CategoryResult {
 
 namespace expect {
 
-void assert(bool condition, std::string message);
+namespace detail {
+
+template<typename L, typename R>
+struct equal_tester {
+    static bool test(const L& lhs, const R& rhs) {
+        return lhs == rhs;
+    }
+};
+
+template<>
+struct equal_tester<double, double> {
+    static bool test(const double& val, const double& other) {
+        return nearly_equal(val, other);
+    }
+};
+
+template<typename T>
+concept is_data_container = requires {
+    requires std::is_same_v<std::remove_cvref_t<T>, SIPLUS_NAMESPACE::UnknownDataTypeContainer>;
+};
+
+} /* detail */
+
+/**
+ * @brief Test equality in C++ code, not in SIPlus code. This is useful to avoid
+ * possible SIPlus type conversions when testing equality when you want to strictly 
+ * make sure that a value is a certain exact value.
+ *
+ * (side note, are we basically making == vs === again? If so, someone stop me)
+ *
+ * @tparam L Left hand value
+ * @tparam R Right hand value
+ * @param[in] lhs Left hand value 
+ * @param[in] rhs Right hand value
+ * @return whether they are equal
+ */
+template<typename L, typename R>
+bool equal(const L& lhs, const R& rhs) {
+    return detail::equal_tester<L, R>::test(lhs, rhs);
+}
+
+void expect(bool condition, std::string message);
+
+void expression(
+    const std::string& expression, 
+    const SIPLUS_NAMESPACE::UnknownDataTypeContainer& expected,
+    const SIPLUS_NAMESPACE::UnknownDataTypeContainer& defaultData 
+);
+
+template<
+    typename Expected,
+    typename Default = SIPLUS_NAMESPACE::UnknownDataTypeContainer
+> requires (!detail::is_data_container<Default> || !detail::is_data_container<Expected>)
+void expression(
+    const std::string& expression, 
+    Expected&& expected,
+    Default&& defaultData = SIPLUS_NAMESPACE::make_data(test_data{})
+) {
+    expect::expression(
+        expression, 
+        SIPLUS_NAMESPACE::make_data(std::forward<Expected>(expected)),
+        SIPLUS_NAMESPACE::make_data(std::forward<Default>(defaultData)) 
+    );
+}
+
+template<SIPLUS_NAMESPACE::simple_value_retrievable_type T>
+void conversion(
+    const SIPLUS_NAMESPACE::UnknownDataTypeContainer& from,
+    const typename T::data_type& to
+) {
+    if(!from.can_convert(T::descriptor)) {
+        throw TestFailure{SIPLUS_NAMESPACE::util::to_string(
+            "No converter available to convert from '", from.type, "' to '", 
+            T::descriptor->name, "'"
+        )};
+    }
+
+    auto result = from.convert(T::descriptor);
+
+    expect::expect(equal(result.template as<T>(), to), SIPLUS_NAMESPACE::util::to_string(
+        "Value ", from, ", when converted to '", T::descriptor->name, 
+        "', is not equal to ", to, ". Received ", result, "."
+    ));
+}
+
+template<
+    SIPLUS_NAMESPACE::simple_value_retrievable_type T,
+    typename From
+> requires (!detail::is_data_container<From> || !detail::is_data_container<From>)
+void conversion(From&& from, const typename T::data_type& to) {
+    expect::conversion<T>(SIPLUS_NAMESPACE::make_data(std::forward<From>(from)), to);
+}
 
 } /* namespace expect */
 
-#define STR(x) #x
-#define EXPECT_TRUE_S(expr, msg) ::expect::assert(expr, msg);
-#define EXPECT_TRUE(expr) ::expect::assert(expr, "Expected '" #expr "' to be true. Was false.");
-#define EXPECT_EQUAL(expected, actual) auto result = actual; \
-::expect::assert(expr, "Expected '" STR(actual) "' to be == to '" STR(expected) ". Got: '" + ::SIPLUS_NAMESPACE::util::to_string(result) + "'");
+SIPLUS_NAMESPACE::UnknownDataTypeContainer do_expression(
+    const std::string& expression, 
+    const SIPLUS_NAMESPACE::UnknownDataTypeContainer& defaultData = SIPLUS_NAMESPACE::UnknownDataTypeContainer{}
+);
+
+template<typename T> requires (!expect::detail::is_data_container<T>)
+SIPLUS_NAMESPACE::UnknownDataTypeContainer do_expression(
+    const std::string& expression, 
+    T&& defaultData
+) {
+    return do_expression(expression, SIPLUS_NAMESPACE::make_data(std::forward<T>(defaultData)));
+}
 
 #endif  // INCLUDE_TESTS_TESTING_HXX_   
