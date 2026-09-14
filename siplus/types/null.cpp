@@ -21,7 +21,7 @@ struct NullStringConverter : UnaryOperatorTypeExtensionImpl {
     NullStringConverter() : UnaryOperatorTypeExtensionImpl(make_conversion_descriptor<StringType>()) {}
 
     UnknownDataTypeContainer invoke(const UnknownDataTypeContainer &thisValue) const override {
-        return make_data("(null)");
+        return make_data("");
     }
 };
 
