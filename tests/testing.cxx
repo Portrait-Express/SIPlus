@@ -158,14 +158,6 @@ std::string stringify_exception(std::exception_ptr ex) {
 // expect
 //==================
 
-inline void throw_expect_failed(std::string message) {
-    throw TestFailure{message};
-}
-
-inline void throw_expect_failed(std::optional<std::string> message, std::string defaultMessage) {
-    throw TestFailure{message.value_or(defaultMessage)};
-}
-
 SIPLUS_NAMESPACE::UnknownDataTypeContainer do_expression(
     const std::string& expression, 
     const SIPLUS_NAMESPACE::UnknownDataTypeContainer& defaultData

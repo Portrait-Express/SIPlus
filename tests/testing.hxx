@@ -1,4 +1,5 @@
 #pragma once
+#include "siplus/util.hxx"
 #include <utility>
 #ifndef INCLUDE_TESTS_TESTING_HXX_
 #define INCLUDE_TESTS_TESTING_HXX_
@@ -339,6 +340,14 @@ concept is_data_container = requires {
 
 } /* detail */
 
+inline void throw_expect_failed(std::string message) {
+    throw TestFailure{message};
+}
+
+inline void throw_expect_failed(std::optional<std::string> message, std::string defaultMessage) {
+    throw TestFailure{message.value_or(defaultMessage)};
+}
+
 /**
  * @brief Test equality in C++ code, not in SIPlus code. This is useful to avoid
  * possible SIPlus type conversions when testing equality when you want to strictly 
@@ -364,6 +373,52 @@ void expression(
     const SIPLUS_NAMESPACE::UnknownDataTypeContainer& expected,
     const SIPLUS_NAMESPACE::UnknownDataTypeContainer& defaultData 
 );
+
+/**
+ * @brief Compare two lists of values and ensure that they both contain the 
+ * same set of items, but in any order.
+ *
+ * @tparam T The expected values
+ * @param[in] expected The expected items.
+ * @param[in] actual The actual items.
+ */
+template<typename T>
+void unordered_elements(
+    const std::vector<T>& expected,
+    const std::vector<SIPLUS_NAMESPACE::UnknownDataTypeContainer>& actual
+) {
+    expect(
+        expected.size() == actual.size(), 
+        SIPLUS_NAMESPACE::util::to_string(
+            "List sizes do not match. Expected: ", expected, 
+            " Actual: ", actual
+        )
+    );
+
+    std::unordered_map<SIPlus::UnknownDataTypeContainer, long> counts;
+    for(const auto& element : expected) {
+        auto container = SIPLUS_NAMESPACE::make_data(element);
+        counts[container]++;
+    }
+
+    for(const auto& element : actual) {
+        counts[element]--;
+    }
+
+    for(const auto& [k, v] : counts) {
+        if(v > 0) {
+            throw_expect_failed(SIPLUS_NAMESPACE::util::to_string(
+                "Missing elements from expected result. Expected: ", expected, 
+                " Actual: ", actual
+            ));
+        } else if(v < 0) {
+            throw_expect_failed(SIPLUS_NAMESPACE::util::to_string(
+                "Result contained more elements than expected. Expected: ", 
+                expected, " Actual: ", actual
+            ));
+        }
+    }
+}
 
 template<
     typename Expected,

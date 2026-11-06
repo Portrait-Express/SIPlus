@@ -1,5 +1,6 @@
 #pragma once
 #include "siplus/context.hxx"
+#include <iostream>
 #ifndef INCLUDE_TEXT_RANGE_ITERATOR_HXX_
 #define INCLUDE_TEXT_RANGE_ITERATOR_HXX_
 
@@ -58,7 +59,7 @@ struct range_iterator : Iterator {
         if constexpr (std::is_same_v<std::remove_cvref_t<decltype(*std::declval<BIt>())>, UnknownDataTypeContainer>) {
             return *last;
         } else {
-            return make_data(*cur);
+            return make_data(*last);
         }
     }
 

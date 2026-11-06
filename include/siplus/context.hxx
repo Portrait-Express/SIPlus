@@ -675,8 +675,7 @@ struct SIPLUS_EXPORT UnknownDataTypeContainer {
 
     /**
      * @brief Check if two DataContainers are equal. This will use Comparable, 
-     * or Equatable if implemented, or will fall back to comparing type and ptr 
-     * if neither is implemented.
+     * or Equatable if implemented. If neither are implemented, this will throw.
      *
      * @param[in] other The other value
      * @return `true` if the values in the containers are equal.
@@ -838,7 +837,7 @@ bool operator(T&& value) { \
      * @tparam simple_value_retrievable_type The type to cast to
      */
     template<simple_value_retrievable_type T>
-    T::data_type& as() const {
+    constexpr T::data_type& as() const {
         return *reinterpret_cast<T::data_type*>(ptr);
     }
 

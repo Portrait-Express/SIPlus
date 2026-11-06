@@ -4,6 +4,7 @@
 
 #include "siplus/context.hxx"
 #include "siplus/parser.hxx"
+#include "siplus/stl/functions/pair.hxx"
 #include "testing.hxx"
 
 using namespace SIPLUS_NAMESPACE;
@@ -258,6 +259,35 @@ TEST(Set, Functions) {
                     )", true);
 }
 
+TEST(Pair, Functions) {
+    expect::expression(R"(pair 1 2)", std::pair<long, long>{1, 2});
+    expect::expression(R"(pair 1 2 | .first)", 1);
+    expect::expression(R"(pair 1 2 | .second)", 2);
+}
+
+TEST(Dictionary, Functions) {
+    expect::expression(R"(dict_new; 1)", 1);
+    expect::expression(R"(dict_new | dict_set 1 "John" | dict_get 1)", "John");
+    expect::expression(R"(dict_new | dict_set 1 "John" | dict_has 1)", true);
+    expect::expression(R"(dict_new | dict_set 1 "John" | dict_has 2)", false);
+    expect::expression(R"(dict_new | dict_set 1 "John" | length)", 1);
+    expect::expression(R"(dict_new | dict_set 1 "John" | dict_set 2 "Jane" | length)", 2);
+
+    auto keys = do_expression(R"(dict_new | dict_set 1 "John" | dict_set 2 "Jane" | dict_keys)");
+    auto values = do_expression(R"(dict_new | dict_set 1 "John" | dict_set 2 "Jane" | dict_values)");
+
+    keys.assert_type<types::ArrayType>("<dict_keys result>");
+    values.assert_type<types::ArrayType>("<dict_values result>");
+
+    expect::unordered_elements(
+        std::vector<long>{1, 2}, 
+        keys.as<types::ArrayType>()
+    );
+    expect::unordered_elements(
+        std::vector<std::string>{"John", "Jane"}, 
+        values.as<types::ArrayType>()
+    );
+}
 
 
 CATEGORY_SUB(Converters, Stdlib);

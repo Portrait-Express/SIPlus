@@ -209,6 +209,7 @@ bool UnknownDataTypeContainer::operator==(const UnknownDataTypeContainer& other)
     }
 
     throw_cant_operate(*this, other, "compare", "comparable");
+    return false; // Above never returns, this will never be hit
 }
 
 UnknownDataTypeContainer UnknownDataTypeContainer::operator+(const UnknownDataTypeContainer& other) const {

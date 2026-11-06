@@ -1,4 +1,6 @@
 #include "siplus/context.hxx"
+#include "siplus/stl/functions/dictionary.hxx"
+#include "siplus/stl/functions/pair.hxx"
 #include "siplus/util.hxx"
 #include "stl.hxx"
 #include "siplus/stl/functions/comparison.hxx"
@@ -44,6 +46,18 @@ void attach_stl(SIPlusParserContext& context) {
     context.emplace_function<set_new_func>("set_new");
     context.emplace_function<set_add_func>("set_add");
     context.emplace_function<set_has_func>("set_has");
+
+    //Dictionary functions
+    context.emplace_function<DictionaryNewFunction>("dict_new");
+    context.emplace_function<DictionaryHasFunc>    ("dict_has");
+    context.emplace_function<DictionaryGetFunc>    ("dict_get");
+    context.emplace_function<DictionarySetFunc>    ("dict_set");
+    context.emplace_function<DictionaryRemoveFunc> ("dict_remove");
+    context.emplace_function<DictionaryKeysFunc>   ("dict_keys");
+    context.emplace_function<DictionaryValuesFunc> ("dict_values");
+
+    //Pair functions
+    context.emplace_function<PairFunction>("pair");
 
     //Iterator-related
     context.emplace_function<map_func>("map");

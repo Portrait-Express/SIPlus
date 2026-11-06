@@ -55,7 +55,9 @@ set(SIPLUS_SOURCES
     siplus/stdlib/arithmetic.cpp
     siplus/stdlib/comparison.cpp
     siplus/stdlib/control.cpp
+    siplus/stdlib/dictionary.cpp
     siplus/stdlib/iterable.cpp
+    siplus/stdlib/pair.cpp
     siplus/stdlib/set.cpp
     siplus/stdlib/standardlib.cpp
     siplus/stdlib/text.cpp
