@@ -4,6 +4,7 @@
 
 #include "siplus/context.hxx"
 #include "siplus/parser.hxx"
+#include "siplus/stl/functions/dictionary.hxx"
 #include "siplus/stl/functions/pair.hxx"
 #include "testing.hxx"
 
@@ -315,6 +316,14 @@ TEST(StringBool, Converters) {
 TEST(BoolString, Converters) {
     test_conversion<types::StringType>(true, "true");
     test_conversion<types::StringType>(false, "false");
+}
+
+TEST(DictionaryString, Converters) {
+    auto val = make_data<stl::DictionaryType>({
+        { make_data(1), make_data("Jane") }
+    });
+
+    test_conversion<types::StringType>(val, "{ { 1, Jane } }");
 }
 
 

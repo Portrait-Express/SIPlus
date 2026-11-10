@@ -20,7 +20,7 @@ struct PairStringConverter : public UnaryOperatorTypeExtensionImpl {
         auto pair = thisValue.as<PairType>();
         std::stringstream ss;
         
-        ss << "[ " << pair.first << ", " << pair.second << " ]";
+        ss << "{ " << pair.first << ", " << pair.second << " }";
 
         return make_data<types::StringType>(ss.str());
     }

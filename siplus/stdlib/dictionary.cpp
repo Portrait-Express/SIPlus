@@ -16,6 +16,35 @@ namespace stl {
 
 namespace {
 
+struct DictionaryStringConverter : UnaryOperatorTypeExtensionImpl {
+    DictionaryStringConverter() : UnaryOperatorTypeExtensionImpl(
+        make_conversion_descriptor<types::StringType>()
+    ) {}
+
+    UnknownDataTypeContainer invoke(
+        const UnknownDataTypeContainer &thisValue
+    ) const override {
+        std::stringstream ss;
+        auto iterator = thisValue.iterate();
+
+        ss << "{ ";
+
+        while(iterator->more()) {
+            iterator->next();
+
+            ss << iterator->current();
+
+            if(iterator->more()) {
+                ss << ", ";
+            }
+        }
+
+        ss << " }";
+
+        return make_data<types::StringType>(ss.str());
+    }
+};
+
 struct DictionaryNewFunctionImpl : ValueRetriever {
     UnknownDataTypeContainer retrieve(InvocationContext &value) const override {
         return make_data<DictionaryType>(new DictionaryType::data_type());
@@ -152,7 +181,9 @@ private:
 
 const TypeInfoDescriptor *const DictionaryType::descriptor = new TypeInfoDescriptor("dict");
 
-DictionaryType::DictionaryType() : TypeInfo(descriptor) {}
+DictionaryType::DictionaryType() : TypeInfo(descriptor) {
+    add_extension(new DictionaryStringConverter());
+}
 
 UnknownDataTypeContainer
 DictionaryType::index(

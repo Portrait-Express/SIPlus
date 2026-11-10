@@ -1,3 +1,10 @@
+# 2.3.0
+- Added `dict` type
+  - Added `dict_new`, `dict_get`, `dict_set`, `dict_has`, `dict_keys`, 
+  `dict_values` functions
+- Added `pair` type
+  - Added `pair` function
+
 # 2.2.0
 - Added Type Extensions
 - Added Type Descriptors

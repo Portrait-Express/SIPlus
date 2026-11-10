@@ -460,3 +460,96 @@ Create a new version of `list` filtered with `test`
 [2, 3, 1] | filter (. | gt 2 | not) // [1, 2]
 ```
 
+# Pair (2.3.0)
+
+### Extensions:
+- `Converter[string]`
+- `Equatable`
+
+A pair is a type that contains two other values. This can be used for keeping 
+multiple data objects together when they are related.
+
+### Properties:
+- `first`: The first item in the pair
+- `second`: The second item in the pair
+
+```
+pair "name" "John" | .first // "name"
+pair "name" "John" | .second // "John"
+```
+
+## Functions
+
+### pair 
+Create a new pair instance
+
+- `first` - The first item in the pair
+- `second` - The second item in the pair
+Returns: A new pair object
+
+```
+pair 1 "name" | str // { 1, name }
+pair 1 2 | .second // 2
+```
+
+
+# Dictionary (2.3.0)
+
+### Extensions:
+- `Converter[string]`
+
+A dictionary is the implementation of a hashmap, for those familiar with concept. In simple terms
+it is a key-value map of information. You can use a dictionary to store any value to any key. The
+keys types must be Hashable and Equatable.
+
+A dictionary is iterable, and each item in the iterator is a `pair` object. When iterating a 
+dictionary, the items are not guaranteed to be in any order. If you need to sort the elements,
+consider creating a new array (for example with `dict_new | ... | map . | sort`).
+
+```
+dict_new | dict_set 1 "name" | dict_set 2 "id" | map (.first) // { 1, 2 }
+```
+
+You also may directly index a dictionary to get a value, although this will error if the value is 
+not present in the dictionary. To look up a value that may not be present, use (dict_get)[#dict_get]
+
+```
+dict_new | dict_set 1 "test" | .[1] // "test"
+```
+
+## Functions
+
+### dict_new
+Create a new dictionary instance.
+
+```
+dict_new // New dictionary
+```
+
+
+### dict_set
+Set a value in a dictionary. Returns the same dictionary instance.
+
+- `dict` Dictionary instance
+- `key` The key of the dictionary. This can be any Hashable and Equatable value type.
+- `value` Dictionary value. This can be any value.
+
+```
+dict_new | dict_set "key" "value" | dict_set "other" "value2" 
+// { { key, value }, { other, value2 } }
+```
+
+
+### dict_get
+Get a value from a dictionary, or null, if the key does not exist.
+
+- `dict` Dictionary instance
+- `key` The key to look up
+
+```
+dict_new | dict_set "key" "value" | dict_get "key" // "value"
+dict_new | dict_set "key" "value" | dict_get "key2" // null
+
+// As opposed to
+dict_new | dict_set "key" "value" | .["key2"] // throws error
+```
