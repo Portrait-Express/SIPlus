@@ -2,6 +2,7 @@
 #include <functional>
 #include <memory>
 #include <sstream>
+#include <stdexcept>
 #include <unordered_set>
 
 #include "siplus/context.hxx"
@@ -369,7 +370,7 @@ struct FirstFuncImpl : ValueRetriever {
             return iterator->current();
         }
         
-        return UnknownDataTypeContainer{};
+        throw std::runtime_error{"Sequence contained no elements."};
     }
 
 private:
@@ -390,10 +391,13 @@ struct LastFuncImpl : ValueRetriever {
         auto last = UnknownDataTypeContainer{};
         while(iterator->more()) {
             iterator->next();
-            last = iterator->current();
+
+            if(!iterator->more()) {
+                return iterator->current();
+            }
         }
         
-        return last;
+        throw std::runtime_error{"Sequence contained no elements."};
     }
 
 private:
