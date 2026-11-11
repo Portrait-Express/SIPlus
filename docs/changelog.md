@@ -1,3 +1,6 @@
+# 2.3.1
+- Added `groupBy`, `toDict`, `unique`, `flat`, `concat`, `first`, and `last` functions
+
 # 2.3.0
 - Added `dict` type
   - Added `dict_new`, `dict_get`, `dict_set`, `dict_has`, `dict_keys`, 

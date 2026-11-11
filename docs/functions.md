@@ -460,6 +460,55 @@ Create a new version of `list` filtered with `test`
 [2, 3, 1] | filter (. | gt 2 | not) // [1, 2]
 ```
 
+## unique (2.3.1)
+Select only items that are unique.
+
+- `items` The items to filter
+Returns: A new array of the unique elements, in the same relative order.
+
+```
+[1, 2, 3, 1, 4] | unique // [1, 2, 3, 4]
+```
+
+## flat (2.3.1)
+Flattens any iterables inside an iterable value.
+
+- `items` The iterable to flatten.
+Returns: A new array of the flattened iterables.
+
+```
+[[1, 2], 3] | flat // [1, 2, 3]
+```
+
+## concat (2.3.1)
+Concatenates two iterable sequences.
+
+- `first` The first sequence
+- `second` The second sequence
+Returns: A new array of the two sequences.
+
+```
+[1, 2] | concat [2, 3] // [1, 2, 2, 3]
+```
+
+## first (2.3.1)
+Get the first item in a sequence.
+
+- `items` The items to get the first item from.
+
+```
+[1, 2, 3] | first // 1
+```
+
+## last (2.3.1)
+Get the last item in a sequence.
+
+- `items` The items to get the last item from.
+
+```
+[1, 2, 3] | last // 3
+```
+
 # Pair (2.3.0)
 
 ### Extensions:
@@ -522,6 +571,8 @@ dict_new | dict_set 1 "test" | .[1] // "test"
 ### dict_new
 Create a new dictionary instance.
 
+Returns: A new dictionary.
+
 ```
 dict_new // New dictionary
 ```
@@ -533,6 +584,7 @@ Set a value in a dictionary. Returns the same dictionary instance.
 - `dict` Dictionary instance
 - `key` The key of the dictionary. This can be any Hashable and Equatable value type.
 - `value` Dictionary value. This can be any value.
+Returns: `dict`
 
 ```
 dict_new | dict_set "key" "value" | dict_set "other" "value2" 
@@ -545,6 +597,7 @@ Get a value from a dictionary, or null, if the key does not exist.
 
 - `dict` Dictionary instance
 - `key` The key to look up
+Returns: The item at the key, or `null` if that key does not exist in the dictionary.
 
 ```
 dict_new | dict_set "key" "value" | dict_get "key" // "value"
@@ -552,4 +605,27 @@ dict_new | dict_set "key" "value" | dict_get "key2" // null
 
 // As opposed to
 dict_new | dict_set "key" "value" | .["key2"] // throws error
+```
+
+### toDict (2.3.1)
+Turn an iterable into a dictionary. This will error if multiple entries have the same key.
+
+- `items` The items to make a dictionary of
+- `keySelector` Derivation for getting the key for this item
+Returns: A new dictionary of the items by their generated key.
+
+```
+["foo", "bar"] | toDict .[0] | dict_get "f" // "foo"
+```
+
+### groupBy (2.3.1)
+Group a list of items by a particular key.
+
+- `items` The items to group.
+- `keySelector` Derivation for getting the key for this item. If two items generate the 
+  same key, they are included together.
+Returns: A new dictionary of key to array of items
+
+```
+["foo", "bar", "baz"] | toDict .[0] | dict_get "b" // [ "bar", "baz" ]
 ```
