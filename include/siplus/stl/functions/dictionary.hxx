@@ -76,6 +76,20 @@ struct SIPLUS_EXPORT DictionaryKeysFunc : Function {
     ) const override;
 };
 
+struct SIPLUS_EXPORT ToDictFunc : Function {
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent,
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
+    ) const override;
+};
+
+struct SIPLUS_EXPORT GroupFunc : Function {
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent,
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
+    ) const override;
+};
+
 } /* stl */
 
 SIPLUS_DEFINE_TYPE_INFO(stl::DictionaryType::data_type, stl::DictionaryType);

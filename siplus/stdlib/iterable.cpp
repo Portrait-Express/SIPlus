@@ -2,6 +2,7 @@
 #include <functional>
 #include <memory>
 #include <sstream>
+#include <unordered_set>
 
 #include "siplus/context.hxx"
 #include "siplus/stl/functions/iterable.hxx"
@@ -258,7 +259,148 @@ private:
     std::shared_ptr<ValueRetriever> comparator_;
 };
 
-}
+struct UniqueFuncImpl : ValueRetriever {
+    UniqueFuncImpl(
+        std::shared_ptr<ValueRetriever> items
+    ) : items_(items) {}
+
+    UnknownDataTypeContainer retrieve(InvocationContext &value) const override {
+        std::unordered_set<UnknownDataTypeContainer> set;
+
+        auto items = items_->retrieve(value);
+        auto iterator = items.iterate();
+        auto arr = new types::ArrayType::data_type{};
+
+        while(iterator->more()) {
+            iterator->next();
+
+            if(set.contains(iterator->current())) {
+                continue;
+            }
+
+            set.emplace(iterator->current());
+            arr->emplace_back(iterator->current());
+        }
+        
+        return make_data<types::ArrayType>(arr);
+    }
+
+private:
+    std::shared_ptr<ValueRetriever> items_;
+};
+
+struct FlatFuncImpl : ValueRetriever {
+    FlatFuncImpl(
+        std::shared_ptr<ValueRetriever> items
+    ) : items_(items) {}
+
+    UnknownDataTypeContainer retrieve(InvocationContext &value) const override {
+        auto items = items_->retrieve(value);
+        auto iterator = items.iterate();
+        auto arr = new types::ArrayType::data_type{};
+
+        while(iterator->more()) {
+            iterator->next();
+
+            if(iterator->current().is_iterable()) {
+                auto sub_iterator = iterator->current().iterate();
+
+                while(sub_iterator->more()) {
+                    sub_iterator->next();
+                    arr->emplace_back(sub_iterator->current());
+                }
+            } else {
+                arr->emplace_back(iterator->current());
+            }
+        }
+        
+        return make_data<types::ArrayType>(arr);
+    }
+
+private:
+    std::shared_ptr<ValueRetriever> items_;
+};
+
+struct ConcatFuncImpl : ValueRetriever {
+    ConcatFuncImpl(
+        std::shared_ptr<ValueRetriever> first,
+        std::shared_ptr<ValueRetriever> second
+    ) : first_(first), second_(second) {}
+
+    UnknownDataTypeContainer retrieve(InvocationContext &value) const override {
+        auto first = first_->retrieve(value);
+        auto second = second_->retrieve(value);
+        auto fIterator = first.iterate();
+        auto sIterator = second.iterate();
+
+        auto arr = new types::ArrayType::data_type{};
+
+        while(fIterator->more()) {
+            fIterator->next();
+            arr->emplace_back(fIterator->current());
+        }
+
+        while(sIterator->more()) {
+            sIterator->next();
+            arr->emplace_back(sIterator->current());
+        }
+        
+        return make_data<types::ArrayType>(arr);
+    }
+
+private:
+    std::shared_ptr<ValueRetriever> first_;
+    std::shared_ptr<ValueRetriever> second_;
+};
+
+struct FirstFuncImpl : ValueRetriever {
+    FirstFuncImpl(
+        std::shared_ptr<ValueRetriever> items
+    ) : items_(items) {}
+
+    UnknownDataTypeContainer retrieve(InvocationContext &value) const override {
+        auto items = items_->retrieve(value);
+        auto iterator = items.iterate();
+
+        auto arr = new types::ArrayType::data_type{};
+
+        while(iterator->more()) {
+            iterator->next();
+            return iterator->current();
+        }
+        
+        return UnknownDataTypeContainer{};
+    }
+
+private:
+    std::shared_ptr<ValueRetriever> items_;
+};
+
+struct LastFuncImpl : ValueRetriever {
+    LastFuncImpl(
+        std::shared_ptr<ValueRetriever> items
+    ) : items_(items) {}
+
+    UnknownDataTypeContainer retrieve(InvocationContext &value) const override {
+        auto items = items_->retrieve(value);
+        auto iterator = items.iterate();
+
+        auto arr = new types::ArrayType::data_type{};
+
+        auto last = UnknownDataTypeContainer{};
+        while(iterator->more()) {
+            iterator->next();
+            last = iterator->current();
+        }
+        
+        return last;
+    }
+
+private:
+    std::shared_ptr<ValueRetriever> items_;
+};
+
+} /* namespace anonymous */
 
 std::shared_ptr<ValueRetriever>
 map_func::value(
@@ -274,7 +416,7 @@ map_impl::retrieve(InvocationContext& val) const {
     using vec_type = std::vector<UnknownDataTypeContainer>;
 
     std::unique_ptr<vec_type> ret = std::make_unique<vec_type>();
-    UnknownDataTypeContainer iterable = input_->retrieve(val);;
+    UnknownDataTypeContainer iterable = input_->retrieve(val);
 
     auto iterator = iterable.iterate();
 
@@ -426,6 +568,51 @@ sort_func::value(
 ) const {
     auto [list, comparator] = util::get_parameters_first_parent<1, 1>(parent, parameters);
     return std::make_shared<sort_impl>(list, comparator);
+}
+
+std::shared_ptr<ValueRetriever>
+UniqueFunction::value(
+    std::shared_ptr<ValueRetriever> parent, 
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
+) const {
+    auto [items] = util::get_parameters_first_parent<1>(parent, parameters);
+    return std::make_shared<UniqueFuncImpl>(items);
+}
+
+std::shared_ptr<ValueRetriever>
+FlatFunction::value(
+    std::shared_ptr<ValueRetriever> parent, 
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
+) const {
+    auto [items] = util::get_parameters_first_parent<1>(parent, parameters);
+    return std::make_shared<FlatFuncImpl>(items);
+}
+
+std::shared_ptr<ValueRetriever>
+ConcatFunction::value(
+    std::shared_ptr<ValueRetriever> parent, 
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
+) const {
+    auto [first, second] = util::get_parameters_first_parent<2>(parent, parameters);
+    return std::make_shared<ConcatFuncImpl>(first, second);
+}
+
+std::shared_ptr<ValueRetriever>
+FirstFunction::value(
+    std::shared_ptr<ValueRetriever> parent, 
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
+) const {
+    auto [items] = util::get_parameters_first_parent<1>(parent, parameters);
+    return std::make_shared<FirstFuncImpl>(items);
+}
+
+std::shared_ptr<ValueRetriever>
+LastFunction::value(
+    std::shared_ptr<ValueRetriever> parent, 
+    std::vector<std::shared_ptr<ValueRetriever>> parameters
+) const {
+    auto [items] = util::get_parameters_first_parent<1>(parent, parameters);
+    return std::make_shared<LastFuncImpl>(items);
 }
 
 } /* stl */

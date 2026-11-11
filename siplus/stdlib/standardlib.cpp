@@ -48,6 +48,8 @@ void attach_stl(SIPlusParserContext& context) {
     context.emplace_function<set_has_func>("set_has");
 
     //Dictionary functions
+    context.emplace_function<ToDictFunc>("toDict");
+    context.emplace_function<GroupFunc>("groupBy");
     context.emplace_function<DictionaryNewFunction>("dict_new");
     context.emplace_function<DictionaryHasFunc>    ("dict_has");
     context.emplace_function<DictionaryGetFunc>    ("dict_get");
@@ -70,6 +72,11 @@ void attach_stl(SIPlusParserContext& context) {
     context.emplace_function<sort_func>("sort");
     context.emplace_function<FindFunction>("find");
     context.emplace_function<FilterFunction>("filter");
+    context.emplace_function<UniqueFunction>("unique");
+    context.emplace_function<FlatFunction>("flat");
+    context.emplace_function<ConcatFunction>("concat");
+    context.emplace_function<FirstFunction>("first");
+    context.emplace_function<LastFunction>("last");
 
     //Boolean logic
     using binary_bool_func = typed_binary_operator_function<types::BoolType, types::BoolType>;

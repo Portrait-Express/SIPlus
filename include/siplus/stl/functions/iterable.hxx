@@ -141,6 +141,44 @@ struct SIPLUS_EXPORT sort_func : Function  {
     ) const override;
 };
 
+struct SIPLUS_EXPORT UniqueFunction : Function {
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent, 
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
+    ) const override;
+};
+
+struct SIPLUS_EXPORT FlatFunction : Function {
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent, 
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
+    ) const override;
+};
+
+struct SIPLUS_EXPORT ConcatFunction : Function {
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent, 
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
+    ) const override;
+};
+
+struct SIPLUS_EXPORT FirstFunction : Function {
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent, 
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
+    ) const override;
+};
+
+
+struct SIPLUS_EXPORT LastFunction : Function {
+    std::shared_ptr<ValueRetriever> value(
+        std::shared_ptr<ValueRetriever> parent, 
+        std::vector<std::shared_ptr<ValueRetriever>> parameters
+    ) const override;
+};
+
+
+
 } /* stl */
 } /* SIPLUS_NAMESPACE */
 

@@ -177,6 +177,84 @@ private:
     std::shared_ptr<ValueRetriever> dict_;
 };
 
+struct GroupFuncImpl : ValueRetriever {
+    GroupFuncImpl(
+        std::shared_ptr<ValueRetriever> items,
+        std::shared_ptr<ValueRetriever> keySelector
+    ) : items_(items), keySelector_(keySelector) {}
+
+    UnknownDataTypeContainer retrieve(InvocationContext &value) const override {
+        auto items = items_->retrieve(value);
+        if(!items.is_iterable()) {
+            throw std::runtime_error{"Expected 'items' to be iterable."};
+        }
+
+        auto iterator = items.iterate();
+        auto dict = new DictionaryType::data_type{};
+
+        while(iterator->more()) {
+            iterator->next();
+
+            auto scope = wrap_scope(value.shared_from_this())
+                .use_default(iterator->current())
+                .build();
+
+            auto key = keySelector_->retrieve(*scope);
+            auto it = dict->find(key);
+            if(it == dict->end()) {
+                (*dict)[key] = make_data<types::ArrayType>({ iterator->current() });
+            } else {
+                it->second.as<types::ArrayType>().emplace_back(iterator->current());
+            }
+        }
+
+        return make_data<DictionaryType>(dict);
+    }
+
+private:
+    std::shared_ptr<ValueRetriever> items_;
+    std::shared_ptr<ValueRetriever> keySelector_;
+};
+
+struct ToDictFuncImpl : ValueRetriever {
+    ToDictFuncImpl(
+        std::shared_ptr<ValueRetriever> items,
+        std::shared_ptr<ValueRetriever> keySelector
+    ) : items_(items), keySelector_(keySelector) {}
+
+    UnknownDataTypeContainer retrieve(InvocationContext &value) const override {
+        auto items = items_->retrieve(value);
+        if(!items.is_iterable()) {
+            throw std::runtime_error{"Expected 'items' to be iterable."};
+        }
+
+        auto iterator = items.iterate();
+        auto dict = new DictionaryType::data_type{};
+
+        while(iterator->more()) {
+            iterator->next();
+
+            auto scope = wrap_scope(value.shared_from_this())
+                .use_default(iterator->current())
+                .build();
+
+            auto key = keySelector_->retrieve(*scope);
+
+            if(dict->find(key) != dict->end()) {
+                throw std::runtime_error{util::to_string("Key ", key, " already exists in dictionary.")};
+            }
+
+            (*dict)[key] = iterator->current();
+        }
+
+        return make_data<DictionaryType>(dict);
+    }
+
+private:
+    std::shared_ptr<ValueRetriever> items_;
+    std::shared_ptr<ValueRetriever> keySelector_;
+};
+
 } /* namespace anonymous */
 
 const TypeInfoDescriptor *const DictionaryType::descriptor = new TypeInfoDescriptor("dict");
@@ -264,6 +342,24 @@ DictionaryValuesFunc::value(
 ) const {
     auto [dict] = util::get_parameters_first_parent<1>(parent, params);
     return detail::make_retriever<DictionaryValuesFuncImpl>(dict);
+}
+
+std::shared_ptr<ValueRetriever>
+GroupFunc::value(
+    std::shared_ptr<ValueRetriever> parent, 
+    std::vector<std::shared_ptr<ValueRetriever>> params
+) const {
+    auto [items, keySelector] = util::get_parameters_first_parent<2>(parent, params);
+    return detail::make_retriever<GroupFuncImpl>(items, keySelector);
+}
+
+std::shared_ptr<ValueRetriever>
+ToDictFunc::value(
+    std::shared_ptr<ValueRetriever> parent, 
+    std::vector<std::shared_ptr<ValueRetriever>> params
+) const {
+    auto [items, keySelector] = util::get_parameters_first_parent<2>(parent, params);
+    return detail::make_retriever<ToDictFuncImpl>(items, keySelector);
 }
 
 } /* namespace stl */

@@ -290,6 +290,43 @@ TEST(Dictionary, Functions) {
     );
 }
 
+TEST(GroupDictionary, Functions) {
+    test_expression<types::ArrayType>(R"([1, 2, 3, 4, 5, 6] | groupBy (gt . 3) | .[true])", std::vector<long>{4, 5, 6});
+}
+
+TEST(ToDictionary, Functions) {
+    test_expression(R"(["foo", "bar"] | toDict (.[0]) | .["f"])", "foo");
+}
+
+TEST(Unique, Functions) {
+    test_expression<types::ArrayType>(
+        R"([1, 2, 1, 4, 1, 5, 2] | unique)", 
+        std::vector<long>{1, 2, 4, 5}
+    );
+}
+
+TEST(Flat, Functions) {
+    test_expression<types::ArrayType>(
+        R"([[1, 2], 3] | flat)", 
+        std::vector<long>{1, 2, 3}
+    );
+}
+
+TEST(Concat, Functions) {
+    test_expression<types::ArrayType>(
+        R"(["foo", "bar"] | concat ["baz", "qux"])", 
+        std::vector<std::string>{"foo", "bar", "baz", "qux"}
+    );
+}
+
+TEST(First, Functions) {
+    test_expression(R"(["foo", "bar"] | first)", "foo");
+}
+
+TEST(Last, Functions) {
+    test_expression(R"(["foo", "bar"] | last)", "bar");
+}
+
 
 CATEGORY_SUB(Converters, Stdlib);
 
