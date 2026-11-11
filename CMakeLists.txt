@@ -17,7 +17,7 @@ if(BUILD_SHARED_LIBS AND WITH_STATIC_CRT)
     set(WITH_STATIC_CRT OFF)
 endif()
 
-project(siplus VERSION 2.3.0)
+project(siplus VERSION 2.3.1)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
